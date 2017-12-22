@@ -1,0 +1,82 @@
+{
+  "name": "jvmcode",
+  "displayName": "jvmcode",
+  "description": "Event Bus Bridge to JVM extensions",
+  "version": "0.0.1",
+  "publisher": "contrapt",
+  "engines": {
+    "vscode": "^1.15.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "*"
+  ],
+  "main": "./out/src/extension",
+  "contributes": {
+    "commands": [
+      {
+        "command": "jvmcode.start",
+        "title": "Start JVM Server"
+      },
+      {
+        "command": "jvmcode.sendTo",
+        "title": "Send Message To Address"
+      },
+      {
+        "command": "jvmcode.install",
+        "title": "Install JVM extension"
+      }
+    ],
+    "configuration": {
+      "title": "JVM Code Server Configuration",
+      "properties": {
+        "jvmcode.host": {
+          "type": "string",
+          "default": "localhost",
+          "description": "Host that the server is started on "
+        },
+        "jvmcode.port": {
+          "type": "number",
+          "default": 9000,
+          "description": "TCP port server listens on"
+        },
+        "jvmcode.javaCommand": {
+          "type": "string",
+          "default": "/usr/bin/java",
+          "description": "Path to java command to execute to start the server"
+        },
+        "jvmcode.javaOptions": {
+          "type": "array",
+          "default": [
+            "-Xms50m",
+            "-Xmx1g",
+            "-Xss256k",
+            "-XX:MaxMetaspaceSize=512m",
+            "-server"
+          ],
+          "description": "The JVM options used to start the server"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile; server/gradlew build deploy -b server/build.gradle",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "postinstall": "node ./node_modules/vscode/bin/install",
+    "test": "npm run compile && node ./node_modules/vscode/bin/test"
+  },
+  "devDependencies": {
+    "typescript": "^2.5.2",
+    "vscode": "^1.1.5",
+    "mocha": "^3.5.0",
+    "@types/node": "^8.0.26",
+    "@types/mocha": "^2.2.42"
+  },
+  "dependencies": {
+    "node-uuid": "^1.4.8",
+    "vertx3-eventbus-client": "^3.5.0"
+  }
+}
