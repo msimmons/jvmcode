@@ -9,5 +9,4 @@ tsconfig.json
 vsc-extension-quickstart.md
 server/**
 .gradle/**
-*.jar
 *.vsix
