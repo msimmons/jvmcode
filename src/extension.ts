@@ -15,14 +15,6 @@ export function activate(context: vscode.ExtensionContext) {
         server.start()
     }
     
-    // - Use the JS event bus bridge to publish/subscribe to event bus
-    // - Be able to install verticles as JVM extensions
-    //   - Gradle integration
-    //   - JDBC integration
-    //   - Classpath and class info
-    // - Used by other extensions to access JVM resources (via exposed API?)
-    //   - Language extensions
-    //   - DB extension
     let startCommand = vscode.commands.registerCommand("jvmcode.start", () => {
         server = new JvmServer(context)
         server.start()

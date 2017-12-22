@@ -2,9 +2,16 @@
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+Starts a JVM server that can host other JVM extensions and communicates with the extension host via websockets.  This extension
+exports an API that can be used by other extensions to install their own JVM extensions (packaged as _verticles_) 
+and communicate with them over the _vert.x_ Event Bus.  The benfits are a uniform communication method and consolidating the
+ overhead of running a JVM process.  Possible uses are:
 
-For example if there is an image subfolder under your extension project workspace:
+* _Gradle_ integration to expose dependency, classpath and task information
+
+  * Can be used to support any JVM language extension
+* Database access through _JDBC_ provides query execution, autocomplete, schema description
+* Other integrations that would benefit from running on the JVM
 
 \!\[feature X\]\(images/feature-x.png\)
 
