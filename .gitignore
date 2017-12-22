@@ -4,3 +4,6 @@ node_modules
 build
 .gradle
 .idea
+.vscode
+*.jar
+*.vsix
