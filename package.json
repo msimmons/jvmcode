@@ -2,10 +2,18 @@
   "name": "jvmcode",
   "displayName": "jvmcode",
   "description": "Event Bus Bridge to JVM extensions",
-  "version": "0.0.1",
+  "version": "0.9.0",
   "publisher": "contrapt",
   "engines": {
     "vscode": "^1.15.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/msimmons/jvmcode"
+  },
+  "author": {
+    "name": "Mark Simmons",
+    "email": "mark@contrapt.net"
   },
   "categories": [
     "Other"
@@ -18,29 +26,24 @@
     "commands": [
       {
         "command": "jvmcode.start",
-        "title": "Start JVM Server"
+        "title": "JVM: Start Server"
       },
       {
-        "command": "jvmcode.sendTo",
-        "title": "Send Message To Address"
+        "command": "jvmcode.echo",
+        "title": "JVM: Echo Message"
       },
       {
-        "command": "jvmcode.install",
-        "title": "Install JVM extension"
+        "command": "jvmcode.stop",
+        "title": "JVM: Stop Server"
       }
     ],
     "configuration": {
-      "title": "JVM Code Server Configuration",
+      "title": "JVMCode Server Configuration",
       "properties": {
         "jvmcode.host": {
           "type": "string",
           "default": "localhost",
-          "description": "Host that the server is started on "
-        },
-        "jvmcode.port": {
-          "type": "number",
-          "default": 9000,
-          "description": "TCP port server listens on"
+          "description": "Host that the server is started on"
         },
         "jvmcode.javaCommand": {
           "type": "string",

@@ -10,33 +10,43 @@ let server: JvmServer
 export function activate(context: vscode.ExtensionContext) {
 
     /** - Start and manage the JVM vertx server -- one server per workspace */
-    if ( !server ) {
+    if (!server) {
         server = new JvmServer(context)
         server.start()
     }
-    
+
     let startCommand = vscode.commands.registerCommand("jvmcode.start", () => {
         server = new JvmServer(context)
         server.start()
     });
 
-    let sendTo = vscode.commands.registerCommand("jvmcode.sendTo", () => {
-        server.sendCommand()
+    let echoCommand = vscode.commands.registerCommand("jvmcode.echo", () => {
+        vscode.window.showInputBox().then((message) => {
+            if (message) {
+                server.send('jvmcode.echo', { message: message }).then((reply) => {
+                    vscode.window.showInformationMessage('Got reply: ' + JSON.stringify(reply['body']))
+                }).catch((error) => {
+                    vscode.window.showErrorMessage('Got error: ' + error.message)
+                })
+            }
+        })
     });
 
-    let installCommand = vscode.commands.registerCommand("jvmcode.install", () => {
-        server.installCommand()
-    });
-    context.subscriptions.push(startCommand, installCommand, sendTo);
+    let stopCommand = vscode.commands.registerCommand('jvmcode.stop', () => {
+        server.shutdown()
+        server = null
+    })
+
+    context.subscriptions.push(startCommand, echoCommand, stopCommand);
 
     /* Export an api for use by other extensions */
     let api = {
         // Send message to the given address
-        send(address: string, message: object) : Promise<object> {
+        send(address: string, message: object): Promise<object> {
             return server.send(address, message);
         },
         // Install the given verticle
-        install(jarFiles: string[], verticleName: string) : Promise<object> {
+        install(jarFiles: string[], verticleName: string): Promise<object> {
             return server.install(jarFiles, verticleName);
         },
         // Serve static content at the given path from the given webRoot (absolute)

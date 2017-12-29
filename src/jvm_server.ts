@@ -72,7 +72,7 @@ export class JvmServer {
      * Wait for the bus to be up to send
      */
     private sendInternal = (address: string, message: object, resolve, reject) => {
-        if ( !this.bus ) {
+        if ( !this.bus || this.bus.state != EventBus.OPEN ) {
             setTimeout(this.sendInternal, 100, address, message, resolve, reject)
             return
         }
@@ -161,6 +161,8 @@ export class JvmServer {
         this.status = Status.STOP_REQUESTED
         let reply = this.send('jvmcode.shutdown', {value: this.startupToken})
         this.child.kill('SIGHUP')
+        this.channel.clear()
+        this.channel.hide()
         this.channel.dispose()
         reply.then((message) => {
             console.log(JSON.stringify(message))
