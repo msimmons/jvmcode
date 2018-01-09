@@ -44,9 +44,9 @@ export class JvmServer {
         let configuration = vscode.workspace.getConfiguration('jvmcode')
         let command : string = configuration.get('javaCommand')
         let options : string[] = configuration.get('javaOptions')
-        this.port = configuration.get('port')
         let jarFile = this.context.asAbsolutePath('jvmcode.jar')
-        let args = options.concat(['-jar', jarFile, this.port.toString(), this.startupToken])
+        let cacheDirOpt = '-Dvertx.cacheDirBase=' + this.context.extensionPath + '.vertx'
+        let args = options.concat([cacheDirOpt, '-jar', jarFile, '0', this.startupToken])
         this.child = spawn(command, args)
     
         // Setup event handlers
@@ -210,8 +210,11 @@ export class JvmServer {
             this.port = Number(parts[parts.length-1].trim())
             this.startEventBus()
         }
-        else if ( this.bus ) {
+        else if ( this.channel ) {
             this.channel.appendLine(line)
+        }
+        else { 
+            console.log(line)
         }
     }
 
