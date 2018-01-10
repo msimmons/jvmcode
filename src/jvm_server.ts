@@ -44,9 +44,8 @@ export class JvmServer {
         let configuration = vscode.workspace.getConfiguration('jvmcode')
         let command : string = configuration.get('javaCommand')
         let options : string[] = configuration.get('javaOptions')
-        this.port = configuration.get('port')
         let jarFile = this.context.asAbsolutePath('jvmcode.jar')
-        let args = options.concat(['-jar', jarFile, this.port.toString(), this.startupToken])
+        let args = options.concat(['-jar', jarFile, '0', this.startupToken])
         this.child = spawn(command, args)
     
         // Setup event handlers
