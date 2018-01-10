@@ -9,6 +9,7 @@ import io.vertx.core.logging.LoggerFactory
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.StaticHandler
 import io.vertx.ext.web.handler.sockjs.*
+import io.vertx.ext.bridge.BridgeEventType
 
 class RouterVerticle(val startupToken: String) : AbstractVerticle() {
 

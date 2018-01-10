@@ -31,7 +31,6 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
     compile "io.vertx:vertx-core:$vertx_version"
     compile "io.vertx:vertx-web:$vertx_version"
-    compile "io.vertx:vertx-tcp-eventbus-bridge:$vertx_version"
     runtime "ch.qos.logback:logback-classic:1.2.3"
 
     testCompile "junit:junit:4.12"
