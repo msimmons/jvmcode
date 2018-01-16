@@ -40,11 +40,6 @@
     "configuration": {
       "title": "JVMCode Server Configuration",
       "properties": {
-        "jvmcode.host": {
-          "type": "string",
-          "default": "localhost",
-          "description": "Host that the server is started on"
-        },
         "jvmcode.javaCommand": {
           "type": "string",
           "default": "/usr/bin/java",
