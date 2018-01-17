@@ -67,16 +67,25 @@ class RouterVerticle(val startupToken: String) : AbstractVerticle() {
 
     fun startConsumers() {
 
+        /**
+         * Simple echo for testing
+         */
         vertx.eventBus().consumer<JsonObject>("jvmcode.echo", { message ->
             logger.debug("Got the message ${message.body().encode()}")
             message.reply(JsonObject(mapOf("echo" to message.body())))
         })
 
+        /**
+         * An echo endpoint that will trigger fail, for testing
+         */
         vertx.eventBus().consumer<JsonObject>("jvmcode.echo-fail", { message ->
             logger.debug("Got the message ${message.body().encode()}")
             message.fail(500, "Responding to echo-fail")
         })
 
+        /**
+         * Shutdown this vertx instance
+         */
         vertx.eventBus().consumer<JsonObject>("jvmcode.shutdown", { message ->
             logger.info("Shutting down $startupToken")
             message.reply(JsonObject(mapOf("message" to "shutting down")))
@@ -84,6 +93,9 @@ class RouterVerticle(val startupToken: String) : AbstractVerticle() {
             vertx.close()
         })
 
+        /**
+         * Install a verticle defined by a collection of jarFiles and the FQCN of the verticle to install
+         */
         vertx.eventBus().consumer<JsonObject>("jvmcode.install", { message ->
             val jarFiles = message.body().getJsonArray("jarFiles")
             val verticleName = message.body().getString("verticleName")
@@ -105,6 +117,9 @@ class RouterVerticle(val startupToken: String) : AbstractVerticle() {
             })
         })
 
+        /**
+         * Add a route to serve the static content located at the given absolute path using the given webRoot
+         */
         vertx.eventBus().consumer<JsonObject>("jvmcode.serve", { message ->
             val path = message.body().getString("path")
             val webRoot = message.body().getString("webRoot")

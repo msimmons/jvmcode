@@ -9,8 +9,6 @@ open class Application {
 
     fun startup(startupToken: String) {
         val vertx = Vertx.vertx()
-        //vertx.registerVerticleFactory(JarFileVerticleFactory())
-        //vertx.deployVerticle(BridgeVerticle(startupToken))
         vertx.deployVerticle(RouterVerticle(startupToken))
     }
 
