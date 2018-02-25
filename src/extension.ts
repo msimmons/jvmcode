@@ -32,12 +32,24 @@ export function activate(context: vscode.ExtensionContext) {
         })
     });
 
+    let logLevelCommand = vscode.commands.registerCommand("jvmcode.log-level", () => {
+        vscode.window.showQuickPick(['DEBUG', 'INFO', 'WARN', 'ERROR']).then((choice) => {
+            if (choice) {
+                server.send('jvmcode.log-level', { level: choice }).then((reply) => {
+                    vscode.window.showInformationMessage('Set level to: ' + JSON.stringify(reply['body']['level']))
+                }).catch((error) => {
+                    vscode.window.showErrorMessage('Unable to set level: ' + error.message)
+                })
+            }
+        })
+    })
+
     let stopCommand = vscode.commands.registerCommand('jvmcode.stop', () => {
         server.shutdown()
         server = null
     })
 
-    context.subscriptions.push(startCommand, echoCommand, stopCommand);
+    context.subscriptions.push(startCommand, echoCommand, logLevelCommand, stopCommand);
 
     /* Export an api for use by other extensions */
     let api = {

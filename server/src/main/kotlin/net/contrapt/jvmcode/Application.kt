@@ -20,6 +20,7 @@ open class Application {
          */
         @JvmStatic
         fun main(args : Array<String>) {
+            LogSetter.intitialize(args[0])
             val startupToken = args[1]
             Application().startup(startupToken)
         }

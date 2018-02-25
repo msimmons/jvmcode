@@ -2,7 +2,7 @@
   "name": "jvmcode",
   "displayName": "jvmcode",
   "description": "Event Bus Bridge to JVM extensions",
-  "version": "0.9.0",
+  "version": "1.0.0",
   "publisher": "contrapt",
   "engines": {
     "vscode": "^1.15.0"
@@ -33,6 +33,10 @@
         "title": "JVM: Echo Message"
       },
       {
+        "command": "jvmcode.log-level",
+        "title": "JVM: Set Log Level"
+      },
+      {
         "command": "jvmcode.stop",
         "title": "JVM: Stop Server"
       }
@@ -44,6 +48,14 @@
           "type": "string",
           "default": "/usr/bin/java",
           "description": "Path to java command to execute to start the server"
+        },
+        "jvmcode.logLevel" : {
+          "type": "string",
+          "enum": [
+            "DEBUG", "INFO"
+          ],
+          "default": "INFO",
+          "description": "The server's default log level"
         },
         "jvmcode.javaOptions": {
           "type": "array",

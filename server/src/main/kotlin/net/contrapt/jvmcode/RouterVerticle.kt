@@ -59,8 +59,7 @@ class RouterVerticle(val startupToken: String) : AbstractVerticle() {
     private fun bridgeEventHandler() = Handler<BridgeEvent> { event ->
         when ( event.type() ) {
             BridgeEventType.SOCKET_PING -> {}
-            //TODO Configurable logging
-            else -> logger.info("Got bridge event: ${event.type()} ${event.socket().uri()} ${event.rawMessage?.encode()}")
+            else -> logger.debug("Got bridge event: ${event.type()} ${event.socket().uri()} ${event.rawMessage?.encode()}")
         }
         event.complete(true)
     }
@@ -81,6 +80,16 @@ class RouterVerticle(val startupToken: String) : AbstractVerticle() {
         vertx.eventBus().consumer<JsonObject>("jvmcode.echo-fail", { message ->
             logger.debug("Got the message ${message.body().encode()}")
             message.fail(500, "Responding to echo-fail")
+        })
+
+        /**
+         * An echo endpoint that will trigger a timeout
+         */
+        vertx.eventBus().consumer<JsonObject>("jvmcode.echo-timeout", { message ->
+            logger.debug("Got the message ${message.body().encode()}")
+            vertx.setTimer(60000, {_ ->
+                message.reply(JsonObject(mapOf("echo" to "timeout")))
+            })
         })
 
         /**
@@ -132,5 +141,15 @@ class RouterVerticle(val startupToken: String) : AbstractVerticle() {
             router.route(path).handler(handler)
             message.reply(JsonObject().put("port", httpPort))
         })
+
+        /**
+         * Set the root log level of the running system
+         */
+        vertx.eventBus().consumer<JsonObject>("jvmcode.log-level", { message ->
+            val level = message.body().getString("level")
+            val result = LogSetter.setRootLevel(level)
+            message.reply(JsonObject().put("level", result))
+        })
+
     }
 }
