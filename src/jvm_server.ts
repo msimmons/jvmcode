@@ -1,9 +1,9 @@
 'use strict';
 
-import * as vscode from 'vscode';
-import { ChildProcess, spawn } from 'child_process';
-import { OutputChannel } from 'vscode';
-import { setTimeout } from 'timers';
+import * as vscode from 'vscode'
+import { ChildProcess, spawn } from 'child_process'
+import { OutputChannel } from 'vscode'
+import { setTimeout } from 'timers'
 import * as EventBus from 'vertx3-eventbus-client'
 
 let makeUUID = require('node-uuid').v4;

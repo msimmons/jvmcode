@@ -1,9 +1,9 @@
 'use strict';
 
-import * as vscode from 'vscode';
+import * as vscode from 'vscode'
 import { JvmServer } from './jvm_server'
-import { connect } from 'tls';
-import { OutputChannel } from 'vscode';
+import { connect } from 'tls'
+import { OutputChannel } from 'vscode'
 
 let server: JvmServer
 

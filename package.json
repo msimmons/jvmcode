@@ -1,11 +1,11 @@
 {
   "name": "jvmcode",
   "displayName": "jvmcode",
-  "description": "Event Bus Bridge to JVM extensions",
+  "description": "Event Bus Bridge to JVM Extensions",
   "version": "1.0.0",
   "publisher": "contrapt",
   "engines": {
-    "vscode": "^1.15.0"
+    "vscode": "^1.23.1"
   },
   "repository": {
     "type": "git",
@@ -49,10 +49,11 @@
           "default": "/usr/bin/java",
           "description": "Path to java command to execute to start the server"
         },
-        "jvmcode.logLevel" : {
+        "jvmcode.logLevel": {
           "type": "string",
           "enum": [
-            "DEBUG", "INFO"
+            "DEBUG",
+            "INFO"
           ],
           "default": "INFO",
           "description": "The server's default log level"
@@ -79,14 +80,14 @@
     "test": "npm run compile && node ./node_modules/vscode/bin/test"
   },
   "devDependencies": {
-    "typescript": "^2.5.2",
-    "vscode": "^1.1.5",
+    "@types/mocha": "^2.2.48",
+    "@types/node": "^8.10.15",
     "mocha": "^3.5.0",
-    "@types/node": "^8.0.26",
-    "@types/mocha": "^2.2.42"
+    "typescript": "^2.8.3",
+    "vscode": "^1.1.17"
   },
   "dependencies": {
     "node-uuid": "^1.4.8",
-    "vertx3-eventbus-client": "^3.5.0"
+    "vertx3-eventbus-client": "^3.5.1"
   }
 }
