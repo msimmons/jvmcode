@@ -89,8 +89,11 @@ export class JvmServer {
 
     /**
      * Register a consumer at the given address
+     * The supplied callback should handle (error?, result?) where the error object has the following structure:
+     *    { failureCode: failureCode, failureType: failureType, message: message }
+     * 
      * @param address The address to consume from
-     * @param callback The function(success: boolean, result|error) to call when a message arrives
+     * @param callback The function(error?, result?) to call when a message arrives
      */
     public registerConsumer = (address: string, callback) => {
         if ( !this.bus ) {
@@ -202,7 +205,7 @@ export class JvmServer {
         }
     }
 
-    private checkServerStartedCallback= (data) => {
+    private checkServerStartedCallback = (data) => {
         let line = data.toString()
         if ( line.includes(this.startupToken) ) {
             this.channel.appendLine(line)
@@ -219,6 +222,20 @@ export class JvmServer {
         }
     }
 
+    /**
+     * Registers a handler for any unhandled exception messages returned from the server
+     * Display them in an error notification
+     */
+    private listenForUnhandledException() {
+        this.registerConsumer('jvmcode.exception', (error, result) => {
+            if (result) {
+                vscode.window.showErrorMessage('JVMCode: ' + result.body.message)
+            } else if (error) {
+                vscode.window.showErrorMessage('JVMCode: ' + error.message)
+            }
+        })
+    }
+
     private startEventBus() {
         if ( this.bus ) return;
         let url = 'http://localhost:'+this.port+'/jvmcode/ws/'
@@ -227,6 +244,7 @@ export class JvmServer {
         this.bus.enableReconnect(true)
         this.bus.onopen = () => {
             this.channel.appendLine('Started event bus on ' + this.port)
+            this.listenForUnhandledException()
         }
         this.bus.onerror = (err) => {
             this.channel.appendLine('Error starting event bus: ' + err)

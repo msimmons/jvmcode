@@ -68,7 +68,8 @@ Register a consumer to listen on the event bus
 registerConsumer(address: string, callback)
 ```
 - _address_ The event bus address to listen to
-- _callback_ The callback to execute on receiving a message
+- _callback_ The callback to execute on receiving a message; should handle (error? , result?) where the error object
+is of the form { failureCode: ?, failureType: ?, message: ? }
 
 ### Unregister Consumer
 ```typescript

@@ -93,6 +93,15 @@ class RouterVerticle(val startupToken: String) : AbstractVerticle() {
         })
 
         /**
+         * An echo endpoint that will trigger an unhandled exception
+         */
+        vertx.eventBus().consumer<JsonObject>("jvmcode.echo-unhandled", { message ->
+            logger.debug("Got the message ${message.body().encode()}")
+            message.reply(JsonObject().put("echo", "Sending unhandled message"))
+            throw RuntimeException("Triggered unhandled exception")
+        })
+
+        /**
          * Shutdown this vertx instance
          */
         vertx.eventBus().consumer<JsonObject>("jvmcode.shutdown", { message ->
