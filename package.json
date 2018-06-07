@@ -5,7 +5,7 @@
   "version": "1.0.0",
   "publisher": "contrapt",
   "engines": {
-    "vscode": "^1.23.1"
+    "vscode": "^1.24.0"
   },
   "repository": {
     "type": "git",
@@ -81,13 +81,13 @@
   },
   "devDependencies": {
     "@types/mocha": "^2.2.48",
-    "@types/node": "^8.10.17",
+    "@types/node": "^8.10.18",
     "mocha": "^3.5.0",
-    "typescript": "^2.8.3",
+    "typescript": "^2.9.1",
     "vscode": "^1.1.18"
   },
   "dependencies": {
     "node-uuid": "^1.4.8",
-    "vertx3-eventbus-client": "^3.5.1"
+    "vertx3-eventbus-client": "^3.5.2"
   }
 }
