@@ -1,6 +1,6 @@
 {
   "name": "jvmcode",
-  "displayName": "jvmcode",
+  "displayName": "JVMCode",
   "description": "Event Bus Bridge to JVM Extensions",
   "version": "1.0.0",
   "publisher": "contrapt",
@@ -39,8 +39,21 @@
       {
         "command": "jvmcode.stop",
         "title": "JVM: Stop Server"
+      },
+      {
+        "command": "jvmcode.jvm-project",
+        "title": "JVM: Start Project"
       }
     ],
+    "views": {
+      "explorer": [
+        {
+          "id": "jvmcode.dependency-tree",
+          "name": "JVM Dependencies",
+          "when": "jvmcode.context.isJvmProject"
+        }
+      ]
+    },
     "configuration": {
       "title": "JVMCode Server Configuration",
       "properties": {
@@ -70,7 +83,7 @@
           "description": "The JVM options used to start the server"
         }
       }
-    }
+    } 
   },
   "scripts": {
     "vscode:prepublish": "npm run compile; server/gradlew build deploy -b server/build.gradle",

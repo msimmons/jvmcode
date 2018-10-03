@@ -33,6 +33,8 @@ dependencies {
 
     testCompile "junit:junit:4.12"
     testCompile "io.vertx:vertx-unit:$vertx_version"
+    testCompile 'io.kotlintest:kotlintest:2.0.7'
+
 }
 
 jar {

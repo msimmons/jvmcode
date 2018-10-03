@@ -13,12 +13,18 @@ import io.vertx.ext.web.handler.sockjs.BridgeEvent
 import io.vertx.ext.web.handler.sockjs.BridgeOptions
 import io.vertx.ext.web.handler.sockjs.PermittedOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
+import net.contrapt.jvmcode.model.DependencyData
+import net.contrapt.jvmcode.model.JarEntryData
+import net.contrapt.jvmcode.model.JvmProject
+import net.contrapt.jvmcode.service.DependencyService
 
 class RouterVerticle(val startupToken: String) : AbstractVerticle() {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     private val deployments = mutableMapOf<String, String>()
+
+    private val dependencyService = DependencyService()
 
     var httpPort = 0
         private set
@@ -44,7 +50,7 @@ class RouterVerticle(val startupToken: String) : AbstractVerticle() {
 
         router.route("/jvmcode/ws/*").handler(sockJs)
 
-        httpServer.requestHandler(router::accept).listen(0, {res ->
+        httpServer.requestHandler(router::accept).listen(0) { res ->
             if (res.succeeded()) {
                 httpPort = httpServer.actualPort()
                 logger.info("Started server: $startupToken : $httpPort")
@@ -53,7 +59,7 @@ class RouterVerticle(val startupToken: String) : AbstractVerticle() {
                 logger.error("Failed to start server", res.cause())
                 vertx.close()
             }
-        })
+        }
     }
 
     private fun bridgeEventHandler() = Handler<BridgeEvent> { event ->
@@ -69,52 +75,52 @@ class RouterVerticle(val startupToken: String) : AbstractVerticle() {
         /**
          * Simple echo for testing
          */
-        vertx.eventBus().consumer<JsonObject>("jvmcode.echo", { message ->
+        vertx.eventBus().consumer<JsonObject>("jvmcode.echo") { message ->
             logger.debug("Got the message ${message.body().encode()}")
             message.reply(JsonObject(mapOf("echo" to message.body())))
-        })
+        }
 
         /**
          * An echo endpoint that will trigger fail, for testing
          */
-        vertx.eventBus().consumer<JsonObject>("jvmcode.echo-fail", { message ->
+        vertx.eventBus().consumer<JsonObject>("jvmcode.echo-fail") { message ->
             logger.debug("Got the message ${message.body().encode()}")
             message.fail(500, "Responding to echo-fail")
-        })
+        }
 
         /**
          * An echo endpoint that will trigger a timeout
          */
-        vertx.eventBus().consumer<JsonObject>("jvmcode.echo-timeout", { message ->
+        vertx.eventBus().consumer<JsonObject>("jvmcode.echo-timeout") { message ->
             logger.debug("Got the message ${message.body().encode()}")
-            vertx.setTimer(60000, {_ ->
+            vertx.setTimer(60000) { _ ->
                 message.reply(JsonObject(mapOf("echo" to "timeout")))
-            })
-        })
+            }
+        }
 
         /**
          * An echo endpoint that will trigger an unhandled exception
          */
-        vertx.eventBus().consumer<JsonObject>("jvmcode.echo-unhandled", { message ->
+        vertx.eventBus().consumer<JsonObject>("jvmcode.echo-unhandled") { message ->
             logger.debug("Got the message ${message.body().encode()}")
             message.reply(JsonObject().put("echo", "Sending unhandled message"))
             throw RuntimeException("Triggered unhandled exception")
-        })
+        }
 
         /**
          * Shutdown this vertx instance
          */
-        vertx.eventBus().consumer<JsonObject>("jvmcode.shutdown", { message ->
+        vertx.eventBus().consumer<JsonObject>("jvmcode.shutdown") { message ->
             logger.info("Shutting down $startupToken")
             message.reply(JsonObject(mapOf("message" to "shutting down")))
             httpServer.close()
             vertx.close()
-        })
+        }
 
         /**
          * Install a verticle defined by a collection of jarFiles and the FQCN of the verticle to install
          */
-        vertx.eventBus().consumer<JsonObject>("jvmcode.install", { message ->
+        vertx.eventBus().consumer<JsonObject>("jvmcode.install") { message ->
             val jarFiles = message.body().getJsonArray("jarFiles")
             val verticleName = message.body().getString("verticleName")
             val options = DeploymentOptions().apply {
@@ -123,22 +129,21 @@ class RouterVerticle(val startupToken: String) : AbstractVerticle() {
             }
             val deploymentId = deployments[verticleName]
             if ( deploymentId != null ) vertx.undeploy(deploymentId)
-            vertx.deployVerticle(verticleName, options, {ar ->
+            vertx.deployVerticle(verticleName, options) { ar ->
                 if ( ar.failed() ) {
                     logger.error("Failed deployment", ar.cause())
                     message.fail(500, ar.cause().toString())
-                }
-                else {
+                } else {
                     deployments[verticleName] = ar.result()
                     message.reply(JsonObject().put("deploymentId", ar.result()).put("port", httpPort))
                 }
-            })
-        })
+            }
+        }
 
         /**
          * Add a route to serve the static content located at the given absolute path using the given webRoot
          */
-        vertx.eventBus().consumer<JsonObject>("jvmcode.serve", { message ->
+        vertx.eventBus().consumer<JsonObject>("jvmcode.serve") { message ->
             val path = message.body().getString("path")
             val webRoot = message.body().getString("webRoot")
             val handler = StaticHandler.create().apply {
@@ -149,16 +154,62 @@ class RouterVerticle(val startupToken: String) : AbstractVerticle() {
             }
             router.route(path).handler(handler)
             message.reply(JsonObject().put("port", httpPort))
-        })
+        }
 
         /**
          * Set the root log level of the running system
          */
-        vertx.eventBus().consumer<JsonObject>("jvmcode.log-level", { message ->
+        vertx.eventBus().consumer<JsonObject>("jvmcode.log-level") { message ->
             val level = message.body().getString("level")
             val result = LogSetter.setRootLevel(level)
             message.reply(JsonObject().put("level", result))
-        })
+        }
 
+        /**
+         * Signal that this is a JVM project, which will result in dependency info being sent to the client
+         */
+        vertx.eventBus().consumer<JsonObject>("jvmcode.enable-dependencies") { message ->
+            // Get the current JDK dependencies
+            val dependencies = dependencyService.getDependencies()
+            // Send them to the client
+            vertx.eventBus().publish("jvmcode.dependencies", JsonObject.mapFrom(JvmProject(dependencies)))
+        }
+
+        /**
+         * Add dependencies to be managed for this project; these can come from the user via interaction with this
+         * extension or from other extensions, eg Gradle, Maven
+         */
+        vertx.eventBus().consumer<JsonObject>("jvmcode.add-dependencies") { message ->
+            // Process the new dependencies
+            // Send all current dependencies to the client
+            vertx.eventBus().publish("jvmcode.dependencies", JsonObject())
+        }
+
+        /**
+         * Return the jar entries for the given dependency
+         */
+        vertx.eventBus().consumer<JsonObject>("jvmcode.jar-entries") { message ->
+            try {
+                val dependencyData = message.body().getJsonObject("dependency").mapTo(DependencyData::class.java)
+                message.reply(JsonObject.mapFrom(dependencyService.getJarData(dependencyData)))
+            } catch (e: Exception) {
+                logger.error("Getting jar entries", e)
+                message.fail(500, e.message)
+            }
+        }
+
+        /**
+         * Return the contents of the given jar entry
+         */
+        vertx.eventBus().consumer<JsonObject>("jvmcode.jar-entry") { message ->
+            try {
+                val jarEntryData = message.body().getJsonObject("jarEntry").mapTo(JarEntryData::class.java)
+                val resolved = dependencyService.getJarEntryContents(jarEntryData)
+                message.reply(JsonObject.mapFrom(resolved))
+            } catch (e: Exception) {
+                logger.error("Getting jar entry contents", e)
+                message.fail(500, e.message)
+            }
+        }
     }
 }

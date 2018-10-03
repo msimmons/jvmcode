@@ -63,17 +63,25 @@ export class JvmServer {
      * @param address 
      * @param message 
      */
-    public send(address: string, message: object) : Promise<object> {
-        return new Promise<object>((resolve, reject) => {
+    public send(address: string, message: object) : Promise<any> {
+        return new Promise<any>((resolve, reject) => {
             this.sendInternal(address, message, resolve, reject)
         })
+    }
+
+    public publish(address: string, message: object) {
+        this.publishInternal(address, message)
+    }
+
+    private busNotReady() : boolean {
+        return (!this.bus || this.bus.state != EventBus.OPEN)
     }
 
     /**
      * Wait for the bus to be up to send
      */
     private sendInternal = (address: string, message: object, resolve, reject) => {
-        if ( !this.bus || this.bus.state != EventBus.OPEN ) {
+        if (this.busNotReady()) {
             setTimeout(this.sendInternal, 100, address, message, resolve, reject)
             return
         }
@@ -88,6 +96,17 @@ export class JvmServer {
     }
 
     /**
+     * Wait for the bus to be up to publish
+     */
+    private publishInternal = (address: string, message: object) => {
+        if (this.busNotReady()) {
+            setTimeout(this.publishInternal, 100, address, message)
+            return
+        }
+        this.bus.publish(address, message)
+    }
+
+    /**
      * Register a consumer at the given address
      * The supplied callback should handle (error?, result?) where the error object has the following structure:
      *    { failureCode: failureCode, failureType: failureType, message: message }
@@ -96,11 +115,12 @@ export class JvmServer {
      * @param callback The function(error?, result?) to call when a message arrives
      */
     public registerConsumer = (address: string, callback) => {
-        if ( !this.bus ) {
-            setTimeout(this.registerConsumer, 500, address, callback)
+        if (this.busNotReady()) {
+            setTimeout(this.registerConsumer, 100, address, callback)
             return
         }
         this.bus.registerHandler(address, {}, callback)
+        console.log(`Consumer registered at ${address} by ${this.context.extensionPath}`)
     }
 
     /**
@@ -110,6 +130,7 @@ export class JvmServer {
      */
     public unregisterConsumer = (address: string, callback) => {
         this.bus.unregisterHandler(address, callback)
+        console.log(`Consumer unregistered from ${address} by ${this.context.extensionPath}`)
     }
 
     public sendCommand() {
@@ -131,7 +152,7 @@ export class JvmServer {
      * @param jarFiles List of jars needed to install the verticle
      * @param verticleName The full classname of the verticle to deploy
      */
-    public install(jarFiles: string[], verticleName: string) : Promise<object> {
+    public install(jarFiles: string[], verticleName: string) : Promise<any> {
         let reply = this.send('jvmcode.install', {jarFiles: jarFiles, verticleName: verticleName})
         reply.then((message) => {
             this.channel.appendLine(JSON.stringify(message))
@@ -157,7 +178,7 @@ export class JvmServer {
      * @param webRoot The absolute path to the static content
      * @returns {port: <httpPort>} or error
      */
-    public serve(path: string, webRoot: string) : Promise<object> {
+    public serve(path: string, webRoot: string) : Promise<any> {
         return this.send('jvmcode.serve', {path: path, webRoot: webRoot})
     }
 
