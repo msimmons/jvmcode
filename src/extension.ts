@@ -3,7 +3,7 @@
 import * as vscode from 'vscode'
 import { JvmServer } from './jvm_server'
 import { DependencyTreeProvider } from './dependency_tree_provider';
-import { DependencyData, JarEntryNode } from './models';
+import { DependencyData, JarEntryNode, JarEntryData } from './models';
 import { JarContentProvider } from './jar_content_provider';
 
 let server: JvmServer
@@ -107,7 +107,8 @@ export function activate(context: vscode.ExtensionContext) {
         }
         vscode.window.withProgress({ location: vscode.ProgressLocation.Window, title: entryNode.name}, (progess) => {
             return getJarEntryContent(entryNode).then((reply) => {
-                openJarEntryContent(reply.body as JarEntryNode, true)
+                entryNode.content = reply.body.text
+                openJarEntryContent(entryNode, true)
             }).catch(error => {
                 vscode.window.showErrorMessage(error)
             })
@@ -122,10 +123,11 @@ export function activate(context: vscode.ExtensionContext) {
     /**
      * Open a jar entry's content
      */
-    function openJarEntryContent(entry: JarEntryNode, preview: boolean) {
-        let uri = vscode.Uri.parse(contentProvider.scheme + '://' + entry.dependency + '/' + entry.pkg + '/' + entry.name)
+    function openJarEntryContent(entryNode: JarEntryNode, preview: boolean) {
+        if (!entryNode.content) return
+        let uri = vscode.Uri.parse(contentProvider.scheme + '://' + entryNode.dependency + '/' + entryNode.pkg + '/' + entryNode.name)
         vscode.workspace.openTextDocument(uri).then((doc) => {
-            contentProvider.update(uri, entry)
+            contentProvider.update(uri, entryNode)
             vscode.window.showTextDocument(doc, { preview: preview })
         })
     }

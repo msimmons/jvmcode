@@ -2,7 +2,7 @@
 
 import * as vscode from 'vscode';
 import { Uri } from 'vscode';
-import { JarEntryData } from './models';
+import { JarEntryData, JarEntryNode } from './models';
 
 /**
  * Provide content for resources found in JAR files
@@ -27,11 +27,11 @@ export class JarContentProvider implements vscode.TextDocumentContentProvider {
     }
     
     /**
-     * Update the view based on the new sqlStatement
+     * Update the view based on the new jar entry
      * @param uri The uri to update
      * @param entry new JarEntryData to update with
      */
-    update(uri: Uri, entry: JarEntryData) {
+    update(uri: Uri, entry: JarEntryNode) {
         this.entries[uri.path] = {entry: entry}
         this.onDidChangeEmitter.fire(uri);
     }
@@ -62,7 +62,7 @@ export class JarContentProvider implements vscode.TextDocumentContentProvider {
      */
 	provideTextDocumentContent(uri: vscode.Uri): string | Thenable<string> {
         if ( !this.entries.hasOwnProperty(uri.path) ) return ''
-        else return this.entries[uri.path].entry.text
+        else return this.entries[uri.path].entry.content
         /**
         let text = this.entries[uri.path].entry.text
         return `
