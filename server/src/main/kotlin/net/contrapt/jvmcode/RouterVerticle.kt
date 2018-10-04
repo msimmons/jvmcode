@@ -2,16 +2,17 @@ package net.contrapt.jvmcode
 
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.DeploymentOptions
+import io.vertx.core.Future
 import io.vertx.core.Handler
 import io.vertx.core.http.HttpServer
 import io.vertx.core.json.JsonObject
 import io.vertx.core.logging.LoggerFactory
 import io.vertx.ext.bridge.BridgeEventType
+import io.vertx.ext.bridge.PermittedOptions
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.StaticHandler
 import io.vertx.ext.web.handler.sockjs.BridgeEvent
 import io.vertx.ext.web.handler.sockjs.BridgeOptions
-import io.vertx.ext.web.handler.sockjs.PermittedOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import net.contrapt.jvmcode.model.DependencyData
 import net.contrapt.jvmcode.model.JarEntryData
@@ -63,8 +64,9 @@ class RouterVerticle(val startupToken: String) : AbstractVerticle() {
     }
 
     private fun bridgeEventHandler() = Handler<BridgeEvent> { event ->
-        when ( event.type() ) {
-            BridgeEventType.SOCKET_PING -> {}
+        when (event.type()) {
+            BridgeEventType.SOCKET_PING -> {
+            }
             else -> logger.debug("Got bridge event: ${event.type()} ${event.socket().uri()} ${event.rawMessage?.encode()}")
         }
         event.complete(true)
@@ -128,9 +130,9 @@ class RouterVerticle(val startupToken: String) : AbstractVerticle() {
                 isolationGroup = verticleName
             }
             val deploymentId = deployments[verticleName]
-            if ( deploymentId != null ) vertx.undeploy(deploymentId)
+            if (deploymentId != null) vertx.undeploy(deploymentId)
             vertx.deployVerticle(verticleName, options) { ar ->
-                if ( ar.failed() ) {
+                if (ar.failed()) {
                     logger.error("Failed deployment", ar.cause())
                     message.fail(500, ar.cause().toString())
                 } else {
@@ -169,6 +171,7 @@ class RouterVerticle(val startupToken: String) : AbstractVerticle() {
          * Signal that this is a JVM project, which will result in dependency info being sent to the client
          */
         vertx.eventBus().consumer<JsonObject>("jvmcode.enable-dependencies") { message ->
+            // TODO The message should contain some config, like list of package filters, etc
             // Get the current JDK dependencies
             val dependencies = dependencyService.getDependencies()
             // Send them to the client
@@ -189,27 +192,37 @@ class RouterVerticle(val startupToken: String) : AbstractVerticle() {
          * Return the jar entries for the given dependency
          */
         vertx.eventBus().consumer<JsonObject>("jvmcode.jar-entries") { message ->
-            try {
-                val dependencyData = message.body().getJsonObject("dependency").mapTo(DependencyData::class.java)
-                message.reply(JsonObject.mapFrom(dependencyService.getJarData(dependencyData)))
-            } catch (e: Exception) {
-                logger.error("Getting jar entries", e)
-                message.fail(500, e.message)
-            }
+            vertx.executeBlocking( Handler<Future<JsonObject>> { future ->
+                try {
+                    val dependencyData = message.body().getJsonObject("dependency").mapTo(DependencyData::class.java)
+                    future.complete(JsonObject.mapFrom(dependencyService.getJarData(dependencyData)))
+                } catch (e: Exception) {
+                    logger.error("Getting jar entries", e)
+                    future.fail(e)
+                }
+            }, false, Handler { ar ->
+                if (ar.failed()) message.fail(1, ar.cause().toString())
+                else message.reply(ar.result())
+            })
         }
 
         /**
          * Return the contents of the given jar entry
          */
         vertx.eventBus().consumer<JsonObject>("jvmcode.jar-entry") { message ->
-            try {
-                val jarEntryData = message.body().getJsonObject("jarEntry").mapTo(JarEntryData::class.java)
-                val resolved = dependencyService.getJarEntryContents(jarEntryData)
-                message.reply(JsonObject.mapFrom(resolved))
-            } catch (e: Exception) {
-                logger.error("Getting jar entry contents", e)
-                message.fail(500, e.message)
-            }
+            vertx.executeBlocking(Handler<Future<JsonObject>> { future ->
+                try {
+                    val jarEntryData = message.body().getJsonObject("jarEntry").mapTo(JarEntryData::class.java)
+                    val resolved = dependencyService.getJarEntryContents(jarEntryData)
+                    future.complete(JsonObject.mapFrom(resolved))
+                } catch (e: Exception) {
+                    logger.error("Getting jar entry contents", e)
+                    future.fail(e)
+                }
+            }, false, Handler { ar ->
+                if (ar.failed()) message.fail(1, ar.cause().toString())
+                else message.reply(ar.result())
+            })
         }
     }
 }
