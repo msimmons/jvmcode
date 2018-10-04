@@ -1,9 +1,6 @@
 package net.contrapt.jvmcode.service
 
-import net.contrapt.jvmcode.model.DependencyData
-import net.contrapt.jvmcode.model.JarData
-import net.contrapt.jvmcode.model.JarEntryData
-import net.contrapt.jvmcode.model.JarPackageData
+import net.contrapt.jvmcode.model.*
 import java.io.File
 import java.io.InputStream
 import java.util.jar.JarFile
@@ -14,6 +11,7 @@ class DependencyService {
     private val javaVersion : String
     private val javaHome : String
     private val jdkDependencyData : DependencyData
+    private lateinit var config: JvmConfig
 
     init {
         javaVersion = System.getProperty("java.version")
@@ -24,7 +22,8 @@ class DependencyService {
     /**
      * Get dependencies
      */
-    fun getDependencies() : Collection<DependencyData> {
+    fun getDependencies(config: JvmConfig) : Collection<DependencyData> {
+        this.config = config
         val jdk = listOf(jdkDependencyData)
         val sorted = dependencies.sorted()
         return jdk + sorted
@@ -45,7 +44,9 @@ class DependencyService {
             }
             return JarData(pkgMap
                     .map { entry -> JarPackageData(entry.key).apply { entries.addAll(entry.value) } }
-                    .filter { pkg -> pkg.entries.size > 0 }
+                    .filter { pkg ->
+                        pkg.entries.size > 0 && !config.excludes.any { exclude -> pkg.name.startsWith(exclude) }
+                    }
                     .toSortedSet()
             )
         }

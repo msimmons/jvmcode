@@ -63,21 +63,6 @@ export class JarContentProvider implements vscode.TextDocumentContentProvider {
 	provideTextDocumentContent(uri: vscode.Uri): string | Thenable<string> {
         if ( !this.entries.hasOwnProperty(uri.path) ) return ''
         else return this.entries[uri.path].entry.content
-        /**
-        let text = this.entries[uri.path].entry.text
-        return `
-        <html>
-        <body>
-        <pre><code>${text}</code></pre>
-        <!--textarea disabled="true" style="border: none;background-color:white;width=100%;height=100%">${text}</textarea-->
-        </body>
-        </html>
-        `
-        */
-    }
-    
-    getScriptUri(fileName: string) : Uri {
-        return vscode.Uri.file(this.context.asAbsolutePath('ui/'+fileName))
     }
 
 }

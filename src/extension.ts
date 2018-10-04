@@ -51,7 +51,9 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.workspace.registerTextDocumentContentProvider(contentProvider.scheme, contentProvider)
         vscode.commands.executeCommand('setContext', 'jvmcode.context.isJvmProject', true)
         isJvmProject = true
-        server.publish('jvmcode.enable-dependencies', {})
+        let configuration = vscode.workspace.getConfiguration('jvmcode')
+        let excludes: string[] = configuration.get("excludes")
+        server.publish('jvmcode.enable-dependencies', {excludes: excludes})
     }
 
     /**

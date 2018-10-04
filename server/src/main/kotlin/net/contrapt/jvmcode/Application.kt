@@ -1,6 +1,8 @@
 package net.contrapt.jvmcode
 
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import io.vertx.core.Vertx
+import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import io.vertx.core.logging.LoggerFactory
 
@@ -10,6 +12,10 @@ open class Application {
 
     fun startup(startupToken: String) {
         val vertx = Vertx.vertx()
+        // Configure Jackson as needed
+        Json.mapper.apply {
+            registerModule(KotlinModule())
+        }
         // Unhandled exceptions get published on the event bus
         vertx.exceptionHandler { e ->
             vertx.eventBus().publish("jvmcode.exception", JsonObject().put("message", e.message))

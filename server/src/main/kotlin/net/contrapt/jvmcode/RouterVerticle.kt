@@ -16,6 +16,7 @@ import io.vertx.ext.web.handler.sockjs.BridgeOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import net.contrapt.jvmcode.model.DependencyData
 import net.contrapt.jvmcode.model.JarEntryData
+import net.contrapt.jvmcode.model.JvmConfig
 import net.contrapt.jvmcode.model.JvmProject
 import net.contrapt.jvmcode.service.DependencyService
 
@@ -171,9 +172,10 @@ class RouterVerticle(val startupToken: String) : AbstractVerticle() {
          * Signal that this is a JVM project, which will result in dependency info being sent to the client
          */
         vertx.eventBus().consumer<JsonObject>("jvmcode.enable-dependencies") { message ->
-            // TODO The message should contain some config, like list of package filters, etc
+            // Get config, like list of package filters, etc
+            val config = message.body().mapTo(JvmConfig::class.java)
             // Get the current JDK dependencies
-            val dependencies = dependencyService.getDependencies()
+            val dependencies = dependencyService.getDependencies(config)
             // Send them to the client
             vertx.eventBus().publish("jvmcode.dependencies", JsonObject.mapFrom(JvmProject(dependencies)))
         }

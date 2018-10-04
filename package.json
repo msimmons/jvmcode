@@ -81,6 +81,16 @@
             "-server"
           ],
           "description": "The JVM options used to start the server"
+        },
+        "jvmcode.excludes": {
+          "type": "array",
+          "default": [
+            "com.sun",
+            "com.oracle",
+            "jdk",
+            "sun"
+          ],
+          "description": "A list of packages to exclude from dependency list.  Matches all packages with the given prefix"
         }
       }
     } 
