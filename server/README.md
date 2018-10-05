@@ -7,7 +7,8 @@
 - Supports serving static content for hosted extensions (to allow implementation of complex content providers)
 
 ### TODO
-- Allow filtering dependencies by package name
+- _Allow filtering dependencies by package name_
 - _Make sure blocking activities are executed safely_
 - Handle jmod as well as jars
 - More inteligent mapping of class names to file:locations when loading source
+- _User supplied dependencies (manual not Gradle/Maven etc)_

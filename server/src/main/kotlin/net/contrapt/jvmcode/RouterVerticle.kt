@@ -226,5 +226,26 @@ class RouterVerticle(val startupToken: String) : AbstractVerticle() {
                 else message.reply(ar.result())
             })
         }
+
+        /**
+         * Add a single jar file dependency and publish the new dependencies
+         */
+        vertx.eventBus().consumer<JsonObject>("jvmcode.add-dependency") { message ->
+            vertx.executeBlocking(Handler<Future<Unit>> { future ->
+                try {
+                    val jarFile = message.body().getString("jarFile")
+                    dependencyService.addDependency(jarFile)
+                    val config = message.body().mapTo(JvmConfig::class.java)
+                    val dependencies = dependencyService.getDependencies(config)
+                    vertx.eventBus().publish("jvmcode.dependencies", JsonObject.mapFrom(JvmProject(dependencies)))
+                    future.complete()
+                } catch (e: Exception) {
+                    logger.error("Getting jar entry contents", e)
+                    future.fail(e)
+                }
+            }, false, Handler { ar ->
+                if (ar.failed()) message.fail(1, ar.cause().toString())
+            })
+        }
     }
 }

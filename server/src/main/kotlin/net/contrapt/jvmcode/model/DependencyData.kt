@@ -3,36 +3,19 @@ package net.contrapt.jvmcode.model
 import java.io.File
 
 data class DependencyData (
-    var source: String = "",
-    var fileName: String = "",
-    var sourceFileName: String? = "",
-    var docFilename: String? = "",
+    val source: String,
+    val fileName: String,
+    val sourceFileName: String?,
+    val docFilename: String?,
+    var groupId: String,
+    var artifactId: String,
+    var version: String,
     val scopes: MutableSet<String> = mutableSetOf(),
-    val modules: MutableSet<String> = mutableSetOf(),
-    var groupId: String = "",
-    var artifactId: String = "",
-    var version: String = ""
+    val modules: MutableSet<String> = mutableSetOf()
 ) : Comparable<DependencyData> {
-
-    constructor(javaHome: String, javaVersion: String) : this() {
-        source = "System"
-        fileName = javaHome + File.separator + "jre/lib/rt.jar"
-        sourceFileName = javaHome + File.separator + "src.zip"
-        groupId = System.getProperty("java.vendor")
-        artifactId = "JDK"
-        version = javaVersion
-    }
 
     override fun compareTo(other: DependencyData): Int {
         return "${groupId}:${artifactId}:${version}".compareTo("${other.groupId}:${other.artifactId}:${other.version}")
-    }
-
-    private fun extractArtifactInfo(path: String) : Triple<String, String, String> {
-        val parts = path.split("/")
-        val version = parts[parts.size-3]
-        val artifact = parts[parts.size-4]
-        val group = parts[parts.size-5]
-        return Triple(group, artifact, version)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -45,5 +28,23 @@ data class DependencyData (
 
     override fun hashCode(): Int {
         return fileName.hashCode()
+    }
+
+    companion object {
+
+        fun create(javaHome: String, javaVersion: String) : DependencyData {
+            val fileName = javaHome + File.separator + "jre/lib/rt.jar"
+            val sourceFileName = javaHome + File.separator + "src.zip"
+            val groupId = System.getProperty("java.vendor")
+            val artifactId = "JDK"
+            val version = javaVersion
+            return DependencyData("System", fileName, sourceFileName, null, groupId, artifactId, version)
+        }
+
+        fun create(jarFile: String) : DependencyData {
+            val fileName = jarFile.split(File.separator).last()
+            return DependencyData("User", jarFile, null, null, "", fileName, "")
+        }
+
     }
 }

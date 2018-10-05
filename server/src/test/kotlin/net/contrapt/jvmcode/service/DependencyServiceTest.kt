@@ -32,4 +32,14 @@ class DependencyServiceTest {
         jarEntries.packages.size shouldBe beGreaterThan(0)
         jarEntries.packages.any { pkg -> pkg.name.startsWith("com.sun") } shouldBe false
     }
+
+    @Test
+    fun addDependencyTest() {
+        val service = DependencyService()
+        javaClass.classLoader
+        val path = javaClass.classLoader.getResource("postgresql-42.1.4.jar").path
+        service.addDependency(path)
+        val deps = service.getDependencies(JvmConfig(setOf("com.sun")))
+        deps.size shouldBe 2
+    }
 }

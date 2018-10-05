@@ -16,7 +16,7 @@ class DependencyService {
     init {
         javaVersion = System.getProperty("java.version")
         javaHome = System.getProperty("java.home").replace("${File.separator}jre", "")
-        jdkDependencyData = DependencyData(javaHome, javaVersion)
+        jdkDependencyData = DependencyData.create(javaHome, javaVersion)
     }
 
     /**
@@ -27,6 +27,13 @@ class DependencyService {
         val jdk = listOf(jdkDependencyData)
         val sorted = dependencies.sorted()
         return jdk + sorted
+    }
+
+    /**
+     * Add a single JAR file dependency
+     */
+    fun addDependency(jarFile: String) {
+        dependencies.add(DependencyData.create(jarFile))
     }
 
     fun getJarData(dependencyData: DependencyData) : JarData {

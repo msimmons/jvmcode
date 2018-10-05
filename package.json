@@ -43,6 +43,10 @@
       {
         "command": "jvmcode.jvm-project",
         "title": "JVM: Start Project"
+      },
+      {
+        "command": "jvmcode.add-dependency",
+        "title": "JVM: Add a Dependency"
       }
     ],
     "views": {

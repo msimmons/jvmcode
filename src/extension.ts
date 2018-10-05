@@ -52,7 +52,7 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.executeCommand('setContext', 'jvmcode.context.isJvmProject', true)
         isJvmProject = true
         let configuration = vscode.workspace.getConfiguration('jvmcode')
-        let excludes: string[] = configuration.get("excludes")
+        let excludes: string[] = configuration.get('excludes')
         server.publish('jvmcode.enable-dependencies', {excludes: excludes})
     }
 
@@ -64,12 +64,12 @@ export function activate(context: vscode.ExtensionContext) {
         dependencyProvider.setDependencies(dependencies)
     }
 
-    context.subscriptions.push(vscode.commands.registerCommand("jvmcode.start", () => {
+    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.start', () => {
         server = new JvmServer(context)
         server.start()
     }))
 
-    context.subscriptions.push(vscode.commands.registerCommand("jvmcode.echo", () => {
+    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.echo', () => {
         vscode.window.showInputBox().then((message) => {
             if (message) {
                 server.send('jvmcode.echo', { message: message }).then((reply) => {
@@ -81,7 +81,7 @@ export function activate(context: vscode.ExtensionContext) {
         })
     }))
 
-    context.subscriptions.push(vscode.commands.registerCommand("jvmcode.log-level", () => {
+    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.log-level', () => {
         vscode.window.showQuickPick(['DEBUG', 'INFO', 'WARN', 'ERROR']).then((choice) => {
             if (choice) {
                 server.send('jvmcode.log-level', { level: choice }).then((reply) => {
@@ -103,6 +103,9 @@ export function activate(context: vscode.ExtensionContext) {
         server.publish('jvmcode.dependencies', { name: 'foo', value: 'bar' })
     }))
 
+    /**
+     * Command to get the content of a jar entry and show it in an editor
+     */
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.jar-entry', (entryNode: JarEntryNode) => {
         if (entryNode.content) {
             openJarEntryContent(entryNode, true)
@@ -115,8 +118,19 @@ export function activate(context: vscode.ExtensionContext) {
                 vscode.window.showErrorMessage(error)
             })
         })
-    })
-    )
+    }))
+
+    /**
+     * Allows the user to manually enter a jar dependency
+     */
+    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.add-dependency', () => {
+        vscode.window.showOpenDialog({filters: {'Dependency': ['jar']}, canSelectMany: false}).then((jarFile) => {
+            if (!jarFile || jarFile.length === 0) return
+            let configuration = vscode.workspace.getConfiguration('jvmcode')
+            let excludes: string[] = configuration.get('excludes')
+            server.publish('jvmcode.add-dependency', {jarFile: jarFile[0]['path'], excludes: excludes})
+        })
+    }))
 
     async function getJarEntryContent(entryNode: JarEntryNode) {
         return await server.send('jvmcode.jar-entry', {jarEntry: entryNode})
