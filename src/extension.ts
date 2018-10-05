@@ -9,6 +9,7 @@ import { JarContentProvider } from './jar_content_provider';
 let server: JvmServer
 let dependencyProvider: DependencyTreeProvider
 let contentProvider: JarContentProvider
+let statsStatus: vscode.StatusBarItem
 let isJvmProject = false
 
 export function activate(context: vscode.ExtensionContext) {
@@ -17,7 +18,41 @@ export function activate(context: vscode.ExtensionContext) {
     if (!server) {
         server = new JvmServer(context)
         server.start()
+        registerStatsListener()
         registerDependencyListener()
+    }
+
+    /**
+     * Register a consumer for JVM stats message 
+     */
+    function registerStatsListener() {
+        statsStatus = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0)
+        statsStatus.text = '---'
+        statsStatus.show()
+        server.registerConsumer('jvmcode.stats', (error, result) => {
+            if (error) {
+                console.error(error)
+            }
+            else {
+                var freeKB = Math.round(result.body.free/1000)
+                var totalKB = Math.round(result.body.total/1000)
+                var maxKB = Math.round(result.body.max/1000)
+                var pct = Math.round(result.body.total/result.body.max)
+                statsStatus.tooltip = `free: ${freeKB} total: ${totalKB} max: ${maxKB}`
+                if (pct < 50) {
+                    statsStatus.color = 'white'
+                    statsStatus.text = `${freeKB}K`
+                }
+                else if (pct < 80) {
+                    statsStatus.color = 'orange'
+                    statsStatus.text = '$(alert)'
+                }
+                else {
+                    statsStatus.color = 'red'
+                    statsStatus.text = '$(stop)'
+                }
+            }
+        })
     }
 
     /** 

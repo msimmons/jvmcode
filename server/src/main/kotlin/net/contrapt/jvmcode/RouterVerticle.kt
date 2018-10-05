@@ -76,6 +76,16 @@ class RouterVerticle(val startupToken: String, var config: JvmConfig) : Abstract
     fun startConsumers() {
 
         /**
+         * JVM stats monitoring
+         */
+        vertx.setPeriodic(30000) { handler ->
+            val free = Runtime.getRuntime().freeMemory()
+            val total = Runtime.getRuntime().totalMemory()
+            val max = Runtime.getRuntime().maxMemory()
+            vertx.eventBus().publish("jvmcode.stats", JsonObject().put("free", free).put("total", total).put("max", max))
+        }
+
+        /**
          * Simple echo for testing
          */
         vertx.eventBus().consumer<JsonObject>("jvmcode.echo") { message ->
