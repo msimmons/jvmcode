@@ -20,7 +20,7 @@ import net.contrapt.jvmcode.model.JvmConfig
 import net.contrapt.jvmcode.model.JvmProject
 import net.contrapt.jvmcode.service.DependencyService
 
-class RouterVerticle(val startupToken: String) : AbstractVerticle() {
+class RouterVerticle(val startupToken: String, var config: JvmConfig) : AbstractVerticle() {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -127,7 +127,7 @@ class RouterVerticle(val startupToken: String) : AbstractVerticle() {
             val jarFiles = message.body().getJsonArray("jarFiles")
             val verticleName = message.body().getString("verticleName")
             val options = DeploymentOptions().apply {
-                extraClasspath = jarFiles.list as List<String>
+                extraClasspath = jarFiles.list.map { it.toString() }
                 isolationGroup = verticleName
             }
             val deploymentId = deployments[verticleName]
@@ -173,7 +173,7 @@ class RouterVerticle(val startupToken: String) : AbstractVerticle() {
          */
         vertx.eventBus().consumer<JsonObject>("jvmcode.enable-dependencies") { message ->
             // Get config, like list of package filters, etc
-            val config = message.body().mapTo(JvmConfig::class.java)
+            config = message.body().mapTo(JvmConfig::class.java)
             // Get the current JDK dependencies
             val dependencies = dependencyService.getDependencies(config)
             // Send them to the client
@@ -235,7 +235,7 @@ class RouterVerticle(val startupToken: String) : AbstractVerticle() {
                 try {
                     val jarFile = message.body().getString("jarFile")
                     dependencyService.addDependency(jarFile)
-                    val config = message.body().mapTo(JvmConfig::class.java)
+                    config = message.body().mapTo(JvmConfig::class.java)
                     val dependencies = dependencyService.getDependencies(config)
                     vertx.eventBus().publish("jvmcode.dependencies", JsonObject.mapFrom(JvmProject(dependencies)))
                     future.complete()

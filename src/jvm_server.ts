@@ -49,6 +49,11 @@ export class JvmServer {
         let cacheDirOpt = '-Dvertx.cacheDirBase=' + this.context.extensionPath + '.vertx'
         let args = options.concat([cacheDirOpt, '-jar', jarFile, logLevel, this.startupToken])
         this.child = spawn(command, args)
+
+        // Write blob of configuration to stdin
+        let excludes: string[] = configuration.get('excludes')
+        let configObject = {excludes: excludes}
+        this.child.stdin.write(JSON.stringify(configObject) + '\n')
     
         // Setup event handlers
         this.child.on('error', this.handleServerErrorCallback);
@@ -211,19 +216,6 @@ export class JvmServer {
         this.child = null
         this.bus = null
         this.status = Status.STOPPED
-        //setTimeout(this.restartIfAppropriate, 500)
-    }
-
-    private restartIfAppropriate = () => {
-        if ( this.status === Status.STOP_REQUESTED ) {
-            this.status = Status.STOPPED
-            this.child = null
-            this.bus = null
-        }
-        else if ( this.status === Status.STARTED ) {
-            this.status = Status.STOPPED;
-            this.restart();
-        }
     }
 
     private checkServerStartedCallback = (data) => {

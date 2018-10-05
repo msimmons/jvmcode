@@ -49,7 +49,7 @@ class DependencyService {
                     entryToDependencyMap.put(entryData.name, dependencyData)
                 }
             }
-            return JarData(pkgMap
+            return JarData(pkgMap.asSequence()
                     .map { entry -> JarPackageData(entry.key).apply { entries.addAll(entry.value) } }
                     .filter { pkg ->
                         pkg.entries.size > 0 && !config.excludes.any { exclude -> pkg.name.startsWith(exclude) }
