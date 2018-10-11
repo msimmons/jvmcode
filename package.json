@@ -5,7 +5,7 @@
   "version": "1.0.0",
   "publisher": "contrapt",
   "engines": {
-    "vscode": "^1.24.0"
+    "vscode": "^1.28.0"
   },
   "repository": {
     "type": "git",
@@ -97,7 +97,7 @@
           "description": "A list of packages to exclude from dependency list.  Matches all packages with the given prefix"
         }
       }
-    } 
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile; server/gradlew build deploy -b server/build.gradle",

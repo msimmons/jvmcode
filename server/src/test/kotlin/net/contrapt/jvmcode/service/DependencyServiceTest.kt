@@ -3,6 +3,7 @@ package net.contrapt.jvmcode.service
 import io.kotlintest.matchers.beGreaterThan
 import io.kotlintest.matchers.shouldBe
 import io.kotlintest.matchers.shouldNotBe
+import net.contrapt.jvmcode.model.JarEntryType
 import net.contrapt.jvmcode.model.JvmConfig
 import org.junit.Test
 
@@ -17,9 +18,12 @@ class DependencyServiceTest {
         depData.source shouldBe "System"
         val jarEntries = service.getJarData(depData)
         jarEntries.packages.size shouldBe beGreaterThan(0)
-        val entry = jarEntries.packages.first().entries.first()
-        service.getJarEntryContents(entry)
-        entry.text shouldNotBe null
+        val resourceEntry = jarEntries.packages.first().entries.first()
+        service.getJarEntryContents(resourceEntry)
+        resourceEntry.text shouldNotBe null
+        val classEntry = jarEntries.packages.first { it.name == "java.lang" }.entries.first { it.type == JarEntryType.CLASS }
+        val javaEntry = service.getJarEntryContents(classEntry)
+        javaEntry.text shouldNotBe null
     }
 
     @Test

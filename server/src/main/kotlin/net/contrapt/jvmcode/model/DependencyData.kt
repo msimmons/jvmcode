@@ -32,6 +32,9 @@ data class DependencyData (
 
     companion object {
 
+        /**
+         * Create the JDK dependency
+         */
         fun create(javaHome: String, javaVersion: String) : DependencyData {
             val fileName = javaHome + File.separator + "jre/lib/rt.jar"
             val sourceFileName = javaHome + File.separator + "src.zip"
@@ -41,6 +44,9 @@ data class DependencyData (
             return DependencyData("System", fileName, sourceFileName, null, groupId, artifactId, version)
         }
 
+        /**
+         * Create a user added dependency
+         */
         fun create(jarFile: String) : DependencyData {
             val fileName = jarFile.split(File.separator).last()
             return DependencyData("User", jarFile, null, null, "", fileName, "")

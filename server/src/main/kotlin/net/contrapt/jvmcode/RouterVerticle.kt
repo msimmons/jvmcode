@@ -14,10 +14,7 @@ import io.vertx.ext.web.handler.StaticHandler
 import io.vertx.ext.web.handler.sockjs.BridgeEvent
 import io.vertx.ext.web.handler.sockjs.BridgeOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
-import net.contrapt.jvmcode.model.DependencyData
-import net.contrapt.jvmcode.model.JarEntryData
-import net.contrapt.jvmcode.model.JvmConfig
-import net.contrapt.jvmcode.model.JvmProject
+import net.contrapt.jvmcode.model.*
 import net.contrapt.jvmcode.service.DependencyService
 
 class RouterVerticle(val startupToken: String, var config: JvmConfig) : AbstractVerticle() {
@@ -191,13 +188,23 @@ class RouterVerticle(val startupToken: String, var config: JvmConfig) : Abstract
         }
 
         /**
-         * Add dependencies to be managed for this project; these can come from the user via interaction with this
-         * extension or from other extensions, eg Gradle, Maven
+         * Add dependencies to be managed for this project from an outside source, such as Gradle, Maven, other.
          */
         vertx.eventBus().consumer<JsonObject>("jvmcode.add-dependencies") { message ->
-            // Process the new dependencies
-            // Send all current dependencies to the client
-            vertx.eventBus().publish("jvmcode.dependencies", JsonObject())
+            vertx.executeBlocking(Handler<Future<Unit>> { future ->
+                try {
+                    val dependencyList = message.body().mapTo(DependencyList::class.java)
+                    dependencyService.addDependencies(dependencyList)
+                    val dependencies = dependencyService.getDependencies(config)
+                    vertx.eventBus().publish("jvmcode.dependencies", JsonObject.mapFrom(JvmProject(dependencies)))
+                    future.complete()
+                } catch (e: Exception) {
+                    logger.error("Adding additional dependencies", e)
+                    future.fail(e)
+                }
+            }, false, Handler { ar ->
+                if (ar.failed()) message.fail(1, ar.cause().toString())
+            })
         }
 
         /**

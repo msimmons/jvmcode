@@ -36,7 +36,7 @@ export class DependencyTreeProvider implements TreeDataProvider<object> {
 
     public getTreeItem(element: TreeNode) : TreeItem {
         let item = new TreeItem(element.treeLabel(), TreeItemCollapsibleState.Collapsed)
-        if ( element.type === 'class' || element.type === 'resource') {
+        if ( element.type === 'CLASS' || element.type === 'RESOURCE') {
             item.collapsibleState = TreeItemCollapsibleState.None
             item.command = {title: 'JAR Open Entry', command: 'jvmcode.jar-entry', arguments: [element]}
         }

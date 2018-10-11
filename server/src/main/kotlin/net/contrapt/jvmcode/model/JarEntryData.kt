@@ -1,8 +1,9 @@
 package net.contrapt.jvmcode.model
 
 data class JarEntryData(
-        var name: String = "",
-        var type: String = "",
+        val name: String,
+        val type: JarEntryType,
+        val pkg: String,
         var text: String? = null
 ) : Comparable<JarEntryData> {
 

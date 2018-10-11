@@ -3,15 +3,23 @@ package net.contrapt.jvmcode.service
 import net.contrapt.jvmcode.model.*
 import java.io.File
 import java.io.InputStream
+import java.util.jar.JarEntry
 import java.util.jar.JarFile
 
 class DependencyService {
+
+    // All the dependencies being tracked TODO store user added ones
     private val dependencies = mutableSetOf<DependencyData>()
-    private val entryToDependencyMap = mutableMapOf<String, DependencyData>()
+
+    // Map of entry name to entry data and dependency it belongs to
+    private val entryMap = mutableMapOf<String, Pair<JarEntryData, DependencyData>>()
+
     private val javaVersion : String
     private val javaHome : String
     private val jdkDependencyData : DependencyData
     private lateinit var config: JvmConfig
+
+    private val SOURCE_EXTENSIONS = listOf("java", "kt", "groovy", "kts")
 
     init {
         javaVersion = System.getProperty("java.version")
@@ -36,17 +44,25 @@ class DependencyService {
         dependencies.add(DependencyData.create(jarFile))
     }
 
+    /**
+     * Add a collection of dependencies
+     */
+    fun addDependencies(dependencyList: DependencyList) {
+        dependencies.addAll(dependencyList.dependencies)
+    }
+
     fun getJarData(dependencyData: DependencyData) : JarData {
         val pkgMap = mutableMapOf<String, MutableSet<JarEntryData>>()
         try {
             val jarFile = JarFile(dependencyData.fileName)
             jarFile.entries().toList().forEach { entry ->
                 if ( entry.isDirectory ) pkgMap.put(pathToPackage(entry.name), mutableSetOf())
+                else if (entry.name.contains("$")) { }
                 else {
                     val packageName = pathToPackage(entry.name)
-                    val entryData = pathToJarEntry(entry.name)
+                    val entryData = pathToJarEntry(packageName, entry.name)
                     pkgMap.getOrPut(packageName, { sortedSetOf() }).add(entryData)
-                    entryToDependencyMap.put(entryData.name, dependencyData)
+                    entryMap.put(entryData.name, Pair(entryData, dependencyData))
                 }
             }
             return JarData(pkgMap.asSequence()
@@ -63,27 +79,30 @@ class DependencyService {
     }
 
     fun getJarEntryContents(entry: JarEntryData) : JarEntryData {
-        val dependency = entryToDependencyMap[entry.name]
-        if ( dependency == null ) return entry
-        else if ( dependency.sourceFileName != null && entry.type.equals("class")) return getContentFromSourceJar(dependency.sourceFileName as String, entry)
+        val entryRecord = entryMap[entry.name]
+        if ( entryRecord == null ) return entry
+        val dependency = entryRecord.second
+        if (dependency.sourceFileName != null && entry.type == JarEntryType.CLASS) return getContentFromSourceJar(dependency.sourceFileName, entry)
         else return getContentFromJar(dependency.fileName, entry)
     }
 
     private fun getContentFromSourceJar(fileName: String, entry: JarEntryData) : JarEntryData {
         try {
             val jarFile = JarFile(fileName)
-            jarFile.entries().toList().forEach { jarEntry ->
-                if ( jarEntry.isDirectory ) return@forEach
-                val className = entry.name
-                val sourceEntry = pathToJarEntry(jarEntry.name)
-                if ( className.split(".", "$")[0] == sourceEntry.name.split(".")[0] ) {
-                    sourceEntry.text = jarFile.getInputStream(jarEntry).bufferedReader().use {
-                        it.readText()
-                    }
-                    return sourceEntry
-                }
+            val entryPath = "${entry.pkg.replace(".", File.separator)}${File.separator}${entry.name}"
+            var jarEntry : JarEntry? = null
+            jarEntry = SOURCE_EXTENSIONS.fold(jarEntry) { curEntry, ext ->
+                if (curEntry == null) jarFile.getJarEntry("${entryPath}.${ext}") else curEntry
             }
-            return entry
+            if (jarEntry == null) {
+                return entry
+            } else {
+                val sourceEntry = pathToJarEntry(entry.pkg, jarEntry.name)
+                sourceEntry.text = jarFile.getInputStream(jarEntry).bufferedReader().use {
+                    it.readText()
+                }
+                return sourceEntry
+            }
         }
         catch (e: Exception) {
             throw RuntimeException("Unable to read content for ${entry.name}")
@@ -94,12 +113,11 @@ class DependencyService {
         try {
             val jarFile = JarFile(fileName)
             jarFile.entries().toList().forEach { jarEntry ->
-                if ( !jarEntry.isDirectory && pathToJarEntry(jarEntry.name).name.equals(entry.name)) {
+                if ( !jarEntry.isDirectory && pathToJarEntry(entry.pkg, jarEntry.name).name.equals(entry.name)) {
                     jarFile.getInputStream(jarEntry).use {
                         entry.text = when (entry.type) {
-                            "resource" -> getResourceFromJar(it)
-                            "class" -> getClassFromJar(it)
-                            else -> throw IllegalStateException("Don't know about entry type ${entry.type}")
+                            JarEntryType.RESOURCE -> getResourceFromJar(it)
+                            JarEntryType.CLASS -> getClassFromJar(it)
                         }
                     }
                     return entry
@@ -127,11 +145,18 @@ class DependencyService {
     /**
      * Turn a jar path into a JarEntryData
      */
-    private fun pathToJarEntry(path: String) : JarEntryData {
+    private fun pathToJarEntry(packageName: String, path: String) : JarEntryData {
         val parts = path.split("/")
-        val name = parts[parts.size-1]
-        val type = if ( name.endsWith(".class") ) "class" else "resource"
-        return JarEntryData(name, type)
+        val fileName = parts[parts.size-1]
+        val type = when (fileName.endsWith(".class")) {
+            true -> JarEntryType.CLASS
+            else -> JarEntryType.RESOURCE
+        }
+        val name = when (type) {
+            JarEntryType.CLASS -> fileName.replace(".class", "")
+            else -> fileName
+        }
+        return JarEntryData(name, type, packageName)
     }
 
     /**
