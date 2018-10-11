@@ -11,6 +11,7 @@
 - _Make sure blocking activities are executed safely_
 - Handle jmod as well as jars
 - More inteligent mapping of class names to file:locations when loading source
+- Multiple jar/jmod per dependency
 - _User supplied dependencies (manual not Gradle/Maven etc)_
 - _Send config at server startup_
 - _Monitor and show JVM memory stats_

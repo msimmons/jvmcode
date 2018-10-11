@@ -17,10 +17,8 @@ export class JarContentProvider implements vscode.TextDocumentContentProvider {
 	private onDidChangeEmitter = new vscode.EventEmitter<vscode.Uri>();
     private subscriptions: vscode.Disposable;
     private entries = {}
-    private context: vscode.ExtensionContext
 
-	public constructor(context: vscode.ExtensionContext) {
-        this.context = context
+	public constructor() {
 		// Listen to the `closeTextDocument`-event which means we must
 		// clear the corresponding model object - `ReferencesDocument`
         //this.subscriptions = vscode.workspace.onDidCloseTextDocument(doc => {this.closeDoc(doc)})
@@ -31,8 +29,8 @@ export class JarContentProvider implements vscode.TextDocumentContentProvider {
      * @param uri The uri to update
      * @param entry new JarEntryData to update with
      */
-    update(uri: Uri, entry: JarEntryNode) {
-        this.entries[uri.path] = {entry: entry}
+    update(uri: Uri, content: string) {
+        this.entries[uri.toString()] = content
         this.onDidChangeEmitter.fire(uri);
     }
 
@@ -61,8 +59,8 @@ export class JarContentProvider implements vscode.TextDocumentContentProvider {
      * @param uri The uri to provider for
      */
 	provideTextDocumentContent(uri: vscode.Uri): string | Thenable<string> {
-        if ( !this.entries.hasOwnProperty(uri.path) ) return ''
-        else return this.entries[uri.path].entry.content
+        if ( !this.entries.hasOwnProperty(uri.toString()) ) return ''
+        else return this.entries[uri.toString()]
     }
 
 }

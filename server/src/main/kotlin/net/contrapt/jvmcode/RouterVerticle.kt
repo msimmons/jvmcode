@@ -251,8 +251,8 @@ class RouterVerticle(val startupToken: String, var config: JvmConfig) : Abstract
             vertx.executeBlocking(Handler<Future<Unit>> { future ->
                 try {
                     val jarFile = message.body().getString("jarFile")
+                    config = message.body().getJsonObject("config").mapTo(JvmConfig::class.java)
                     dependencyService.addDependency(jarFile)
-                    config = message.body().mapTo(JvmConfig::class.java)
                     val dependencies = dependencyService.getDependencies(config)
                     vertx.eventBus().publish("jvmcode.dependencies", JsonObject.mapFrom(JvmProject(dependencies)))
                     future.complete()

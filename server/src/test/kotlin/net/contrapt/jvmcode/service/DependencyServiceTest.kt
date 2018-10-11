@@ -12,7 +12,7 @@ class DependencyServiceTest {
     @Test
     fun systemJdkTest() {
         val service = DependencyService()
-        val deps = service.getDependencies(JvmConfig(setOf()))
+        val deps = service.getDependencies(JvmConfig(setOf(), setOf("java")))
         deps.size shouldBe 1
         val depData = deps.first()
         depData.source shouldBe "System"
@@ -29,7 +29,7 @@ class DependencyServiceTest {
     @Test
     fun systemJdkWithExcludesTest() {
         val service = DependencyService()
-        val deps = service.getDependencies(JvmConfig(setOf("com.sun")))
+        val deps = service.getDependencies(JvmConfig(setOf("com.sun"), setOf("java")))
         deps.size shouldBe 1
         val depData = deps.first()
         val jarEntries = service.getJarData(depData)
@@ -43,7 +43,7 @@ class DependencyServiceTest {
         javaClass.classLoader
         val path = javaClass.classLoader.getResource("postgresql-42.1.4.jar").path
         service.addDependency(path)
-        val deps = service.getDependencies(JvmConfig(setOf("com.sun")))
+        val deps = service.getDependencies(JvmConfig(setOf("com.sun"), setOf("java")))
         deps.size shouldBe 2
     }
 }

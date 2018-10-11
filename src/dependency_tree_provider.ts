@@ -1,18 +1,18 @@
 import * as vscode from 'vscode'
 import { TreeDataProvider, TreeItem, TreeItemCollapsibleState, EventEmitter } from 'vscode'
-import { DependencyData, DependencyNode, JarPackageNode, TreeNode } from './models'
-import { JvmServer } from './jvm_server';
+import { DependencyData, DependencyNode, JarPackageNode, TreeNode, JarEntryData } from './models'
+import { DependencyService } from './dependency_service';
 
-export class DependencyTreeProvider implements TreeDataProvider<object> {
+export class DependencyTreeProvider implements TreeDataProvider<TreeNode> {
 
     public viewId = 'jvmcode.dependency-tree';
     
-    private server: JvmServer
+    private service: DependencyService
     private dependencies: DependencyNode[]
-    private onDidChangeEmitter = new EventEmitter<object>()
+    private onDidChangeEmitter = new EventEmitter<TreeNode>()
 
-    constructor(server: JvmServer) {
-        this.server = server
+    constructor(service: DependencyService) {
+        this.service = service
     }
 
     public clearDependencies() {
@@ -38,21 +38,21 @@ export class DependencyTreeProvider implements TreeDataProvider<object> {
         let item = new TreeItem(element.treeLabel(), TreeItemCollapsibleState.Collapsed)
         if ( element.type === 'CLASS' || element.type === 'RESOURCE') {
             item.collapsibleState = TreeItemCollapsibleState.None
-            item.command = {title: 'JAR Open Entry', command: 'jvmcode.jar-entry', arguments: [element]}
+            item.command = {title: 'Open Entry', command: 'jvmcode.jar-entry', arguments: [element]}
         }
         return item
     }
 
-    public getChildren(element: TreeNode) : object[] | Thenable<object[]> {
+    public getChildren(element: TreeNode) : TreeNode[] | Thenable<TreeNode[]> {
         if ( !element ) return this.dependencies
-        else if ( element.type === 'dependency' ) return this.getJarEntries(element as DependencyNode)
+        else if ( element.type === 'dependency' ) return this.getPackageNodes(element as DependencyNode)
         else if ( element.type === 'package' ) return (element as JarPackageNode).entries
     }
 
-    private async getJarEntries(dependency: DependencyNode) : Promise<JarPackageNode[]> {
+    private async getPackageNodes(dependency: DependencyNode) : Promise<JarPackageNode[]> {
         try {
-            let reply = await this.server.send('jvmcode.jar-entries', {dependency: dependency.data})
-            return reply.body.packages.map((jarEntry)=>{ return new JarPackageNode(dependency, jarEntry)})
+            let packages = await this.service.getPackages(dependency.data)
+            return packages.map((pkgData) => { return new JarPackageNode(dependency, pkgData) })
         }
         catch(error) {
             vscode.window.showErrorMessage(error.message)

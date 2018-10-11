@@ -41,7 +41,7 @@ export class DependencyNode implements TreeNode {
     type = 'dependency'
     constructor(data: DependencyData) { this.data = data}
     public treeLabel() : string  {
-        return this.data.source + ': ' + this.data.groupId + ':' + this.data.artifactId + ':' + this.data.version 
+        return this.data.source + ':' + this.data.groupId + ':' + this.data.artifactId + ':' + this.data.version 
     }
 }
 
@@ -50,7 +50,7 @@ export class JarPackageNode implements TreeNode {
     name: string
     type = 'package'
     constructor(dependency: DependencyNode, data: JarPackageData) { 
-        this.dependency = dependency.treeLabel()
+        this.dependency = dependency.data.fileName
         this.name = data.name
         this.entries = data.entries.map((entry) => {
             return new JarEntryNode(this, entry.name, entry.type)

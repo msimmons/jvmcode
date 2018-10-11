@@ -19,8 +19,6 @@ class DependencyService {
     private val jdkDependencyData : DependencyData
     private lateinit var config: JvmConfig
 
-    private val SOURCE_EXTENSIONS = listOf("java", "kt", "groovy", "kts")
-
     init {
         javaVersion = System.getProperty("java.version")
         javaHome = System.getProperty("java.home").replace("${File.separator}jre", "")
@@ -91,7 +89,7 @@ class DependencyService {
             val jarFile = JarFile(fileName)
             val entryPath = "${entry.pkg.replace(".", File.separator)}${File.separator}${entry.name}"
             var jarEntry : JarEntry? = null
-            jarEntry = SOURCE_EXTENSIONS.fold(jarEntry) { curEntry, ext ->
+            jarEntry = config.extensions.fold(jarEntry) { curEntry, ext ->
                 if (curEntry == null) jarFile.getJarEntry("${entryPath}.${ext}") else curEntry
             }
             if (jarEntry == null) {

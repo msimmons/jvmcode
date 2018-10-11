@@ -95,6 +95,16 @@
             "sun"
           ],
           "description": "A list of packages to exclude from dependency list.  Matches all packages with the given prefix"
+        },
+        "jvmcode.sourceExtensions": {
+          "type": "array",
+          "default": [
+            "java",
+            "kt",
+            "kts",
+            "groovy"
+          ],
+          "description": "A list of extensions used to look for source files in dependency jars"
         }
       }
     }

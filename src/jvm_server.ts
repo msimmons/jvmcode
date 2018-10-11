@@ -5,6 +5,7 @@ import { ChildProcess, spawn } from 'child_process'
 import { OutputChannel } from 'vscode'
 import { setTimeout } from 'timers'
 import * as EventBus from 'vertx3-eventbus-client'
+import { ConfigService } from './config_service';
 
 let makeUUID = require('node-uuid').v4;
 
@@ -51,9 +52,8 @@ export class JvmServer {
         this.child = spawn(command, args)
 
         // Write blob of configuration to stdin
-        let excludes: string[] = configuration.get('excludes')
-        let configObject = {excludes: excludes}
-        this.child.stdin.write(JSON.stringify(configObject) + '\n')
+        let config = ConfigService.getConfig()
+        this.child.stdin.write(JSON.stringify(config) + '\n')
     
         // Setup event handlers
         this.child.on('error', this.handleServerErrorCallback);
