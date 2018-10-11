@@ -25,6 +25,10 @@ export function activate(context: vscode.ExtensionContext) {
         statsController.registerStatsListener(server)
     }
 
+    //
+    // Register all the commands below
+    //
+
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.start', () => {
         server = new JvmServer(context)
         server.start()
@@ -66,9 +70,18 @@ export function activate(context: vscode.ExtensionContext) {
 
     /**
      * Allow the user to find any class in the projects current dependencies
+     * Maybe show local project classes first, if no match, show dependency classes (possibly pre-filtered)
      */
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.find-class', () => {
-        vscode.window.createQuickPick()
+        dependencyController.start()
+        dependencyService.getJarEntries().then((result) => {
+            let quickPick = vscode.window.createQuickPick()
+            let items = result.map((r) => { 
+                return { label: r.name, detail: r.pkg } as vscode.QuickPickItem
+            })
+            quickPick.items = items
+            quickPick.show()
+        })
     }))
 
     /**

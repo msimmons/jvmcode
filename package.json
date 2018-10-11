@@ -47,6 +47,10 @@
       {
         "command": "jvmcode.add-dependency",
         "title": "JVM: Add a Dependency"
+      },
+      {
+        "command": "jvmcode.find-class",
+        "title": "JVM: Find a class"
       }
     ],
     "views": {

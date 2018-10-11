@@ -17,6 +17,7 @@ export interface DependencyData {
     groupId: string
     artifactId: string
     version: string
+    packages: JarPackageData[]
 }
 
 /**
@@ -33,6 +34,7 @@ export interface JarPackageData {
 export interface JarEntryData {
     type: string
     name: string
+    pkg: string
     text?: string
 }
 
@@ -68,6 +70,7 @@ export class JarEntryNode implements TreeNode {
     name: string
     type: string
     content: string
+    contentName: string
     constructor(pkg: JarPackageNode, name: string, type: string) { 
         this.dependency = pkg.dependency
         this.pkg = pkg.name

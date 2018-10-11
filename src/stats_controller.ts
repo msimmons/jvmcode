@@ -4,7 +4,7 @@ import * as vscode from 'vscode'
 import { JvmServer } from './jvm_server';
 
 /**
- * Responsible for managing various views related to dependencies
+ * Responsible for managing views related to JVM statistics
  */
 export class StatsController {
 

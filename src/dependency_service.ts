@@ -51,12 +51,35 @@ export class DependencyService {
     }
 
     /**
+     * Return all of the jar entries across all dependencies
+     */
+    public async getJarEntries() : Promise<JarEntryData[]> {
+        let depPkgs = []
+        for (var dep of this.dependencies) {
+            depPkgs.push(await this.getPackages(dep))
+        }
+        // Wait for all the packages to resolve, than get the entries
+        return Promise.all(depPkgs).then((depPkgs) => {
+            let jarEntries = []
+            for (var pkgList of depPkgs) {
+                for (var pkg of pkgList) {
+                    jarEntries = jarEntries.concat(pkg.entries)
+                }
+            }
+            return jarEntries
+        })
+    }
+
+    /**
      * Returns the collection of package entries for the dependency
      * @param dependency 
      */
     public async getPackages(dependency: DependencyData) : Promise<JarPackageData[]> {
-        let result = await this.server.send('jvmcode.jar-entries', {dependency: dependency})
-        return result.body.packages
+        if (!dependency.packages) {
+            let result = await this.server.send('jvmcode.jar-entries', {dependency: dependency})
+            dependency.packages = result.body.packages
+        }
+        return dependency.packages
     }
 
     /**

@@ -69,7 +69,7 @@ export class DependencyController {
      */
     private openJarEntryContent(entryNode: JarEntryNode) {
         if (!entryNode.content) return
-        let uri = vscode.Uri.parse(this.contentProvider.scheme + '://' + entryNode.dependency + '/' + entryNode.pkg + '/' + entryNode.name)
+        let uri = vscode.Uri.parse(this.contentProvider.scheme + '://' + entryNode.dependency + '/' + entryNode.pkg + '/' + entryNode.contentName)
         vscode.workspace.openTextDocument(uri).then((doc) => {
             this.contentProvider.update(uri, entryNode.content)
             vscode.window.showTextDocument(doc, { preview: true }).then((te) => {
@@ -89,6 +89,7 @@ export class DependencyController {
         vscode.window.withProgress({ location: vscode.ProgressLocation.Window, title: entryNode.name}, (progess) => {
             return this.getJarEntryContent(entryNode).then((reply) => {
                 entryNode.content = reply.text
+                entryNode.contentName = reply.name
                 this.openJarEntryContent(entryNode)
             }).catch(error => {
                 vscode.window.showErrorMessage(error)
