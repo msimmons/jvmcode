@@ -2,7 +2,7 @@
   "name": "jvmcode",
   "displayName": "JVMCode",
   "description": "Event Bus Bridge to JVM Extensions",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "contrapt",
   "engines": {
     "vscode": "^1.28.0"
