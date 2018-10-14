@@ -101,7 +101,9 @@
             "com.sun",
             "com.oracle",
             "jdk",
-            "sun"
+            "sun",
+            "java.awt",
+            "java.rmi"
           ],
           "description": "A list of packages to exclude from dependency list.  Matches all packages with the given prefix"
         },
