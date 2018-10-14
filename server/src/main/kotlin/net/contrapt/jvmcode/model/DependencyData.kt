@@ -2,7 +2,7 @@ package net.contrapt.jvmcode.model
 
 import java.io.File
 
-data class DependencyData (
+class DependencyData (
     val source: String,
     val fileName: String,
     val sourceFileName: String?,

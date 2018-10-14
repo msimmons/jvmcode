@@ -1,8 +1,6 @@
 package net.contrapt.jvmcode.service
 
-import io.kotlintest.matchers.beGreaterThan
-import io.kotlintest.matchers.shouldBe
-import io.kotlintest.matchers.shouldNotBe
+import io.kotlintest.matchers.*
 import net.contrapt.jvmcode.model.JarEntryType
 import net.contrapt.jvmcode.model.JvmConfig
 import org.junit.Test
@@ -45,5 +43,26 @@ class DependencyServiceTest {
         service.addDependency(path)
         val deps = service.getDependencies(JvmConfig(setOf("com.sun"), setOf("java")))
         deps.size shouldBe 2
+    }
+
+    @Test
+    fun getClasspathTest() {
+        val service = DependencyService()
+        javaClass.classLoader
+        val path1 = javaClass.classLoader.getResource("postgresql-42.1.4.jar").path
+        service.addDependency(path1)
+        var classpath = service.getClasspath()
+        classpath should endWith("postgresql-42.1.4.jar")
+        // Add a second jar file
+        val path2 = javaClass.classLoader.getResource("jd-gui-1.4.0.jar").path
+        service.addDependency(path2)
+        classpath = service.getClasspath()
+        classpath should haveSubstring("postgresql-42.1.4.jar:")
+        classpath should endWith("jd-gui-1.4.0.jar")
+        // Add a class directory
+        service.addClassDirectory("/home/mark/classes")
+        classpath = service.getClasspath()
+        classpath should startWith("/home/mark/classes:")
+        classpath should endWith("jd-gui-1.4.0.jar")
     }
 }

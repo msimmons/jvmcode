@@ -48,14 +48,16 @@ export class DependencyNode implements TreeNode {
 }
 
 export class JarPackageNode implements TreeNode {
+    data: JarPackageData
     dependency: string
     name: string
     type = 'package'
     constructor(dependency: DependencyNode, data: JarPackageData) { 
+        this.data = data
         this.dependency = dependency.data.fileName
         this.name = data.name
         this.entries = data.entries.map((entry) => {
-            return new JarEntryNode(this, entry.name, entry.type)
+            return new JarEntryNode(this, entry)
         })
     }
     public treeLabel() : string { 
@@ -65,17 +67,19 @@ export class JarPackageNode implements TreeNode {
 }
 
 export class JarEntryNode implements TreeNode {
+    data: JarEntryData
     dependency: string
     pkg: string
     name: string
     type: string
     content: string
     contentName: string
-    constructor(pkg: JarPackageNode, name: string, type: string) { 
+    constructor(pkg: JarPackageNode, data: JarEntryData) { 
+        this.data = data
         this.dependency = pkg.dependency
         this.pkg = pkg.name
-        this.name = name
-        this.type = type
+        this.name = data.name
+        this.type = data.type
     }
     public treeLabel() : string { 
         return this.name

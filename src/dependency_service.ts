@@ -13,25 +13,25 @@ export class DependencyService {
     private context: vscode.ExtensionContext
     private server: JvmServer
     private dependencies: DependencyData[] = []
+    private depListeners = [] // Array of dependency callbacks
 
     public constructor(context: vscode.ExtensionContext, server: JvmServer) {
         this.context = context
         this.server = server
-    }
-
-    start() {
-        let configuration = vscode.workspace.getConfiguration('jvmcode')
-        this.registerDependencyListener(this.dependencyListener)
-        this.server.publish('jvmcode.enable-dependencies', ConfigService.getConfig())
+        this.server.registerConsumer('jvmcode.dependencies', this.dependencyListener)
     }
 
     /**
-     * Listen to dependency updates and cache them here
+     * Listen to dependency updates and cache them here, then call any other registered callbacks
      * @param callback 
      */
     private dependencyListener = (error, result) => {
-        if (error) return
-        this.dependencies = result.body.dependencies
+        if (!error && result) {
+            this.dependencies = result.body.dependencies
+        }
+        this.depListeners.forEach((listener) => {
+            listener(error, result)
+        })
     }
 
     /**
@@ -39,15 +39,29 @@ export class DependencyService {
      * @param callback 
      */
     public registerDependencyListener(callback) {
-        this.server.registerConsumer('jvmcode.dependencies', callback)
+        this.depListeners.push(callback)
     }
 
     /**
+     * Request dependencies to be published
+     */
+    public requestDependencies() {
+        this.server.publish('jvmcode.request-dependencies', ConfigService.getConfig())
+    }
+
+     /**
      * Add a new single jar file dependency
      * @param dependency 
      */
     public addDependency(jarFile: string) {
         this.server.publish('jvmcode.add-dependency', {jarFile: jarFile, config: ConfigService.getConfig()})
+    }
+
+    /**
+     * Add a class directory to the classpath
+     */
+    public addClassDirectory(classDir: string) {
+        this.server.publish('jvmcode.add-classdir', {classDir: classDir})
     }
 
     /**
@@ -89,6 +103,14 @@ export class DependencyService {
     public async getJarEntryContent(jarEntry: JarEntryNode) : Promise<JarEntryData> {
         let reply = await this.server.send('jvmcode.jar-entry', {jarEntry: jarEntry})
         return reply.body
+    }
+
+    /**
+     * Get the current classpath
+     */
+    public async getClasspath() : Promise<string> {
+        let response =  await this.server.send('jvmcode.classpath', {})
+        return response.body.classpath
     }
 
 }

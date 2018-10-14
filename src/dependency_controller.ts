@@ -18,6 +18,7 @@ export class DependencyController {
 
     public constructor(service: DependencyService) {
         this.service = service
+        this.registerDependencyListener()
     }
 
     public start() {
@@ -27,15 +28,15 @@ export class DependencyController {
         this.contentProvider = new JarContentProvider()
         vscode.workspace.registerTextDocumentContentProvider(this.contentProvider.scheme, this.contentProvider)
         vscode.commands.executeCommand('setContext', 'jvmcode.context.isJvmProject', true)
-        this.service.start()
         this.isStarted = true
+        this.service.requestDependencies()
     }
 
     /** 
      * Register a consumer for dependencies coming from
      * the server
      */
-    public registerDependencyListener() {
+    private registerDependencyListener() {
         this.service.registerDependencyListener((error, result) => {
             if (error) {
                 vscode.window.showErrorMessage(error.message)

@@ -5,14 +5,15 @@ plugin
 ## TODO
 
 - Dependency Management
-  - Default JDK dependencies
-  - Allow manually entered jar dependencies
-  - Accept dependencies from other tools (Gradle, Maven)
-  - Tree view of jar dependencies
+  - _Default JDK dependencies_
+  - _Allow manually entered jar dependencies_
+  - _Accept dependencies from other tools (Gradle, Maven)_
+  - _Tree view of jar dependencies_
     - source: group:artifact:version
       - jarfile.jar | jmod
         - com.package1
         - com.package2
+  - _Compiled class output on classpath_
   - Supplier of Classpath
     - To repl shells
     - To run or debug a program

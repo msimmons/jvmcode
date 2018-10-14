@@ -75,7 +75,7 @@ class RouterVerticle(val startupToken: String, var config: JvmConfig) : Abstract
         /**
          * JVM stats monitoring
          */
-        vertx.setPeriodic(30000) { handler ->
+        vertx.setPeriodic(30000) { _ ->
             val free = Runtime.getRuntime().freeMemory()
             val total = Runtime.getRuntime().totalMemory()
             val max = Runtime.getRuntime().maxMemory()
@@ -178,7 +178,7 @@ class RouterVerticle(val startupToken: String, var config: JvmConfig) : Abstract
         /**
          * Signal that this is a JVM project, which will result in dependency info being sent to the client
          */
-        vertx.eventBus().consumer<JsonObject>("jvmcode.enable-dependencies") { message ->
+        vertx.eventBus().consumer<JsonObject>("jvmcode.request-dependencies") { message ->
             // Get config, like list of package filters, etc
             config = message.body().mapTo(JvmConfig::class.java)
             // Get the current JDK dependencies
@@ -264,5 +264,33 @@ class RouterVerticle(val startupToken: String, var config: JvmConfig) : Abstract
                 if (ar.failed()) message.fail(1, ar.cause().toString())
             })
         }
+
+        /**
+         * Add a single class directory to the classpath
+         */
+        vertx.eventBus().consumer<JsonObject>("jvmcode.add-classdir") { message ->
+            try {
+                val classDir = message.body().getString("classDir")
+                dependencyService.addClassDirectory(classDir)
+                message.reply(message.body())
+            } catch (e: Exception) {
+                logger.error("Adding a class directory", e)
+                message.fail(500, e.message)
+            }
+        }
+
+        /**
+         * Return the classpath for the current set of dependencies
+         */
+        vertx.eventBus().consumer<JsonObject>("jvmcode.classpath") { message ->
+            try {
+                val classpath = dependencyService.getClasspath()
+                message.reply(JsonObject().put("classpath", classpath))
+            } catch (e: Exception) {
+                logger.error("Getting jar entry contents", e)
+                message.fail(500, e.message)
+            }
+        }
+
     }
 }

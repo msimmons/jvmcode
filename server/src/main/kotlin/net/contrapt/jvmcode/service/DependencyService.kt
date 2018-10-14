@@ -8,8 +8,11 @@ import java.util.jar.JarFile
 
 class DependencyService {
 
-    // All the dependencies being tracked TODO store user added ones
+    // All the dependencies being tracked TODO store user added ones persistently?
     private val dependencies = mutableSetOf<DependencyData>()
+
+    // All the output class directories for adding to classpath
+    private val classDirs = mutableSetOf<String>()
 
     // Map of entry name to entry data and dependency it belongs to
     private val entryMap = mutableMapOf<String, Pair<JarEntryData, DependencyData>>()
@@ -43,6 +46,13 @@ class DependencyService {
     }
 
     /**
+     * Add an output directory
+     */
+    fun addClassDirectory(classDir: String) {
+        classDirs.add(classDir)
+    }
+
+    /**
      * Add a collection of dependencies
      */
     fun addDependencies(dependencyList: DependencyList) {
@@ -63,8 +73,11 @@ class DependencyService {
                     entryMap.put(entryData.name, Pair(entryData, dependencyData))
                 }
             }
-            return JarData(pkgMap.asSequence()
-                    .map { entry -> JarPackageData(entry.key).apply { entries.addAll(entry.value) } }
+            return JarData(dependencyData.fileName,
+                    pkgMap.asSequence()
+                    .map {
+                        entry -> JarPackageData(entry.key).apply { entries.addAll(entry.value) }
+                    }
                     .filter { pkg ->
                         pkg.entries.size > 0 && !config.excludes.any { exclude -> pkg.name.startsWith(exclude) }
                     }
@@ -82,6 +95,14 @@ class DependencyService {
         val dependency = entryRecord.second
         if (dependency.sourceFileName != null && entry.type == JarEntryType.CLASS) return getContentFromSourceJar(dependency.sourceFileName, entry)
         else return getContentFromJar(dependency.fileName, entry)
+    }
+
+    /**
+     * Return the classpath represented by the current dependencies
+     */
+    fun getClasspath() : String {
+        val components = classDirs + dependencies.map{ it.fileName }
+        return components.joinToString(File.pathSeparator) { it }
     }
 
     private fun getContentFromSourceJar(fileName: String, entry: JarEntryData) : JarEntryData {

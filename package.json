@@ -41,16 +41,21 @@
         "title": "JVM: Stop Server"
       },
       {
-        "command": "jvmcode.jvm-project",
-        "title": "JVM: Start Project"
+        "command": "jvmcode.add-dependency",
+        "title": "JVM: Add Dependency"
       },
       {
-        "command": "jvmcode.add-dependency",
-        "title": "JVM: Add a Dependency"
+        "command": "jvmcode.add-classdir",
+        "title": "JVM: Add Class Directory"
       },
       {
         "command": "jvmcode.find-class",
-        "title": "JVM: Find a class"
+        "title": "JVM: Find Class"
+      },
+      {
+        "command": "jvmcode.exec-class",
+        "title": "JVM: Execute Class"
+
       }
     ],
     "views": {
@@ -106,7 +111,8 @@
             "java",
             "kt",
             "kts",
-            "groovy"
+            "groovy",
+            "scala"
           ],
           "description": "A list of extensions used to look for source files in dependency jars"
         }

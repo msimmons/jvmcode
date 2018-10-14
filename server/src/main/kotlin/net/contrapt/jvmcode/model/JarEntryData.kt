@@ -1,6 +1,6 @@
 package net.contrapt.jvmcode.model
 
-data class JarEntryData(
+class JarEntryData(
         val name: String,
         val type: JarEntryType,
         val pkg: String,

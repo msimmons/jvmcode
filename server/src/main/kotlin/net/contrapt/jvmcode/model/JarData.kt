@@ -1,5 +1,6 @@
 package net.contrapt.jvmcode.model
 
-data class JarData(
+class JarData(
+        val jarFile: String,
         val packages: Collection<JarPackageData>
 )

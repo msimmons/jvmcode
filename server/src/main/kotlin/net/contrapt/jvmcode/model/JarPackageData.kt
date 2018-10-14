@@ -1,7 +1,7 @@
 package net.contrapt.jvmcode.model
 
-data class JarPackageData(
-        var name: String = "",
+class JarPackageData(
+        val name: String,
         val entries: MutableCollection<JarEntryData> = mutableSetOf()
 ) : Comparable<JarPackageData> {
 

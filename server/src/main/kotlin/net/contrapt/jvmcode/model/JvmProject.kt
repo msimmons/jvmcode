@@ -1,5 +1,5 @@
 package net.contrapt.jvmcode.model
 
-data class JvmProject(
+class JvmProject(
         val dependencies: Collection<DependencyData>
 )

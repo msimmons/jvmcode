@@ -20,9 +20,7 @@ export function activate(context: vscode.ExtensionContext) {
         server.start()
         dependencyService = new DependencyService(context, server)
         dependencyController = new DependencyController(dependencyService)
-        dependencyController.registerDependencyListener()
-        statsController = new StatsController()
-        statsController.registerStatsListener(server)
+        statsController = new StatsController(server)
     }
 
     //
@@ -63,17 +61,12 @@ export function activate(context: vscode.ExtensionContext) {
         server = null
     }))
 
-    // Possibly deprecated
-    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.jvm-project', () => {
-        dependencyController.start()
-    }))
-
     /**
      * Allow the user to find any class in the projects current dependencies
      * Maybe show local project classes first, if no match, show dependency classes (possibly pre-filtered)
      */
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.find-class', () => {
-        dependencyController.start()
+        dependencyController.start() // This won't work correctly first time.
         dependencyService.getJarEntries().then((result) => {
             let quickPick = vscode.window.createQuickPick()
             let items = result.map((r) => { 
@@ -98,6 +91,33 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.window.showOpenDialog({filters: {'Dependency': ['jar']}, canSelectMany: false}).then((jarFile) => {
             if (!jarFile || jarFile.length === 0) return
             dependencyService.addDependency(jarFile[0]['path'])
+        })
+    }))
+
+    /**
+     * Allows the user to manually enter a class directory
+     */
+    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.add-classdir', () => {
+        vscode.window.showInputBox({placeHolder: 'Class directory'}).then((classDir) => {
+            if (!classDir) return
+            dependencyService.addClassDirectory(classDir)
+        })
+    }))
+
+    /**
+     * Allow the user to execute the given main application class
+     */
+    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.exec-class', () => {
+        vscode.window.showInputBox({placeHolder: "Enter FQCN for main class"}).then((mainClass) => {
+            if (!mainClass) return
+            let classpath = dependencyService.getClasspath()
+            classpath.then((cp) => {
+                let configuration = vscode.workspace.getConfiguration('jvmcode')
+                let command : string = configuration.get('javaCommand')
+                let terminal = vscode.window.createTerminal({name: mainClass, env: {}})
+                terminal.sendText(`${command} -cp ${cp} ${mainClass}`, true)
+                terminal.show()
+            })
         })
     }))
 

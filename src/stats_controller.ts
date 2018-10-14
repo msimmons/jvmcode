@@ -10,13 +10,14 @@ export class StatsController {
 
     private statusItem : vscode.StatusBarItem
 
-    public constructor() {
+    public constructor(server: JvmServer) {
+        this.registerStatsListener(server)
     }
 
     /**
      * Listen to JVM stats messages and update the UI as appropriate
      */
-    public registerStatsListener(server: JvmServer) {
+    private registerStatsListener(server: JvmServer) {
         this.statusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0)
         this.statusItem.text = '---'
         this.statusItem.show()
