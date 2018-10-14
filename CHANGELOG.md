@@ -9,3 +9,9 @@ All notable changes to the "jvmcode" extension will be documented in this file.
 ### Changed
 
 ### Removed
+
+## [1.0.1] - 2018-10-13
+
+### Added
+- Dependency and classpath management
+- Basic java exec with classpath

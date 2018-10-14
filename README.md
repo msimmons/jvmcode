@@ -102,3 +102,7 @@ You must have a JDK installed to run the server.
 ### 1.0.0
 
 Initial release of JVMCode
+
+### 1.0.1
+
+Rudimentary dependency management
