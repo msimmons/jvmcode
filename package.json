@@ -1,11 +1,11 @@
 {
   "name": "jvmcode",
-  "displayName": "jvmcode",
+  "displayName": "JVMCode",
   "description": "Event Bus Bridge to JVM Extensions",
   "version": "1.0.0",
   "publisher": "contrapt",
   "engines": {
-    "vscode": "^1.24.0"
+    "vscode": "^1.28.0"
   },
   "repository": {
     "type": "git",
@@ -39,8 +39,34 @@
       {
         "command": "jvmcode.stop",
         "title": "JVM: Stop Server"
+      },
+      {
+        "command": "jvmcode.add-dependency",
+        "title": "JVM: Add Dependency"
+      },
+      {
+        "command": "jvmcode.add-classdir",
+        "title": "JVM: Add Class Directory"
+      },
+      {
+        "command": "jvmcode.find-class",
+        "title": "JVM: Find Class"
+      },
+      {
+        "command": "jvmcode.exec-class",
+        "title": "JVM: Execute Class"
+
       }
     ],
+    "views": {
+      "explorer": [
+        {
+          "id": "jvmcode.dependency-tree",
+          "name": "JVM Dependencies",
+          "when": "jvmcode.context.isJvmProject"
+        }
+      ]
+    },
     "configuration": {
       "title": "JVMCode Server Configuration",
       "properties": {
@@ -68,6 +94,27 @@
             "-server"
           ],
           "description": "The JVM options used to start the server"
+        },
+        "jvmcode.excludes": {
+          "type": "array",
+          "default": [
+            "com.sun",
+            "com.oracle",
+            "jdk",
+            "sun"
+          ],
+          "description": "A list of packages to exclude from dependency list.  Matches all packages with the given prefix"
+        },
+        "jvmcode.sourceExtensions": {
+          "type": "array",
+          "default": [
+            "java",
+            "kt",
+            "kts",
+            "groovy",
+            "scala"
+          ],
+          "description": "A list of extensions used to look for source files in dependency jars"
         }
       }
     }

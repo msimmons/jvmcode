@@ -29,7 +29,7 @@ jvmcode.exports.send('address', {})
 ```
 
 ### Send Message
-To send a message on the event bus and receive a response, use the
+To send a message on the event bus and receive a response from a single consumer, use the
 following call.  The response is returned as a _Promise_.  The response body contained in _response.body_
 
 ```typescript
@@ -38,6 +38,17 @@ send(address: string, message: any): Promise<any>
 - _address_ The event bus address to send to (your verticle should be listening)
 - _message_ A message
 - _returns_ A Promise for the response
+
+### Publish Message
+To publish a message on the event bus for multiple potential consumers, use the
+following call.
+
+```typescript
+publish(address: string, message: any)
+```
+- _address_ The event bus address to publish to (anyone can be listening)
+- _message_ A message
+
 
 ### Install your Verticle
 To install your _verticle_ use the following call.  
