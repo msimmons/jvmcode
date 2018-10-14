@@ -28,12 +28,13 @@ export class StatsController {
             else {
                 var freeKB = Math.round(result.body.free/1000)
                 var totalKB = Math.round(result.body.total/1000)
+                var usedKB = totalKB - freeKB
                 var maxKB = Math.round(result.body.max/1000)
                 var pct = Math.round(result.body.total/result.body.max)
                 this.statusItem.tooltip = `free: ${freeKB} total: ${totalKB} max: ${maxKB}`
                 if (pct < 50) {
                     this.statusItem.color = 'white'
-                    this.statusItem.text = `${freeKB}K`
+                    this.statusItem.text = `${usedKB}K`
                 }
                 else if (pct < 80) {
                     this.statusItem.color = 'orange'
