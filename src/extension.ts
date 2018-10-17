@@ -98,6 +98,7 @@ export function activate(context: vscode.ExtensionContext) {
      * Allows the user to manually enter a class directory
      */
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.add-classdir', () => {
+        dependencyController.start()
         vscode.window.showInputBox({placeHolder: 'Class directory'}).then((classDir) => {
             if (!classDir) return
             dependencyService.addClassDirectory(classDir)
@@ -108,15 +109,17 @@ export function activate(context: vscode.ExtensionContext) {
      * Allow the user to execute the given main application class
      */
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.exec-class', () => {
+        dependencyController.start()
         vscode.window.showInputBox({placeHolder: "Enter FQCN for main class"}).then((mainClass) => {
             if (!mainClass) return
             let classpath = dependencyService.getClasspath()
             classpath.then((cp) => {
-                let configuration = vscode.workspace.getConfiguration('jvmcode')
-                let command : string = configuration.get('javaCommand')
-                let terminal = vscode.window.createTerminal({name: mainClass, env: {}})
-                terminal.sendText(`${command} -cp ${cp} ${mainClass}`, true)
-                terminal.show()
+                let def = {type: 'jvmcode'} as vscode.TaskDefinition
+                let args = cp ? ['-cp', cp] : []
+                args = args.concat([mainClass])
+                let exec = new vscode.ProcessExecution('/usr/bin/java', args, {})
+                let task = new vscode.Task(def, vscode.workspace.workspaceFolders[0], mainClass, 'jvmcode', exec, [])
+                vscode.tasks.executeTask(task)
             })
         })
     }))
