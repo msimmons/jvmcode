@@ -6,21 +6,24 @@ class DependencyData (
     val source: String,
     val fileName: String,
     val sourceFileName: String?,
-    var groupId: String,
-    var artifactId: String,
-    var version: String,
+    val groupId: String,
+    val artifactId: String,
+    val version: String,
     val scopes: MutableSet<String> = mutableSetOf(),
-    val modules: MutableSet<String> = mutableSetOf()
+    val modules: MutableSet<String> = mutableSetOf(),
+    val transitive: Boolean = false
 ) : Comparable<DependencyData> {
 
+    fun key() = "${groupId}:${artifactId}:${version}"
+
     override fun compareTo(other: DependencyData): Int {
-        return "${groupId}:${artifactId}:${version}".compareTo("${other.groupId}:${other.artifactId}:${other.version}")
+        return key().compareTo(other.key())
     }
 
     override fun equals(other: Any?): Boolean {
         return when(other) {
             null -> false
-            is DependencyData -> other.fileName == fileName
+            is DependencyData -> other.key() == key()
             else -> false
         }
     }
