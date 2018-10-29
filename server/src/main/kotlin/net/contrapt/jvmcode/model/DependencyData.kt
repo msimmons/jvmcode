@@ -6,7 +6,6 @@ class DependencyData (
     val source: String,
     val fileName: String,
     val sourceFileName: String?,
-    val docFilename: String?,
     var groupId: String,
     var artifactId: String,
     var version: String,
@@ -41,7 +40,7 @@ class DependencyData (
             val groupId = System.getProperty("java.vendor")
             val artifactId = "JDK"
             val version = javaVersion
-            return DependencyData("System", fileName, sourceFileName, null, groupId, artifactId, version)
+            return DependencyData("System", fileName, sourceFileName, groupId, artifactId, version)
         }
 
         /**
@@ -49,7 +48,7 @@ class DependencyData (
          */
         fun create(jarFile: String) : DependencyData {
             val fileName = jarFile.split(File.separator).last()
-            return DependencyData("User", jarFile, null, null, "", fileName, "")
+            return DependencyData("User", jarFile, null, "", fileName, "")
         }
 
     }

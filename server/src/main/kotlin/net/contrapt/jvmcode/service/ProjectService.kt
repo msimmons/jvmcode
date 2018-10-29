@@ -6,13 +6,13 @@ import java.io.InputStream
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
 
-class DependencyService {
+class ProjectService(var config: JvmConfig) {
 
     // All the dependencies being tracked TODO store user added ones persistently?
     private val dependencies = mutableSetOf<DependencyData>()
 
-    // All the output class directories for adding to classpath
-    private val classDirs = mutableSetOf<String>()
+    // Classpath data added by other extensions or the user
+    private val classpath = mutableSetOf<ClasspathData>()
 
     // Map of entry name to entry data and dependency it belongs to
     private val entryMap = mutableMapOf<String, Pair<JarEntryData, DependencyData>>()
@@ -20,7 +20,6 @@ class DependencyService {
     private val javaVersion : String
     private val javaHome : String
     private val jdkDependencyData : DependencyData
-    private lateinit var config: JvmConfig
 
     init {
         javaVersion = System.getProperty("java.version")
@@ -29,13 +28,13 @@ class DependencyService {
     }
 
     /**
-     * Get dependencies
+     * Get a JvmProject representation of current dependencies and classpath
      */
-    fun getDependencies(config: JvmConfig) : Collection<DependencyData> {
+    fun getJvmProject(config: JvmConfig = this.config) : JvmProject {
         this.config = config
         val jdk = listOf(jdkDependencyData)
         val sorted = dependencies.sorted()
-        return jdk + sorted
+        return JvmProject(jdk + sorted, classpath)
     }
 
     /**
@@ -49,14 +48,24 @@ class DependencyService {
      * Add an output directory
      */
     fun addClassDirectory(classDir: String) {
-        classDirs.add(classDir)
+        val cp = classpath.firstOrNull { it.source == "User" }
+        if (cp != null) {
+            cp.classDirs.add(classDir)
+        } else {
+            classpath.add(ClasspathData("User", "user", "user").apply {
+                classDirs.add(classDir)
+            })
+        }
     }
 
     /**
-     * Add a collection of dependencies
+     * Update project information
      */
-    fun addDependencies(dependencyList: DependencyList) {
-        dependencies.addAll(dependencyList.dependencies)
+    fun updateProject(source: String, jvmProject: JvmProject) {
+        dependencies.removeIf { it.source == source }
+        classpath.removeIf { it.source == source }
+        dependencies.addAll(jvmProject.dependencies)
+        classpath.addAll(jvmProject.classpath)
     }
 
     fun getJarData(dependencyData: DependencyData) : JarData {
@@ -101,7 +110,7 @@ class DependencyService {
      * Return the classpath represented by the current dependencies
      */
     fun getClasspath() : String {
-        val components = classDirs + dependencies.map{ it.fileName }
+        val components = classpath.flatMap { it.classDirs } + dependencies.map{ it.fileName }
         return components.joinToString(File.pathSeparator) { it }
     }
 

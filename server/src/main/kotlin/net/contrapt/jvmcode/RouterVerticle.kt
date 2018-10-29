@@ -2,7 +2,6 @@ package net.contrapt.jvmcode
 
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.DeploymentOptions
-import io.vertx.core.Future
 import io.vertx.core.Handler
 import io.vertx.core.http.HttpServer
 import io.vertx.core.json.JsonObject
@@ -14,16 +13,15 @@ import io.vertx.ext.web.handler.StaticHandler
 import io.vertx.ext.web.handler.sockjs.BridgeEvent
 import io.vertx.ext.web.handler.sockjs.BridgeOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
-import net.contrapt.jvmcode.model.*
-import net.contrapt.jvmcode.service.DependencyService
+import net.contrapt.jvmcode.handler.*
+import net.contrapt.jvmcode.model.JvmConfig
+import net.contrapt.jvmcode.service.ProjectService
 
 class RouterVerticle(val startupToken: String, var config: JvmConfig) : AbstractVerticle() {
 
     private val logger = LoggerFactory.getLogger(javaClass)
-
     private val deployments = mutableMapOf<String, String>()
-
-    private val dependencyService = DependencyService()
+    private val projectService = ProjectService(config)
 
     var httpPort = 0
         private set
@@ -71,6 +69,15 @@ class RouterVerticle(val startupToken: String, var config: JvmConfig) : Abstract
     }
 
     fun startConsumers() {
+
+        // Message Handlers
+        val addDependency = AddDependency(vertx, projectService)
+        val addClassdir = AddClassDir(vertx, projectService)
+        val getClasspath = GetClasspath(vertx, projectService)
+        val requestProject = RequestProject(vertx, projectService)
+        val updateProject = UpdateProject(vertx, projectService)
+        val jarEntries = JarEntries(vertx, projectService)
+        val jarEntry = JarEntry(vertx, projectService)
 
         /**
          * JVM stats monitoring
@@ -176,121 +183,40 @@ class RouterVerticle(val startupToken: String, var config: JvmConfig) : Abstract
         }
 
         /**
-         * Signal that this is a JVM project, which will result in dependency info being sent to the client
+         * Signal that this is a JVM project, which will result in project info being published to any listeners
          */
-        vertx.eventBus().consumer<JsonObject>("jvmcode.request-dependencies") { message ->
-            // Get config, like list of package filters, etc
-            config = message.body().mapTo(JvmConfig::class.java)
-            // Get the current JDK dependencies
-            val dependencies = dependencyService.getDependencies(config)
-            // Send them to the client
-            vertx.eventBus().publish("jvmcode.dependencies", JsonObject.mapFrom(JvmProject(dependencies)))
-        }
+        vertx.eventBus().consumer<JsonObject>("jvmcode.request-project", requestProject)
 
         /**
-         * Add dependencies to be managed for this project from an outside source, such as Gradle, Maven, other.
+         * Update project info (dependencies, classpath) -- likely called by other extensions such as Gradle or Maven integration
+         * { source: string, project: JvmProject }
          */
-        vertx.eventBus().consumer<JsonObject>("jvmcode.add-dependencies") { message ->
-            vertx.executeBlocking(Handler<Future<Unit>> { future ->
-                try {
-                    val dependencyList = message.body().mapTo(DependencyList::class.java)
-                    dependencyService.addDependencies(dependencyList)
-                    val dependencies = dependencyService.getDependencies(config)
-                    vertx.eventBus().publish("jvmcode.dependencies", JsonObject.mapFrom(JvmProject(dependencies)))
-                    future.complete()
-                } catch (e: Exception) {
-                    logger.error("Adding additional dependencies", e)
-                    future.fail(e)
-                }
-            }, false, Handler { ar ->
-                if (ar.failed()) message.fail(1, ar.cause().toString())
-            })
-        }
+        vertx.eventBus().consumer<JsonObject>("jvmcode.update-project", updateProject)
 
         /**
          * Return the jar entries for the given dependency
          */
-        vertx.eventBus().consumer<JsonObject>("jvmcode.jar-entries") { message ->
-            vertx.executeBlocking( Handler<Future<JsonObject>> { future ->
-                try {
-                    val dependencyData = message.body().getJsonObject("dependency").mapTo(DependencyData::class.java)
-                    future.complete(JsonObject.mapFrom(dependencyService.getJarData(dependencyData)))
-                } catch (e: Exception) {
-                    logger.error("Getting jar entries", e)
-                    future.fail(e)
-                }
-            }, false, Handler { ar ->
-                if (ar.failed()) message.fail(1, ar.cause().toString())
-                else message.reply(ar.result())
-            })
-        }
+        vertx.eventBus().consumer<JsonObject>("jvmcode.jar-entries", jarEntries)
 
         /**
          * Return the contents of the given jar entry
          */
-        vertx.eventBus().consumer<JsonObject>("jvmcode.jar-entry") { message ->
-            vertx.executeBlocking(Handler<Future<JsonObject>> { future ->
-                try {
-                    val jarEntryData = message.body().getJsonObject("jarEntry").mapTo(JarEntryData::class.java)
-                    val resolved = dependencyService.getJarEntryContents(jarEntryData)
-                    future.complete(JsonObject.mapFrom(resolved))
-                } catch (e: Exception) {
-                    logger.error("Getting jar entry contents", e)
-                    future.fail(e)
-                }
-            }, false, Handler { ar ->
-                if (ar.failed()) message.fail(1, ar.cause().toString())
-                else message.reply(ar.result())
-            })
-        }
+        vertx.eventBus().consumer<JsonObject>("jvmcode.jar-entry", jarEntry)
 
         /**
          * Add a single jar file dependency and publish the new dependencies
          */
-        vertx.eventBus().consumer<JsonObject>("jvmcode.add-dependency") { message ->
-            vertx.executeBlocking(Handler<Future<Unit>> { future ->
-                try {
-                    val jarFile = message.body().getString("jarFile")
-                    config = message.body().getJsonObject("config").mapTo(JvmConfig::class.java)
-                    dependencyService.addDependency(jarFile)
-                    val dependencies = dependencyService.getDependencies(config)
-                    vertx.eventBus().publish("jvmcode.dependencies", JsonObject.mapFrom(JvmProject(dependencies)))
-                    future.complete()
-                } catch (e: Exception) {
-                    logger.error("Getting jar entry contents", e)
-                    future.fail(e)
-                }
-            }, false, Handler { ar ->
-                if (ar.failed()) message.fail(1, ar.cause().toString())
-            })
-        }
+        vertx.eventBus().consumer<JsonObject>("jvmcode.add-dependency", addDependency)
 
         /**
          * Add a single class directory to the classpath
          */
-        vertx.eventBus().consumer<JsonObject>("jvmcode.add-classdir") { message ->
-            try {
-                val classDir = message.body().getString("classDir")
-                dependencyService.addClassDirectory(classDir)
-                message.reply(message.body())
-            } catch (e: Exception) {
-                logger.error("Adding a class directory", e)
-                message.fail(500, e.message)
-            }
-        }
+        vertx.eventBus().consumer<JsonObject>("jvmcode.add-classdir", addClassdir)
 
         /**
          * Return the classpath for the current set of dependencies
          */
-        vertx.eventBus().consumer<JsonObject>("jvmcode.classpath") { message ->
-            try {
-                val classpath = dependencyService.getClasspath()
-                message.reply(JsonObject().put("classpath", classpath))
-            } catch (e: Exception) {
-                logger.error("Getting jar entry contents", e)
-                message.fail(500, e.message)
-            }
-        }
+        vertx.eventBus().consumer<JsonObject>("jvmcode.classpath", getClasspath)
 
     }
 }

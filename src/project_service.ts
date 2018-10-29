@@ -1,35 +1,39 @@
 'use strict';
 
 import * as vscode from 'vscode'
+import { readdir, readdirSync, statSync, existsSync } from 'fs'
 import { JvmServer } from './jvm_server';
-import { DependencyData, JarPackageData, JarEntryNode, JarEntryData } from './models';
+import { DependencyData, JarPackageData, JarEntryNode, JarEntryData, ClasspathData } from './models';
 import { ConfigService } from './config_service';
+import * as path from 'path'
 
 /**
  * Service to make dependency related request to JvmServer on behalf of other components
  */
-export class DependencyService {
+export class ProjectService {
 
     private context: vscode.ExtensionContext
     private server: JvmServer
     private dependencies: DependencyData[] = []
-    private depListeners = [] // Array of dependency callbacks
+    private classpath: ClasspathData[] = []
+    private projectListeners = [] // Array of dependency callbacks
 
     public constructor(context: vscode.ExtensionContext, server: JvmServer) {
         this.context = context
         this.server = server
-        this.server.registerConsumer('jvmcode.dependencies', this.dependencyListener)
+        this.server.registerConsumer('jvmcode.project', this.projectListener)
     }
 
     /**
      * Listen to dependency updates and cache them here, then call any other registered callbacks
      * @param callback 
      */
-    private dependencyListener = (error, result) => {
+    private projectListener = (error, result) => {
         if (!error && result) {
             this.dependencies = result.body.dependencies
+            this.classpath = result.body.classpath
         }
-        this.depListeners.forEach((listener) => {
+        this.projectListeners.forEach((listener) => {
             listener(error, result)
         })
     }
@@ -38,30 +42,33 @@ export class DependencyService {
      * Register a listener for incoming dependencies
      * @param callback 
      */
-    public registerDependencyListener(callback) {
-        this.depListeners.push(callback)
+    public registerProjectListener(callback) {
+        this.projectListeners.push(callback)
     }
 
     /**
-     * Request dependencies to be published
+     * Request that the project be published
      */
-    public requestDependencies() {
-        this.server.publish('jvmcode.request-dependencies', ConfigService.getConfig())
+    public async requestProject() {
+        let reply = await this.server.send('jvmcode.request-project', ConfigService.getConfig())
+        this.projectListener(undefined, reply)
     }
 
      /**
      * Add a new single jar file dependency
      * @param dependency 
      */
-    public addDependency(jarFile: string) {
-        this.server.publish('jvmcode.add-dependency', {jarFile: jarFile, config: ConfigService.getConfig()})
+    public async addDependency(jarFile: string) {
+        let reply = await this.server.send('jvmcode.add-dependency', {jarFile: jarFile, config: ConfigService.getConfig()})
+        this.projectListener(undefined, reply)
     }
 
     /**
      * Add a class directory to the classpath
      */
-    public addClassDirectory(classDir: string) {
-        this.server.publish('jvmcode.add-classdir', {classDir: classDir})
+    public async addClassDirectory(classDir: string) {
+        let reply = await this.server.send('jvmcode.add-classdir', {classDir: classDir})
+        this.projectListener(undefined, reply)
     }
 
     /**
@@ -82,6 +89,26 @@ export class DependencyService {
             }
             return jarEntries
         })
+    }
+
+    /**
+     * Return all classes in registered class directories (returned as JarEntryData for uniformity)
+     */
+    public getClasses() : JarEntryData[] {
+        let entries = []
+        this.classpath.forEach((cp) => {
+            cp.classDirs.forEach((dir) => {
+                let files = this.getFiles(dir)
+                entries = entries.concat(files.map((file) => {
+                    file = file.replace(dir, '').replace('.class', '')
+                    let ndx = file.lastIndexOf('/')
+                    let name = file.substr(ndx+1)
+                    let pkg = file.substr(1, ndx-1).replace('/', '.')
+                    return { type: 'class', name: name, pkg: pkg }
+                })
+            )})
+        })
+        return entries
     }
 
     /**
@@ -111,6 +138,20 @@ export class DependencyService {
     public async getClasspath() : Promise<string> {
         let response =  await this.server.send('jvmcode.classpath', {})
         return response.body.classpath
+    }
+
+    private getFiles(dir: string) : string[] {
+        let files = []
+        if (!existsSync(dir)) return files
+        readdirSync(dir).forEach((entry) => {
+            let file = path.join(dir, entry)
+            if (statSync(file).isDirectory()) {
+                files = files.concat(this.getFiles(file))
+            } else {
+                files.push(file)
+            }
+        })
+        return files
     }
 
 }

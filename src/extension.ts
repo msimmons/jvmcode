@@ -3,23 +3,25 @@
 import * as vscode from 'vscode'
 import { JvmServer } from './jvm_server'
 import { JarEntryNode } from './models';
-import { DependencyService } from './dependency_service';
-import { DependencyController } from './dependency_controller';
+import { ProjectService } from './project_service';
+import { ProjectController } from './project_controller';
 import { StatsController } from './stats_controller';
 
-let server: JvmServer
-let dependencyService: DependencyService
-let dependencyController: DependencyController
+export let server: JvmServer
+export let projectService: ProjectService
+export let projectController: ProjectController
 let statsController: StatsController
+export let extensionContext: vscode.ExtensionContext
 
 export function activate(context: vscode.ExtensionContext) {
+    extensionContext = context
 
     // Start and manage the JVM vertx server -- one server per workspace
     if (!server) {
         server = new JvmServer(context)
         server.start()
-        dependencyService = new DependencyService(context, server)
-        dependencyController = new DependencyController(dependencyService)
+        projectService = new ProjectService(context, server)
+        projectController = new ProjectController(projectService)
         statsController = new StatsController(server)
     }
 
@@ -66,13 +68,18 @@ export function activate(context: vscode.ExtensionContext) {
      * Maybe show local project classes first, if no match, show dependency classes (possibly pre-filtered)
      */
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.find-class', () => {
-        dependencyController.start() // This won't work correctly first time.
-        dependencyService.getJarEntries().then((result) => {
+        projectController.start() // This won't work correctly first time.
+        let jarEntries = projectService.getJarEntries()
+        let classes = projectService.getClasses()
+        Promise.all([jarEntries]).then((results) => {
             let quickPick = vscode.window.createQuickPick()
-            let items = result.map((r) => { 
+            let classItems = classes.map((c) => {
+                return { label: c.name, detail: c.pkg } as vscode.QuickPickItem
+            })
+            let jarItems = results[0].map((r) => { 
                 return { label: r.name, detail: r.pkg } as vscode.QuickPickItem
             })
-            quickPick.items = items
+            quickPick.items = classItems.concat(jarItems)
             quickPick.show()
         })
     }))
@@ -81,7 +88,7 @@ export function activate(context: vscode.ExtensionContext) {
      * Command to get the content of a jar entry and show it in an editor
      */
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.jar-entry', (entryNode: JarEntryNode) => {
-        dependencyController.openJarEntry(entryNode)
+        projectController.openJarEntry(entryNode)
     }))
 
     /**
@@ -90,7 +97,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.add-dependency', () => {
         vscode.window.showOpenDialog({filters: {'Dependency': ['jar']}, canSelectMany: false}).then((jarFile) => {
             if (!jarFile || jarFile.length === 0) return
-            dependencyService.addDependency(jarFile[0]['path'])
+            projectService.addDependency(jarFile[0]['path'])
         })
     }))
 
@@ -98,10 +105,10 @@ export function activate(context: vscode.ExtensionContext) {
      * Allows the user to manually enter a class directory
      */
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.add-classdir', () => {
-        dependencyController.start()
+        projectController.start()
         vscode.window.showInputBox({placeHolder: 'Class directory'}).then((classDir) => {
             if (!classDir) return
-            dependencyService.addClassDirectory(classDir)
+            projectService.addClassDirectory(classDir)
         })
     }))
 
@@ -109,10 +116,10 @@ export function activate(context: vscode.ExtensionContext) {
      * Allow the user to execute the given main application class
      */
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.exec-class', () => {
-        dependencyController.start()
+        projectController.start()
         vscode.window.showInputBox({placeHolder: "Enter FQCN for main class"}).then((mainClass) => {
             if (!mainClass) return
-            let classpath = dependencyService.getClasspath()
+            let classpath = projectService.getClasspath()
             classpath.then((cp) => {
                 let def = {type: 'jvmcode'} as vscode.TaskDefinition
                 let args = cp ? ['-cp', cp] : []
@@ -127,7 +134,7 @@ export function activate(context: vscode.ExtensionContext) {
     /* Export an api for use by other extensions */
     let api = {
         // Send message to the given address (one consumer with result callback)
-        send(address: string, message: object): Promise<object> {
+        send(address: string, message: object): Promise<any> {
             return server.send(address, message)
         },
         // Publish a message to the given address (multiple consumers, no callback)
@@ -135,7 +142,7 @@ export function activate(context: vscode.ExtensionContext) {
             server.publish(address, message)
         },
         // Install the given verticle
-        install(jarFiles: string[], verticleName: string): Promise<object> {
+        install(jarFiles: string[], verticleName: string): Promise<any> {
             return server.install(jarFiles, verticleName)
         },
         // Serve static content at the given path from the given webRoot (absolute)
@@ -153,7 +160,6 @@ export function activate(context: vscode.ExtensionContext) {
     }
     return api
 }
-
 
 // this method is called when your extension is deactivated
 export function deactivate() {

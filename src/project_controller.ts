@@ -3,22 +3,22 @@
 import * as vscode from 'vscode'
 import { DependencyTreeProvider } from './dependency_tree_provider';
 import { JarContentProvider } from './jar_content_provider';
-import { DependencyService } from './dependency_service';
+import { ProjectService } from './project_service';
 import { DependencyData, JarEntryNode, JarEntryData } from './models';
 
 /**
- * Responsible for managing various views related to dependencies
+ * Responsible for managing various views related to a project
  */
-export class DependencyController {
+export class ProjectController {
 
-    private service: DependencyService
+    private service: ProjectService
     private dependencyTree: DependencyTreeProvider
     private contentProvider: JarContentProvider
     private isStarted = false
 
-    public constructor(service: DependencyService) {
+    public constructor(service: ProjectService) {
         this.service = service
-        this.registerDependencyListener()
+        this.registerProjectListener()
     }
 
     public start() {
@@ -29,15 +29,15 @@ export class DependencyController {
         vscode.workspace.registerTextDocumentContentProvider(this.contentProvider.scheme, this.contentProvider)
         vscode.commands.executeCommand('setContext', 'jvmcode.context.isJvmProject', true)
         this.isStarted = true
-        this.service.requestDependencies()
+        this.service.requestProject()
     }
 
     /** 
      * Register a consumer for dependencies coming from
      * the server
      */
-    private registerDependencyListener() {
-        this.service.registerDependencyListener((error, result) => {
+    private registerProjectListener() {
+        this.service.registerProjectListener((error, result) => {
             if (error) {
                 vscode.window.showErrorMessage(error.message)
             }

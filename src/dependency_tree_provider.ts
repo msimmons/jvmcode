@@ -1,17 +1,17 @@
 import * as vscode from 'vscode'
 import { TreeDataProvider, TreeItem, TreeItemCollapsibleState, EventEmitter } from 'vscode'
-import { DependencyData, DependencyNode, JarPackageNode, TreeNode, JarEntryData } from './models'
-import { DependencyService } from './dependency_service';
+import { DependencyData, DependencyNode, JarPackageNode, TreeNode } from './models'
+import { ProjectService } from './project_service';
 
 export class DependencyTreeProvider implements TreeDataProvider<TreeNode> {
 
     public viewId = 'jvmcode.dependency-tree';
     
-    private service: DependencyService
+    private service: ProjectService
     private dependencies: DependencyNode[]
     private onDidChangeEmitter = new EventEmitter<TreeNode>()
 
-    constructor(service: DependencyService) {
+    constructor(service: ProjectService) {
         this.service = service
     }
 
@@ -24,7 +24,7 @@ export class DependencyTreeProvider implements TreeDataProvider<TreeNode> {
         if (!dependencies) {
             return
         }
-        this.dependencies = dependencies.map((d) => {
+        this.dependencies = dependencies.filter((d) => { return !d.transitive }).map((d) => {
             return new DependencyNode(d)
         })
         this.onDidChangeEmitter.fire(null)

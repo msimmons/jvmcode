@@ -11,13 +11,24 @@ export interface DependencyData {
     source: string
     fileName: string
     sourceFileName: string
-    docFilename: string
     scopes: string[]
     modules: string[]
     groupId: string
     artifactId: string
     version: string
+    transitive: boolean
     packages: JarPackageData[]
+}
+
+/**
+ * Describes a set of source and class directories to facilitate finding corresponding objects in the current project
+ */
+export interface ClasspathData {
+    source: string
+    name: string
+    module: string
+    sourceDirs: string[]
+    classDirs: string[]
 }
 
 /**

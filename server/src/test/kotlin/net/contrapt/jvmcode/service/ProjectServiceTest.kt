@@ -5,14 +5,15 @@ import net.contrapt.jvmcode.model.JarEntryType
 import net.contrapt.jvmcode.model.JvmConfig
 import org.junit.Test
 
-class DependencyServiceTest {
+class ProjectServiceTest {
 
     @Test
     fun systemJdkTest() {
-        val service = DependencyService()
-        val deps = service.getDependencies(JvmConfig(setOf(), setOf("java")))
-        deps.size shouldBe 1
-        val depData = deps.first()
+        val config = JvmConfig(setOf(), setOf("java"))
+        val service = ProjectService(config)
+        val project = service.getJvmProject()
+        project.dependencies.size shouldBe 1
+        val depData = project.dependencies.first()
         depData.source shouldBe "System"
         val jarEntries = service.getJarData(depData)
         jarEntries.packages.size shouldBe beGreaterThan(0)
@@ -26,8 +27,9 @@ class DependencyServiceTest {
 
     @Test
     fun systemJdkWithExcludesTest() {
-        val service = DependencyService()
-        val deps = service.getDependencies(JvmConfig(setOf("com.sun"), setOf("java")))
+        val config = JvmConfig(setOf("com.sun"), setOf("java"))
+        val service = ProjectService(config)
+        val deps = service.getJvmProject().dependencies
         deps.size shouldBe 1
         val depData = deps.first()
         val jarEntries = service.getJarData(depData)
@@ -37,18 +39,18 @@ class DependencyServiceTest {
 
     @Test
     fun addDependencyTest() {
-        val service = DependencyService()
+        val config = JvmConfig(setOf("com.sun"), setOf("java"))
+        val service = ProjectService(config)
         javaClass.classLoader
         val path = javaClass.classLoader.getResource("postgresql-42.1.4.jar").path
         service.addDependency(path)
-        val deps = service.getDependencies(JvmConfig(setOf("com.sun"), setOf("java")))
+        val deps = service.getJvmProject().dependencies
         deps.size shouldBe 2
     }
 
     @Test
     fun getClasspathTest() {
-        val service = DependencyService()
-        javaClass.classLoader
+        val service = ProjectService(JvmConfig(setOf(), setOf()))
         val path1 = javaClass.classLoader.getResource("postgresql-42.1.4.jar").path
         service.addDependency(path1)
         var classpath = service.getClasspath()
