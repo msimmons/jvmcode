@@ -1,12 +1,10 @@
 version: 2
 
 references:
-  jvm_cache_keys: &jvm_cache_keys
+  build_cache_keys: &build_cache_keys
     - v1-jvm-deps-{{ checksum "server/build.gradle" }}-{{ checksum "server/gradle.properties" }}
     - v1-jvm-deps-{{ checksum "server/build.gradle" }}-
     - v1-jvm-deps-
-
-  npm_cache_keys: &npm_cache_keys
     - v1-npm-deps-{{ checksum "package.json" }}
     - v1-npm-deps-
 
@@ -28,8 +26,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            *jvm_cache_keys
-            *npm_cache_keys
+            *build_cache_keys
       - run: vsce package
       - save_cache:
           key: *jvm_cache_key
