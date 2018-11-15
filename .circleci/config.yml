@@ -1,0 +1,55 @@
+version: 2
+
+references:
+  jvm_cache_keys: &jvm_cache_keys
+    - v1-jvm-deps-{{ checksum "server/build.gradle" }}-{{ checksum "server/gradle.properties" }}
+    - v1-jvm-deps-{{ checksum "server/build.gradle" }}-
+    - v1-jvm-deps-
+
+  npm_cache_keys: &npm_cache_keys
+    - v1-npm-deps-{{ checksum "package.json" }}
+    - v1-npm-deps-
+
+  jvm_cache_key: &jvm_cache_key
+    v1-java-deps-{{ checksum "server/build.gradle" }}-{{ checksum "server/gradle.properties" }}
+
+  npm_cache_key: &npm_cache_key
+    v1-npm-deps-{{ checksum "package.json" }}
+
+jobs:
+  build:
+    working_directory: /home/work
+    docker:
+      - image: msimmons/nodejvm:latest
+        auth:
+          username: $DOCKER_USER
+          password: $DOCKER_PASSWORD
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            *jvm_cache_keys
+            *npm_cache_keys
+      - run: vsce package
+      - save_cache:
+          key: *jvm_cache_key
+          paths:
+            - ~/.m2
+            - ~/.gradle
+      - save_cache:
+          key: *npm_cache_key
+          paths:
+            - node_modules
+      - store_artifacts:
+          path: build/reports
+      - store_test_results:
+          path: build/test-results
+      - persist_to_workspace:
+          root: /home
+          paths:
+            - work
+workflows:
+  version: 2
+  build_publish:
+    jobs:
+      - build

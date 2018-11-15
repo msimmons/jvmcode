@@ -5,7 +5,7 @@
   "version": "1.0.1",
   "publisher": "contrapt",
   "engines": {
-    "vscode": "^1.28.0"
+    "vscode": "^1.29.0"
   },
   "repository": {
     "type": "git",
@@ -55,7 +55,6 @@
       {
         "command": "jvmcode.exec-class",
         "title": "JVM: Execute Class"
-
       }
     ],
     "views": {
