@@ -27,6 +27,7 @@ jobs:
       - restore_cache:
           keys:
             *build_cache_keys
+      - run: npm i vsce -g
       - run: vsce package
       - save_cache:
           key: *jvm_cache_key
