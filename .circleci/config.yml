@@ -16,7 +16,7 @@ references:
 
 jobs:
   build:
-    working_directory: /home/work
+    working_directory: /home/work/build
     docker:
       - image: msimmons/nodejvm:latest
         auth:
