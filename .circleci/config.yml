@@ -22,8 +22,6 @@ jobs:
         auth:
           username: $DOCKER_USER
           password: $DOCKER_PASSWORD
-        environment:
-          PATH: "/home/work/.nvm/versions/node/v8.6.0/bin:$PATH"
     steps:
       - checkout
       - restore_cache:
