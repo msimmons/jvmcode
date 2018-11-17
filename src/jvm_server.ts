@@ -46,7 +46,7 @@ export class JvmServer {
         let command : string = configuration.get('javaCommand')
         let options : string[] = configuration.get('javaOptions')
         let logLevel : string = configuration.get('logLevel')
-        let jarFile = this.context.asAbsolutePath('jvmcode.jar')
+        let jarFile = this.context.asAbsolutePath('out/jvmcode.jar')
         let cacheDirOpt = '-Dvertx.cacheDirBase=' + this.context.extensionPath + '.vertx'
         let args = options.concat([cacheDirOpt, '-jar', jarFile, logLevel, this.startupToken])
         this.child = spawn(command, args)
