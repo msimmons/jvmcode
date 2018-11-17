@@ -33,6 +33,7 @@ jobs:
             source ~/.nvm/nvm.sh
             nvm i 8
             npm i vsce -g
+            npm install
             vsce package
 
       - save_cache:
