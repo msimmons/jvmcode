@@ -31,7 +31,7 @@ jobs:
             *build_cache_keys
       - run: 
         shell: /bin/bash --login -eo pipefail 
-        command: |
+        command: >-
           nvm i 8
           npm i vsce -g
       - save_cache:
