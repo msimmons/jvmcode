@@ -133,7 +133,7 @@ class ProjectService(var config: JvmConfig) {
             }
         }
         catch (e: Exception) {
-            throw RuntimeException("Unable to read content for ${entry.name}")
+            throw RuntimeException("Unable to read content for ${entry.name}", e)
         }
     }
 
