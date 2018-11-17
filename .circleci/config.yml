@@ -27,9 +27,7 @@ jobs:
       - restore_cache:
           keys:
             *build_cache_keys
-      - run: |
-        source ~/.nvm/nvm.sh
-        nvm install 8
+      - run: source ../.nvm/nvm.sh && nvm i 8
       - run: npm i vsce -g
       - run: vsce package
       - save_cache:
