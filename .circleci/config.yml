@@ -30,7 +30,7 @@ jobs:
       - run: 
           shell: /bin/bash --login -eo pipefail 
           command: |
-            . ~/.bashrc
+            source ~/.nvm/nvm.sh
             nvm i 8
             npm i vsce -g
 
