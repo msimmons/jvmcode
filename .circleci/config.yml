@@ -28,7 +28,7 @@ jobs:
           keys:
             *build_cache_keys
       - run: |
-        . ~/.nvm/nvm.sh
+        source ~/.nvm/nvm.sh
         nvm install 8
       - run: npm i vsce -g
       - run: vsce package
