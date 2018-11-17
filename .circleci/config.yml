@@ -29,9 +29,11 @@ jobs:
       - restore_cache:
           keys:
             *build_cache_keys
-      - run: source ../.nvm/nvm.sh && nvm i 8
-      - run: npm i vsce -g
-      - run: vsce package
+      - run: 
+        shell: /bin/bash --login -eo pipefail 
+        command: |
+          nvm i 8
+          npm i vsce -g
       - save_cache:
           key: *jvm_cache_key
           paths:
