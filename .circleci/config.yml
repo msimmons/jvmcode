@@ -51,13 +51,9 @@ jobs:
             - node_modules
             - ~/.nvm
       - store_artifacts:
-          path: server/build/reports
+          path: jvmcode*.vsix
       - store_test_results:
           path: server/build/test-results
-      - persist_to_workspace:
-          root: /home
-          paths:
-            - work
 workflows:
   version: 2
   build_publish:
