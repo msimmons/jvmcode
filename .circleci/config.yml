@@ -39,6 +39,8 @@ jobs:
             npm i vsce -g
             npm install
             vsce package
+            mkdir dist
+            cp *.vsix dist
 
       - save_cache:
           key: *jvm_cache_key
@@ -51,7 +53,7 @@ jobs:
             - node_modules
             - ~/.nvm
       - store_artifacts:
-          path: jvmcode*.vsix
+          path: dist
       - store_test_results:
           path: server/build/test-results
 workflows:
