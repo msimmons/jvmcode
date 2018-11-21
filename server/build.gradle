@@ -50,7 +50,7 @@ task deploy(type: Copy, dependsOn: ['build']) {
         include jar.archiveName
         rename jar.archiveName, 'jvmcode.jar'
     }
-    into "${project.rootDir}/.."
+    into "${project.rootDir}/../out"
 }
 
 wrapper {

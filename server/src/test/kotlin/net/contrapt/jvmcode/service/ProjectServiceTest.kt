@@ -4,6 +4,7 @@ import io.kotlintest.matchers.*
 import net.contrapt.jvmcode.model.JarEntryType
 import net.contrapt.jvmcode.model.JvmConfig
 import org.junit.Test
+import java.io.File
 
 class ProjectServiceTest {
 
@@ -22,7 +23,9 @@ class ProjectServiceTest {
         resourceEntry.text shouldNotBe null
         val classEntry = jarEntries.packages.first { it.name == "java.lang" }.entries.first { it.type == JarEntryType.CLASS }
         val javaEntry = service.getJarEntryContents(classEntry)
-        javaEntry.text shouldNotBe null
+        if (File(depData.sourceFileName).exists()) {
+            javaEntry.text shouldNotBe null
+        }
     }
 
     @Test

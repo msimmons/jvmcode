@@ -23,6 +23,7 @@ plugin
 - Find Things
   - Find and open a dependency class or resource
   - Exclude things from finding
+- Decompile class with no source (Fernflower?)
 
 ## Symbols
   - source: Either a jar dependency or a source file in current project (JAR, SOURCE)

@@ -10,3 +10,4 @@ vsc-extension-quickstart.md
 server/**
 .gradle/**
 *.vsix
+.circleci/**

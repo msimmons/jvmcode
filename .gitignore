@@ -4,6 +4,5 @@ node_modules
 build
 .gradle
 .idea
-*.jar
 *.vsix
 vsc-extension-quickstart.md

@@ -1,5 +1,6 @@
 package net.contrapt.jvmcode.service
 
+import io.vertx.core.logging.LoggerFactory
 import net.contrapt.jvmcode.model.*
 import java.io.File
 import java.io.InputStream
@@ -8,6 +9,8 @@ import java.util.jar.JarFile
 
 class ProjectService(var config: JvmConfig) {
 
+    private val logger = LoggerFactory.getLogger(javaClass
+    )
     // All the dependencies being tracked TODO store user added ones persistently?
     private val dependencies = mutableSetOf<DependencyData>()
 
@@ -133,7 +136,8 @@ class ProjectService(var config: JvmConfig) {
             }
         }
         catch (e: Exception) {
-            throw RuntimeException("Unable to read content for ${entry.name}")
+            logger.warn("Unable to read content for ${entry.name} from ${fileName}", e)
+            return entry
         }
     }
 
