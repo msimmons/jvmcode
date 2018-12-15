@@ -70,15 +70,6 @@ class RouterVerticle(val startupToken: String, var config: JvmConfig) : Abstract
 
     fun startConsumers() {
 
-        // Message Handlers
-        val addDependency = AddDependency(vertx, projectService)
-        val addClassdir = AddClassDir(vertx, projectService)
-        val getClasspath = GetClasspath(vertx, projectService)
-        val requestProject = RequestProject(vertx, projectService)
-        val updateProject = UpdateProject(vertx, projectService)
-        val jarEntries = JarEntries(vertx, projectService)
-        val jarEntry = JarEntry(vertx, projectService)
-
         /**
          * JVM stats monitoring
          */
@@ -185,38 +176,38 @@ class RouterVerticle(val startupToken: String, var config: JvmConfig) : Abstract
         /**
          * Signal that this is a JVM project, which will result in project info being published to any listeners
          */
-        vertx.eventBus().consumer<JsonObject>("jvmcode.request-project", requestProject)
+        vertx.eventBus().consumer<JsonObject>("jvmcode.request-project", RequestProject(vertx, projectService))
 
         /**
          * Update project info (dependencies, classpath) -- likely called by other extensions such as Gradle or Maven integration
          * { source: string, project: JvmProject }
          */
-        vertx.eventBus().consumer<JsonObject>("jvmcode.update-project", updateProject)
+        vertx.eventBus().consumer<JsonObject>("jvmcode.update-project", UpdateProject(vertx, projectService))
 
         /**
          * Return the jar entries for the given dependency
          */
-        vertx.eventBus().consumer<JsonObject>("jvmcode.jar-entries", jarEntries)
+        vertx.eventBus().consumer<JsonObject>("jvmcode.jar-entries", JarEntries(vertx, projectService))
 
         /**
          * Return the contents of the given jar entry
          */
-        vertx.eventBus().consumer<JsonObject>("jvmcode.jar-entry", jarEntry)
+        vertx.eventBus().consumer<JsonObject>("jvmcode.jar-entry", JarEntry(vertx, projectService))
 
         /**
          * Add a single jar file dependency and publish the new dependencies
          */
-        vertx.eventBus().consumer<JsonObject>("jvmcode.add-dependency", addDependency)
+        vertx.eventBus().consumer<JsonObject>("jvmcode.add-dependency", AddDependency(vertx, projectService))
 
         /**
          * Add a single class directory to the classpath
          */
-        vertx.eventBus().consumer<JsonObject>("jvmcode.add-classdir", addClassdir)
+        vertx.eventBus().consumer<JsonObject>("jvmcode.add-classdir", AddClassDir(vertx, projectService))
 
         /**
          * Return the classpath for the current set of dependencies
          */
-        vertx.eventBus().consumer<JsonObject>("jvmcode.classpath", getClasspath)
+        vertx.eventBus().consumer<JsonObject>("jvmcode.classpath", GetClasspath(vertx, projectService))
 
     }
 }
