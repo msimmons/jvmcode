@@ -47,7 +47,7 @@ class RouterVerticle(val startupToken: String, var config: JvmConfig) : Abstract
 
         router.route("/jvmcode/ws/*").handler(sockJs)
 
-        httpServer.requestHandler(router::accept).listen(0) { res ->
+        httpServer.requestHandler(router).listen(0) { res ->
             if (res.succeeded()) {
                 httpPort = httpServer.actualPort()
                 logger.info("Started server: $startupToken : $httpPort")
@@ -61,11 +61,20 @@ class RouterVerticle(val startupToken: String, var config: JvmConfig) : Abstract
 
     private fun bridgeEventHandler() = Handler<BridgeEvent> { event ->
         when (event.type()) {
-            BridgeEventType.SOCKET_PING -> {
+            BridgeEventType.SOCKET_PING -> { }
+            BridgeEventType.REGISTER -> {
+                if ( event.rawMessage?.getString("address") == "jvmcode.stats" ) vertx.setTimer(1000, {publishJvmStats()})
             }
             else -> logger.debug("Got bridge event: ${event.type()} ${event.socket().uri()} ${event.rawMessage?.encode()}")
         }
         event.complete(true)
+    }
+
+    fun publishJvmStats() {
+        val free = Runtime.getRuntime().freeMemory()
+        val total = Runtime.getRuntime().totalMemory()
+        val max = Runtime.getRuntime().maxMemory()
+        vertx.eventBus().publish("jvmcode.stats", JsonObject().put("free", free).put("total", total).put("max", max))
     }
 
     fun startConsumers() {
@@ -74,10 +83,7 @@ class RouterVerticle(val startupToken: String, var config: JvmConfig) : Abstract
          * JVM stats monitoring
          */
         vertx.setPeriodic(30000) { _ ->
-            val free = Runtime.getRuntime().freeMemory()
-            val total = Runtime.getRuntime().totalMemory()
-            val max = Runtime.getRuntime().maxMemory()
-            vertx.eventBus().publish("jvmcode.stats", JsonObject().put("free", free).put("total", total).put("max", max))
+            publishJvmStats()
         }
 
         /**
