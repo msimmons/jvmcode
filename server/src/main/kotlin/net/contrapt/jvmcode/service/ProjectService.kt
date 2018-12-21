@@ -17,7 +17,7 @@ class ProjectService(var config: JvmConfig) {
     // Classpath data added by other extensions or the user
     private val classpath = mutableSetOf<ClasspathData>()
 
-    // Map of entry name to entry data and dependency it belongs to
+    // Map of entry FQCN to entry data and dependency it belongs to
     private val entryMap = mutableMapOf<String, Pair<JarEntryData, DependencyData>>()
 
     private val javaVersion : String
@@ -85,7 +85,7 @@ class ProjectService(var config: JvmConfig) {
                     val packageName = pathToPackage(entry.name)
                     val entryData = pathToJarEntry(packageName, entry.name)
                     pkgMap.getOrPut(packageName, { sortedSetOf() }).add(entryData)
-                    entryMap.put(entryData.name, Pair(entryData, dependencyData))
+                    entryMap.put(entryData.fqcn(), Pair(entryData, dependencyData))
                 }
             }
             return JarData(dependencyData.fileName,
@@ -109,7 +109,7 @@ class ProjectService(var config: JvmConfig) {
      * If resource, return the contents as is
      */
     fun getJarEntryContents(entry: JarEntryData) : JarEntryData {
-        val entryRecord = entryMap[entry.name]
+        val entryRecord = entryMap[entry.fqcn()]
         if ( entryRecord == null ) return entry
         val dependency = entryRecord.second
         if (dependency.sourceFileName != null && entry.type == JarEntryType.CLASS) return getContentFromSourceJar(dependency.sourceFileName, entry)

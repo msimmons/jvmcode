@@ -9,9 +9,9 @@ plugin
   - _Allow manually entered jar dependencies_
   - _Accept dependencies from other tools (Gradle, Maven)_
   - _Tree view of jar dependencies_
-    - source: group:artifact:version
-      - jarfile.jar | jmod
-        - com.package1
+    - source: group:artifact:version (DependencyContainer)
+      - jarfile.jar | jmod (DependencyData)
+        - com.package1 (PackageData)
         - com.package2
   - _Compiled class output on classpath_
   - Supplier of Classpath
@@ -21,8 +21,8 @@ plugin
 - Run/Debug a program
 - Run/Debug a test
 - Find Things
-  - Find and open a dependency class or resource
-  - Exclude things from finding
+  - _Find and open a dependency class or resource_
+  - _Exclude things from finding_
 - Decompile class with no source (Fernflower?)
 
 ## Symbols

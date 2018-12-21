@@ -74,12 +74,24 @@ export function activate(context: vscode.ExtensionContext) {
         Promise.all([jarEntries]).then((results) => {
             let quickPick = vscode.window.createQuickPick()
             let classItems = classes.map((c) => {
-                return { label: c.name, detail: c.pkg } as vscode.QuickPickItem
+                return { label: c.name, detail: c.pkg, entry: c } as vscode.QuickPickItem
             })
             let jarItems = results[0].map((r) => { 
-                return { label: r.name, detail: r.pkg } as vscode.QuickPickItem
+                return { label: r.name, detail: r.pkg, entry: r } as vscode.QuickPickItem
             })
             quickPick.items = classItems.concat(jarItems)
+            quickPick.onDidAccept(selection => {
+                quickPick.dispose()
+                if (quickPick.selectedItems.length) {
+                    projectController.openJarEntry(quickPick.selectedItems[0]['entry'])
+                }
+            })
+            quickPick.onDidChangeSelection(selection => {
+                //console.log(`change ${selection}`)
+            })
+            quickPick.onDidChangeActive(event => {
+                //console.log(`active ${event} ${quickPick.activeItems}`)
+            })
             quickPick.show()
         })
     }))
@@ -117,7 +129,8 @@ export function activate(context: vscode.ExtensionContext) {
      */
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.exec-class', () => {
         projectController.start()
-        vscode.window.showInputBox({placeHolder: "Enter FQCN for main class"}).then((mainClass) => {
+        let classes = projectService.getClasses().map((c) => {return c.pkg + '.' + c.name})
+        vscode.window.showQuickPick(classes).then((mainClass) => {
             if (!mainClass) return
             let classpath = projectService.getClasspath()
             classpath.then((cp) => {

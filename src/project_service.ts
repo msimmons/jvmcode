@@ -98,13 +98,13 @@ export class ProjectService {
         let entries = []
         this.classpath.forEach((cp) => {
             cp.classDirs.forEach((dir) => {
-                let files = this.getFiles(dir)
+                let files = this.getFiles(dir).filter((file) => {return file.indexOf('$') <= 0})
                 entries = entries.concat(files.map((file) => {
                     file = file.replace(dir, '').replace('.class', '')
                     let ndx = file.lastIndexOf('/')
                     let name = file.substr(ndx+1)
-                    let pkg = file.substr(1, ndx-1).replace('/', '.')
-                    return { type: 'class', name: name, pkg: pkg }
+                    let pkg = file.substr(1, ndx-1).replace(/\//g, '.')
+                    return { type: 'CLASS', name: name, pkg: pkg }
                 })
             )})
         })

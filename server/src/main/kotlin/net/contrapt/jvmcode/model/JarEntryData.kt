@@ -11,4 +11,6 @@ class JarEntryData(
         return name.compareTo(other.name)
     }
 
+    fun fqcn() = "$pkg.$name"
+
 }
