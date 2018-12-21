@@ -22,12 +22,12 @@ class ProjectService(var config: JvmConfig) {
 
     private val javaVersion : String
     private val javaHome : String
-    private val jdkDependencyData : DependencyData
+    private val jdkDependencyData = mutableSetOf<DependencyData>()
 
     init {
         javaVersion = System.getProperty("java.version")
         javaHome = System.getProperty("java.home").replace("${File.separator}jre", "")
-        jdkDependencyData = DependencyData.create(javaHome, javaVersion)
+        jdkDependencyData.add(DependencyData.create(javaHome, javaVersion))
     }
 
     /**
@@ -35,9 +35,8 @@ class ProjectService(var config: JvmConfig) {
      */
     fun getJvmProject(config: JvmConfig = this.config) : JvmProject {
         this.config = config
-        val jdk = listOf(jdkDependencyData)
         val sorted = dependencies.sorted()
-        return JvmProject(jdk + sorted, classpath)
+        return JvmProject(jdkDependencyData + sorted, classpath)
     }
 
     /**
@@ -71,6 +70,10 @@ class ProjectService(var config: JvmConfig) {
         classpath.addAll(jvmProject.classpath)
     }
 
+    /**
+     * For the given dependency, find all the entries contained in the jar file and organize them by package
+     * in the resulting data structures [JarData] -> [JarEntryData]
+     */
     fun getJarData(dependencyData: DependencyData) : JarData {
         val pkgMap = mutableMapOf<String, MutableSet<JarEntryData>>()
         try {
@@ -101,6 +104,10 @@ class ProjectService(var config: JvmConfig) {
         }
     }
 
+    /**
+     * Fill in the contents of the given [JarEntryData] -- if a class, try and find the source or TODO decompile
+     * If resource, return the contents as is
+     */
     fun getJarEntryContents(entry: JarEntryData) : JarEntryData {
         val entryRecord = entryMap[entry.name]
         if ( entryRecord == null ) return entry
@@ -110,7 +117,7 @@ class ProjectService(var config: JvmConfig) {
     }
 
     /**
-     * Return the classpath represented by the current dependencies
+     * Return the full classpath implied by the current dependencies
      */
     fun getClasspath() : String {
         val components = classpath.flatMap { it.classDirs } + dependencies.map{ it.fileName }
@@ -126,7 +133,7 @@ class ProjectService(var config: JvmConfig) {
                 if (curEntry == null) jarFile.getJarEntry("${entryPath}.${ext}") else curEntry
             }
             if (jarEntry == null) {
-                return entry
+                return entry // TODO could use getContentFromJar if we had a decompiler
             } else {
                 val sourceEntry = pathToJarEntry(entry.pkg, jarEntry.name)
                 sourceEntry.text = jarFile.getInputStream(jarEntry).bufferedReader().use {
@@ -144,18 +151,15 @@ class ProjectService(var config: JvmConfig) {
     private fun getContentFromJar(fileName: String, entry: JarEntryData) : JarEntryData {
         try {
             val jarFile = JarFile(fileName)
-            jarFile.entries().toList().forEach { jarEntry ->
-                if ( !jarEntry.isDirectory && pathToJarEntry(entry.pkg, jarEntry.name).name.equals(entry.name)) {
-                    jarFile.getInputStream(jarEntry).use {
-                        entry.text = when (entry.type) {
-                            JarEntryType.RESOURCE -> getResourceFromJar(it)
-                            JarEntryType.CLASS -> getClassFromJar(it)
-                        }
-                    }
-                    return entry
+            val ext = if (entry.type == JarEntryType.CLASS) ".class" else ""
+            val entryPath = "${entry.pkg.replace(".", File.separator)}${File.separator}${entry.name}${ext}"
+            val jarEntry = jarFile.getJarEntry(entryPath)
+            jarFile.getInputStream(jarEntry).use {
+                entry.text = when (entry.type) {
+                    JarEntryType.RESOURCE -> getResourceFromJar(it)
+                    JarEntryType.CLASS -> getClassFromJar(it)
                 }
             }
-            entry.text = "Not Found"
             return entry
         }
         catch (e: Exception) {
@@ -170,7 +174,7 @@ class ProjectService(var config: JvmConfig) {
     }
 
     private fun getClassFromJar(stream: InputStream) : String {
-        stream.use {  it.readBytes() } // Decompile the byte code some day
+        stream.use {  it.readBytes() } // TODO Decompile the byte code some day
         return "No Source Found"
     }
 

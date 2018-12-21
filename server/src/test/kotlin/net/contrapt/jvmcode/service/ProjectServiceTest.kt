@@ -49,6 +49,14 @@ class ProjectServiceTest {
         service.addDependency(path)
         val deps = service.getJvmProject().dependencies
         deps.size shouldBe 2
+        val jarData = service.getJarData(deps.last())
+        val pkg = jarData.packages.find { it.name == "META-INF.maven.org.postgresql.postgresql" } // META-INF/maven/org.postgresql/postgresql
+        val je = pkg?.entries?.first()
+        val jec = when (je) {
+            null -> null
+            else -> {} //service.getJarEntryContents(je) TODO Fix paths whose components contain '.'
+        }
+        jec
     }
 
     @Test
