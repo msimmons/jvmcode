@@ -9,25 +9,29 @@ import java.util.jar.JarFile
 
 class ProjectService(var config: JvmConfig) {
 
-    private val logger = LoggerFactory.getLogger(javaClass
-    )
-    // All the dependencies being tracked TODO store user added ones persistently?
-    private val dependencies = mutableSetOf<DependencyData>()
+    private val logger = LoggerFactory.getLogger(javaClass)
+
+    private val jdkSource : DependencySource
+    //TODO store user added ones persistently?
+    private val userSource: DependencySource
+
+    // All the external dependencies being tracked
+    private val externalSource = mutableMapOf<String, DependencySource>()
 
     // Classpath data added by other extensions or the user
-    private val classpath = mutableSetOf<ClasspathData>()
+    private val classDirs = mutableSetOf<ClasspathData>()
 
     // Map of entry FQCN to entry data and dependency it belongs to
     private val entryMap = mutableMapOf<String, Pair<JarEntryData, DependencyData>>()
 
     private val javaVersion : String
     private val javaHome : String
-    private val jdkDependencyData = mutableSetOf<DependencyData>()
 
     init {
         javaVersion = System.getProperty("java.version")
         javaHome = System.getProperty("java.home").replace("${File.separator}jre", "")
-        jdkDependencyData.add(DependencyData.create(javaHome, javaVersion))
+        jdkSource =  DependencySource.create(javaHome, javaVersion)
+        userSource = DependencySource(DependencySource.USER, "User")
     }
 
     /**
@@ -35,39 +39,42 @@ class ProjectService(var config: JvmConfig) {
      */
     fun getJvmProject(config: JvmConfig = this.config) : JvmProject {
         this.config = config
-        val sorted = dependencies.sorted()
-        return JvmProject(jdkDependencyData + sorted, classpath)
+        val sorted = listOf(jdkSource, userSource) + externalSource.values
+        return JvmProject(sorted, classDirs, getClasspath())
     }
 
     /**
-     * Add a single JAR file dependency
+     * User adds a single JAR file dependency
+     * TODO allow a source file?
      */
     fun addDependency(jarFile: String) {
-        dependencies.add(DependencyData.create(jarFile))
+        userSource.dependencies.add(DependencyData.create(jarFile))
     }
 
     /**
-     * Add an output directory
+     * User adds an output directory
      */
     fun addClassDirectory(classDir: String) {
-        val cp = classpath.firstOrNull { it.source == "User" }
+        val cp = classDirs.firstOrNull { it.source == DependencySource.USER }
         if (cp != null) {
             cp.classDirs.add(classDir)
         } else {
-            classpath.add(ClasspathData("User", "user", "user").apply {
+            classDirs.add(ClasspathData(DependencySource.USER, "user", "user").apply {
                 classDirs.add(classDir)
             })
         }
     }
 
     /**
-     * Update project information
+     * Process update of project dependency information from an external source
      */
     fun updateProject(source: String, jvmProject: JvmProject) {
-        dependencies.removeIf { it.source == source }
-        classpath.removeIf { it.source == source }
-        dependencies.addAll(jvmProject.dependencies)
-        classpath.addAll(jvmProject.classpath)
+        externalSource.remove(source)
+        classDirs.removeIf { it.source == source }
+        externalSource[source] = DependencySource(source, source).apply {
+            dependencies.addAll(jvmProject.dependencySources.flatMap { if (it.name == source) it.dependencies else mutableListOf() })
+        }
+        classDirs.addAll(jvmProject.classDirs)
     }
 
     /**
@@ -117,10 +124,12 @@ class ProjectService(var config: JvmConfig) {
     }
 
     /**
-     * Return the full classpath implied by the current dependencies
+     * Return the full classpath implied by the current dependencies (minus jdk dependencies)
      */
     fun getClasspath() : String {
-        val components = classpath.flatMap { it.classDirs } + dependencies.map{ it.fileName }
+        val components = classDirs.flatMap { it.classDirs } +
+                userSource.dependencies.map { it.fileName } +
+                externalSource.values.asSequence().flatMap { it.dependencies.asSequence().map { it.fileName } }
         return components.joinToString(File.pathSeparator) { it }
     }
 

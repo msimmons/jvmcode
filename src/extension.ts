@@ -2,7 +2,7 @@
 
 import * as vscode from 'vscode'
 import { JvmServer } from './jvm_server'
-import { JarEntryNode } from './models';
+import { JarEntryNode, dependencyLabel } from './models';
 import { ProjectService } from './project_service';
 import { ProjectController } from './project_controller';
 import { StatsController } from './stats_controller';
@@ -68,16 +68,17 @@ export function activate(context: vscode.ExtensionContext) {
      * Maybe show local project classes first, if no match, show dependency classes (possibly pre-filtered)
      */
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.find-class', () => {
-        projectController.start() // This won't work correctly first time.
-        let jarEntries = projectService.getJarEntries()
+        projectController.start() // TODO This won't work correctly first time -- async timing
+        let jarEntries = projectService.getJarEntryNodes()
         let classes = projectService.getClasses()
         Promise.all([jarEntries]).then((results) => {
             let quickPick = vscode.window.createQuickPick()
             let classItems = classes.map((c) => {
                 return { label: c.name, detail: c.pkg, entry: c } as vscode.QuickPickItem
             })
-            let jarItems = results[0].map((r) => { 
-                return { label: r.name, detail: r.pkg, entry: r } as vscode.QuickPickItem
+            let jarItems = results[0].map((r) => {
+                let detail = r.data.pkg + ' (' + dependencyLabel(r.dependency) + ')'
+                return { label: r.name, detail: detail, entry: r } as vscode.QuickPickItem
             })
             quickPick.items = classItems.concat(jarItems)
             quickPick.onDidAccept(selection => {
@@ -132,15 +133,13 @@ export function activate(context: vscode.ExtensionContext) {
         let classes = projectService.getClasses().map((c) => {return c.pkg + '.' + c.name})
         vscode.window.showQuickPick(classes).then((mainClass) => {
             if (!mainClass) return
-            let classpath = projectService.getClasspath()
-            classpath.then((cp) => {
-                let def = {type: 'jvmcode'} as vscode.TaskDefinition
-                let args = cp ? ['-cp', cp] : []
-                args = args.concat([mainClass])
-                let exec = new vscode.ProcessExecution('/usr/bin/java', args, {})
-                let task = new vscode.Task(def, vscode.workspace.workspaceFolders[0], mainClass, 'jvmcode', exec, [])
-                vscode.tasks.executeTask(task)
-            })
+            let cp = projectService.getClasspath()
+            let def = {type: 'jvmcode'} as vscode.TaskDefinition
+            let args = cp ? ['-cp', cp] : []
+            args = args.concat([mainClass])
+            let exec = new vscode.ProcessExecution('/usr/bin/java', args, {})
+            let task = new vscode.Task(def, vscode.workspace.workspaceFolders[0], mainClass, 'jvmcode', exec, [])
+            vscode.tasks.executeTask(task)
         })
     }))
 

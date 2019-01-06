@@ -1,6 +1,7 @@
 package net.contrapt.jvmcode.model
 
 class JvmProject(
-        val dependencies: Collection<DependencyData>,
-        val classpath: Collection<ClasspathData>
+        val dependencySources: Collection<DependencySource>,
+        val classDirs: Collection<ClasspathData>,
+        val classpath: String
 )

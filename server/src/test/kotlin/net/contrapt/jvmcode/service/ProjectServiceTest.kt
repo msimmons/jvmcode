@@ -1,6 +1,7 @@
 package net.contrapt.jvmcode.service
 
 import io.kotlintest.matchers.*
+import net.contrapt.jvmcode.model.DependencySource
 import net.contrapt.jvmcode.model.JarEntryType
 import net.contrapt.jvmcode.model.JvmConfig
 import org.junit.Test
@@ -13,9 +14,11 @@ class ProjectServiceTest {
         val config = JvmConfig(setOf(), setOf("java"))
         val service = ProjectService(config)
         val project = service.getJvmProject()
-        project.dependencies.size shouldBe 1
-        val depData = project.dependencies.first()
-        depData.source shouldBe "System"
+        project.dependencySources.size shouldBe 2 // System and User
+        val depSource = project.dependencySources.first()
+        depSource.name shouldBe DependencySource.SYSTEM
+        depSource.dependencies.size shouldBe 1
+        val depData = depSource.dependencies.first()
         val jarEntries = service.getJarData(depData)
         jarEntries.packages.size shouldBe beGreaterThan(0)
         val resourceEntry = jarEntries.packages.first().entries.first()
@@ -32,9 +35,10 @@ class ProjectServiceTest {
     fun systemJdkWithExcludesTest() {
         val config = JvmConfig(setOf("com.sun"), setOf("java"))
         val service = ProjectService(config)
-        val deps = service.getJvmProject().dependencies
-        deps.size shouldBe 1
-        val depData = deps.first()
+        val deps = service.getJvmProject().dependencySources
+        deps.size shouldBe 2
+        val depSource = deps.first()
+        val depData = depSource.dependencies.first()
         val jarEntries = service.getJarData(depData)
         jarEntries.packages.size shouldBe beGreaterThan(0)
         jarEntries.packages.any { pkg -> pkg.name.startsWith("com.sun") } shouldBe false
@@ -44,12 +48,12 @@ class ProjectServiceTest {
     fun addDependencyTest() {
         val config = JvmConfig(setOf("com.sun"), setOf("java"))
         val service = ProjectService(config)
-        javaClass.classLoader
         val path = javaClass.classLoader.getResource("postgresql-42.1.4.jar").path
         service.addDependency(path)
-        val deps = service.getJvmProject().dependencies
+        val deps = service.getJvmProject().dependencySources
         deps.size shouldBe 2
-        val jarData = service.getJarData(deps.last())
+        val depSource = deps.last()
+        val jarData = service.getJarData(depSource.dependencies.last())
         val pkg = jarData.packages.find { it.name == "META-INF.maven.org.postgresql.postgresql" } // META-INF/maven/org.postgresql/postgresql
         val je = pkg?.entries?.first()
         val jec = when (je) {

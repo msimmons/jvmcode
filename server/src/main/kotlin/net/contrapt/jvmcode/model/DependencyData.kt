@@ -3,7 +3,6 @@ package net.contrapt.jvmcode.model
 import java.io.File
 
 class DependencyData (
-    val source: String,
     val fileName: String,
     val sourceFileName: String?,
     val groupId: String,
@@ -11,19 +10,18 @@ class DependencyData (
     val version: String,
     val scopes: MutableSet<String> = mutableSetOf(),
     val modules: MutableSet<String> = mutableSetOf(),
-    val transitive: Boolean = false
+    val transitive: Boolean = false,
+    val resolved: Boolean = false
 ) : Comparable<DependencyData> {
 
-    fun key() = "${groupId}:${artifactId}:${version}"
-
     override fun compareTo(other: DependencyData): Int {
-        return key().compareTo(other.key())
+        return fileName.compareTo(other.fileName)
     }
 
     override fun equals(other: Any?): Boolean {
         return when(other) {
             null -> false
-            is DependencyData -> other.key() == key()
+            is DependencyData -> other.fileName == fileName
             else -> false
         }
     }
@@ -35,23 +33,11 @@ class DependencyData (
     companion object {
 
         /**
-         * Create the JDK dependency
-         */
-        fun create(javaHome: String, javaVersion: String) : DependencyData {
-            val fileName = javaHome + File.separator + "jre/lib/rt.jar"
-            val sourceFileName = javaHome + File.separator + "src.zip"
-            val groupId = System.getProperty("java.vendor")
-            val artifactId = "JDK"
-            val version = javaVersion
-            return DependencyData("System", fileName, sourceFileName, groupId, artifactId, version)
-        }
-
-        /**
          * Create a user added dependency
          */
         fun create(jarFile: String) : DependencyData {
             val fileName = jarFile.split(File.separator).last()
-            return DependencyData("User", jarFile, null, "", fileName, "")
+            return DependencyData(jarFile, null, "", fileName, "")
         }
 
     }

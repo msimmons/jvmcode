@@ -2,7 +2,6 @@
 
 import * as vscode from 'vscode';
 import { Uri } from 'vscode';
-import { JarEntryData, JarEntryNode } from './models';
 
 /**
  * Provide content for resources found in JAR files

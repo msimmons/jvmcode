@@ -1,21 +1,24 @@
 'use strict';
 
 import * as vscode from 'vscode'
-import { readdir, readdirSync, statSync, existsSync } from 'fs'
+import { DependencySource, DependencyData, ClasspathData, JarEntryData, JarPackageData, JvmProject} from "server-models"
+import { readdirSync, statSync, existsSync } from 'fs'
 import { JvmServer } from './jvm_server';
-import { DependencyData, JarPackageData, JarEntryNode, JarEntryData, ClasspathData } from './models';
+import { JarEntryNode, DependencySourceNode, DependencyNode, JarPackageNode } from './models';
 import { ConfigService } from './config_service';
 import * as path from 'path'
 
 /**
- * Service to make dependency related request to JvmServer on behalf of other components
+ * Service to make project related requests to JvmServer on behalf of other components.  Also manage caching of 
+ * dependency data to be used by other components
  */
 export class ProjectService {
 
     private context: vscode.ExtensionContext
     private server: JvmServer
-    private dependencies: DependencyData[] = []
-    private classpath: ClasspathData[] = []
+    private sourceNodes: DependencySourceNode[]
+    private classDirs: ClasspathData[] = []
+    private classpath: string
     private projectListeners = [] // Array of dependency callbacks
 
     public constructor(context: vscode.ExtensionContext, server: JvmServer) {
@@ -29,21 +32,35 @@ export class ProjectService {
      * @param callback 
      */
     private projectListener = (error, result) => {
-        if (!error && result) {
-            this.dependencies = result.body.dependencies
-            this.classpath = result.body.classpath
+        if (error || !result) {
+            console.error('Got a project event with bad payload', error)
         }
-        this.projectListeners.forEach((listener) => {
-            listener(error, result)
-        })
+        else {
+            let jvmProject = result.body as JvmProject
+            this.sourceNodes = this.createSourceNodes(jvmProject.dependencySources)
+            this.classDirs = jvmProject.classDirs
+            this.classpath = jvmProject.classpath
+            this.projectListeners.forEach((listener) => {
+                listener(jvmProject)
+            })
+        }
     }
 
     /**
      * Register a listener for incoming dependencies
-     * @param callback 
+     * @param callback(project: JvmProject)
      */
     public registerProjectListener(callback) {
         this.projectListeners.push(callback)
+    }
+
+    /**
+     * Create source nodes from the given dependency data
+     */
+    private createSourceNodes(sourceData: DependencySource[]) : DependencySourceNode[] {
+        return sourceData.filter((ds) => { return ds.dependencies.length > 0 }).map((ds) => {
+            return new DependencySourceNode(ds)
+        })
     }
 
     /**
@@ -72,15 +89,53 @@ export class ProjectService {
     }
 
     /**
-     * Return all of the jar entries across all dependencies
+     * Return all the dependency source nodes
      */
-    public async getJarEntries() : Promise<JarEntryData[]> {
-        let depPkgs = []
-        for (var dep of this.dependencies) {
-            depPkgs.push(await this.getPackages(dep))
+    public getSourceNodes() : DependencySourceNode[] {
+        return this.sourceNodes
+    }
+
+    /**
+     * Return all the dependency nodes for the given source
+     */
+    public getDependencyNodes(source: DependencySourceNode) : DependencyNode[] {
+        let nodes = source.data.dependencies.filter((d) => { return !d.transitive }).map((d) => {
+            return new DependencyNode(d)
+        })
+        source.dependencies = nodes
+        return nodes
+    }
+
+    /**
+     * Return all the package nodes for the given dependency
+     */
+    public async getPackageNodes(dependency: DependencyNode) : Promise<JarPackageNode[]> {
+        if (dependency.packages) return dependency.packages
+        try {
+            let packages = await this.getPackages(dependency.data)
+            let nodes = packages.map((pkgData) => { return new JarPackageNode(dependency, pkgData) })
+            dependency.packages = nodes
+            return nodes
+        }
+        catch(error) {
+            vscode.window.showErrorMessage(error.message)
+            return []
+        }
+    }
+
+    /**
+     * Return all the JarEntryNodes accross all dependencies, has the effect of resolving all packages in each
+     * dependency
+     */
+    public async getJarEntryNodes() : Promise<JarEntryNode[]> {
+        let packages : JarPackageNode[][] = []
+        for (var node of this.sourceNodes) {
+            for (var dep of node.dependencies) {
+                packages.push(await this.getPackageNodes(dep))
+            }
         }
         // Wait for all the packages to resolve, than get the entries
-        return Promise.all(depPkgs).then((depPkgs) => {
+        return Promise.all(packages).then((depPkgs) => {
             let jarEntries = []
             for (var pkgList of depPkgs) {
                 for (var pkg of pkgList) {
@@ -96,7 +151,7 @@ export class ProjectService {
      */
     public getClasses() : JarEntryData[] {
         let entries = []
-        this.classpath.forEach((cp) => {
+        this.classDirs.forEach((cp) => {
             cp.classDirs.forEach((dir) => {
                 let files = this.getFiles(dir).filter((file) => {return file.indexOf('$') <= 0})
                 entries = entries.concat(files.map((file) => {
@@ -104,7 +159,7 @@ export class ProjectService {
                     let ndx = file.lastIndexOf('/')
                     let name = file.substr(ndx+1)
                     let pkg = file.substr(1, ndx-1).replace(/\//g, '.')
-                    return { type: 'CLASS', name: name, pkg: pkg }
+                    return { type: 'CLASS', name: name, pkg: pkg } as JarEntryData
                 })
             )})
         })
@@ -115,12 +170,10 @@ export class ProjectService {
      * Returns the collection of package entries for the dependency
      * @param dependency 
      */
-    public async getPackages(dependency: DependencyData) : Promise<JarPackageData[]> {
-        if (!dependency.packages) {
-            let result = await this.server.send('jvmcode.jar-entries', {dependency: dependency})
-            dependency.packages = result.body.packages
-        }
-        return dependency.packages
+    private async getPackages(dependency: DependencyData) : Promise<JarPackageData[]> {
+        let result = await this.server.send('jvmcode.jar-entries', {dependency: dependency})
+        dependency.resolved = true
+        return result.body.packages
     }
 
     /**
@@ -128,16 +181,15 @@ export class ProjectService {
      * @param jarEntry 
      */
     public async getJarEntryContent(jarEntry: JarEntryNode) : Promise<JarEntryData> {
-        let reply = await this.server.send('jvmcode.jar-entry', {jarEntry: jarEntry})
+        let reply = await this.server.send('jvmcode.jar-entry', {jarEntry: jarEntry.data})
         return reply.body
     }
 
     /**
      * Get the current classpath
      */
-    public async getClasspath() : Promise<string> {
-        let response =  await this.server.send('jvmcode.classpath', {})
-        return response.body.classpath
+    public getClasspath() : string {
+        return this.classpath
     }
 
     private getFiles(dir: string) : string[] {

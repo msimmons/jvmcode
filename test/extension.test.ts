@@ -29,7 +29,7 @@ suite("Extension Tests", () => {
     test("Dependencies and jar entries", async () => {
         let root = myExtension.extensionContext.extensionPath
         await myExtension.projectService.addDependency(`${root}/server/src/test/resources/postgresql-42.1.4.jar`)
-        let jars = await myExtension.projectService.getJarEntries()
+        let jars = await myExtension.projectService.getJarEntryNodes()
         assert(jars.length > 4000, "Has some jar entries")
     })
 

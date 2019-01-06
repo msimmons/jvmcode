@@ -1,10 +1,11 @@
 'use strict';
 
 import * as vscode from 'vscode'
+import { DependencySource, JarEntryData, JvmProject } from "server-models"
 import { DependencyTreeProvider } from './dependency_tree_provider';
 import { JarContentProvider } from './jar_content_provider';
 import { ProjectService } from './project_service';
-import { DependencyData, JarEntryNode, JarEntryData } from './models';
+import { JarEntryNode } from './models';
 
 /**
  * Responsible for managing various views related to a project
@@ -37,23 +38,18 @@ export class ProjectController {
      * the server
      */
     private registerProjectListener() {
-        this.service.registerProjectListener((error, result) => {
-            if (error) {
-                vscode.window.showErrorMessage(error.message)
-            }
-            else {
-                this.start()
-                this.updateDependencies(result.body.dependencies)
-            }
+        this.service.registerProjectListener((jvmProject: JvmProject) => {
+            this.start()
+            this.updateDependencies(jvmProject.dependencySources)
         })
     }
 
     /**
-     * Update dependencies for any components that use them
+     * Alert components that dependencies have been updated
      * @param dependencies 
      */
-    public updateDependencies(dependencies: DependencyData[]) {
-        this.dependencyTree.setDependencies(dependencies)
+    public updateDependencies(dependencies: DependencySource[]) {
+        this.dependencyTree.update()
     }
 
     /**
@@ -70,7 +66,9 @@ export class ProjectController {
      */
     private openJarEntryContent(entryNode: JarEntryNode) {
         if (!entryNode.content) return
-        let uri = vscode.Uri.parse(this.contentProvider.scheme + '://' + entryNode.dependency + '/' + entryNode.pkg + '/' + entryNode.contentName)
+        let jarFile = entryNode.dependency.fileName
+        let pkg = entryNode.package.name
+        let uri = vscode.Uri.parse(this.contentProvider.scheme + '://' + jarFile + '/' + pkg + '/' + entryNode.contentName)
         vscode.workspace.openTextDocument(uri).then((doc) => {
             this.contentProvider.update(uri, entryNode.content)
             vscode.window.showTextDocument(doc, { preview: true }).then((te) => {

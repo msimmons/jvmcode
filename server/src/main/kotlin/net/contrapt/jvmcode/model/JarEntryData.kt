@@ -8,7 +8,7 @@ class JarEntryData(
 ) : Comparable<JarEntryData> {
 
     override fun compareTo(other: JarEntryData): Int {
-        return name.compareTo(other.name)
+        return fqcn().compareTo(other.fqcn())
     }
 
     fun fqcn() = "$pkg.$name"
