@@ -26,6 +26,8 @@ export class JvmServer {
     private startupToken : string
     private status: Status = Status.STOPPED
     private channel: OutputChannel
+    // An array of registered consumers that should be re-registred on reconnect
+    private registeredConsumers: {address: string, callback: any}[] = []
 
     public constructor(context: vscode.ExtensionContext) {
         this.context = context
@@ -125,7 +127,15 @@ export class JvmServer {
             return
         }
         this.bus.registerHandler(address, {}, callback)
+        this.registeredConsumers.push({address: address, callback: callback})
         console.log(`Consumer registered at ${address} by ${this.context.extensionPath}`)
+    }
+
+    private reRegisterConsumers = () => {
+        this.registeredConsumers.forEach(rc => {
+            this.bus.registerHandler(rc.address, rc.callback)
+            console.log(`Consumer re-registered at ${rc.address} by ${this.context.extensionPath}`)
+        })
     }
 
     /**
@@ -135,6 +145,7 @@ export class JvmServer {
      */
     public unregisterConsumer = (address: string, callback) => {
         this.bus.unregisterHandler(address, callback)
+        this.registeredConsumers = this.registeredConsumers.filter(rc => !(rc.address===address && rc.callback===callback))
         console.log(`Consumer unregistered from ${address} by ${this.context.extensionPath}`)
     }
 
@@ -264,6 +275,7 @@ export class JvmServer {
         }
         this.bus.onreconnect = () => {
             this.channel.appendLine('Reconnecting to ' + this.port)
+            this.reRegisterConsumers()
         }
     }
 
