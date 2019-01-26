@@ -242,7 +242,8 @@ export class JvmServer {
      * Display them in an error notification
      */
     private listenForUnhandledException() {
-        this.registerConsumer('jvmcode.exception', (error, result) => {
+        // Calling register directly to avoid inserting in re-register queue
+        this.bus.registerHandler('jvmcode.exception', {}, (error, result) => {
             if (result) {
                 vscode.window.showErrorMessage('JVMCode: ' + result.body.message)
             } else if (error) {
