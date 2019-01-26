@@ -273,7 +273,7 @@ export class JvmServer {
     private log(message: string) {
         let now = new Date()
         if (this.channel) {
-            this.channel.appendLine(`${now}: [jvm_server] ${message}`)
+            this.channel.appendLine(`${now.toLocaleString()}: [jvm_server] ${message}`)
         }
         else {
             console.log(`${now}: ${message}`)

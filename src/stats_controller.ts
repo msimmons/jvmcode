@@ -10,6 +10,7 @@ export class StatsController {
 
     private statusItem : vscode.StatusBarItem
 
+
     public constructor(server: JvmServer) {
         this.registerStatsListener(server)
     }
@@ -31,7 +32,8 @@ export class StatsController {
                 var usedKB = totalKB - freeKB
                 var maxKB = Math.round(result.body.max/1000)
                 var pct = Math.round(result.body.total/result.body.max)
-                this.statusItem.tooltip = `free: ${freeKB} total: ${totalKB} max: ${maxKB}`
+                let now = new Date()
+                this.statusItem.tooltip = `free: ${freeKB} total: ${totalKB} max: ${maxKB} updated: ${now.toLocaleString()}`
                 if (pct < 50) {
                     this.statusItem.color = 'white'
                     this.statusItem.text = `${usedKB}K`
