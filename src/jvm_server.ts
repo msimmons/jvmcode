@@ -128,13 +128,13 @@ export class JvmServer {
         }
         this.bus.registerHandler(address, {}, callback)
         this.registeredConsumers.push({address: address, callback: callback})
-        console.log(`Consumer registered at ${address} by ${this.context.extensionPath}`)
+        this.log(`Consumer registered at ${address} by ${this.context.extensionPath}`)
     }
 
     private reRegisterConsumers = () => {
         this.registeredConsumers.forEach(rc => {
             this.bus.registerHandler(rc.address, rc.callback)
-            console.log(`Consumer re-registered at ${rc.address} by ${this.context.extensionPath}`)
+            this.log(`Consumer re-registered at ${rc.address} by ${this.context.extensionPath}`)
         })
     }
 
@@ -146,7 +146,7 @@ export class JvmServer {
     public unregisterConsumer = (address: string, callback) => {
         this.bus.unregisterHandler(address, callback)
         this.registeredConsumers = this.registeredConsumers.filter(rc => !(rc.address===address && rc.callback===callback))
-        console.log(`Consumer unregistered from ${address} by ${this.context.extensionPath}`)
+        this.log(`Consumer unregistered from ${address} by ${this.context.extensionPath}`)
     }
 
     public sendCommand() {
@@ -154,9 +154,9 @@ export class JvmServer {
             if ( address ) {
                 vscode.window.showInputBox().then((message) => {
                     if ( message ) this.send(address, {message: message}).then((reply) => {
-                        this.channel.appendLine(JSON.stringify(reply))
+                        this.log(JSON.stringify(reply))
                     }).catch((error) => {
-                        this.channel.appendLine(JSON.stringify(error))
+                        this.log(JSON.stringify(error))
                     })
                 })
             }
@@ -169,9 +169,11 @@ export class JvmServer {
      * @param verticleName The full classname of the verticle to deploy
      */
     public install(jarFiles: string[], verticleName: string) : Promise<any> {
+        this.log(`Installing ${verticleName}`)
         let reply = this.send('jvmcode.install', {jarFiles: jarFiles, verticleName: verticleName})
         reply.then((message) => {
-            this.channel.appendLine(JSON.stringify(message))
+            this.log(`Installed ${verticleName}`)
+            this.log(JSON.stringify(message))
         }).catch((error) => {
             vscode.window.showErrorMessage('Error installing: ' + error['message'])
         })
@@ -210,20 +212,12 @@ export class JvmServer {
         })
     }
 
-    private restart() {
-        if ( this.status != Status.STOPPED ) return;
-        this.child = null;
-        this.bus = null;
-        this.channel.appendLine('Restarting JVM server...');
-        this.startServer();
-    }
-
     private handleServerErrorCallback = (err, signal) => {
-        this.channel.appendLine(err);
+        this.log(err);
     }
 
     private handleServerExitCallback = (err, signal) => {
-        this.channel.appendLine('Server exited with ' + err + ' ' + signal);
+        this.log('Server exited with ' + err + ' ' + signal);
         this.child = null
         this.bus = null
         this.status = Status.STOPPED
@@ -238,11 +232,8 @@ export class JvmServer {
             this.port = Number(parts[parts.length-1].trim())
             this.startEventBus()
         }
-        else if ( this.channel ) {
-            this.channel.appendLine(line)
-        }
         else { 
-            console.log(line)
+            (this.channel) ? this.channel.appendLine(line) : console.log(line)
         }
     }
 
@@ -263,19 +254,29 @@ export class JvmServer {
     private startEventBus() {
         if ( this.bus ) return;
         let url = 'http://localhost:'+this.port+'/jvmcode/ws/'
-        this.channel.appendLine('Starting event bus at '+url)
+        this.log('Starting event bus at '+url)
         this.bus = new EventBus(url)
         this.bus.enableReconnect(true)
         this.bus.onopen = () => {
-            this.channel.appendLine('Started event bus on ' + this.port)
+            this.log('Started event bus on ' + this.port)
             this.listenForUnhandledException()
         }
         this.bus.onerror = (err) => {
-            this.channel.appendLine('Error starting event bus: ' + err)
+            this.log('Error starting event bus: ' + err)
         }
         this.bus.onreconnect = () => {
-            this.channel.appendLine('Reconnecting to ' + this.port)
+            this.log('Reconnecting to ' + this.port)
             this.reRegisterConsumers()
+        }
+    }
+
+    private log(message: string) {
+        let now = new Date()
+        if (this.channel) {
+            this.channel.appendLine(`${now}: [jvm_server] ${message}`)
+        }
+        else {
+            console.log(`${now}: ${message}`)
         }
     }
 
