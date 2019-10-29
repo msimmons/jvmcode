@@ -15,6 +15,8 @@ export class ConfigService {
         let configuration = vscode.workspace.getConfiguration('jvmcode')
         let excludes: string[] = configuration.get('excludes')
         let extensions: string[] = configuration.get('sourceExtensions')
-        return { excludes: excludes, extensions: extensions }
+        let jmodIncludes: string[] = configuration.get('jmodIncludes')
+        let srcLocation: string = configuration.get('srcLocation')
+        return { excludes: excludes, extensions: extensions, jmodIncludes: jmodIncludes, srcLocation: srcLocation}
     }
 }

@@ -1,7 +1,7 @@
 package net.contrapt.jvmcode.handler
 
-import io.vertx.core.Future
 import io.vertx.core.Handler
+import io.vertx.core.Promise
 import io.vertx.core.Vertx
 import io.vertx.core.eventbus.Message
 import io.vertx.core.json.JsonObject
@@ -14,7 +14,7 @@ abstract class AbstractHandler(val vertx: Vertx, val blocking: Boolean = false) 
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    private fun handler(message: Message<JsonObject>) = Handler<Future<JsonObject>> { future ->
+    private fun handler(message: Message<JsonObject>) = Handler<Promise<JsonObject>> { future ->
         try {
             val result = processMessage(message)
             future.complete(result)

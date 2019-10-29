@@ -16,12 +16,14 @@ import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import net.contrapt.jvmcode.handler.*
 import net.contrapt.jvmcode.model.JvmConfig
 import net.contrapt.jvmcode.service.ProjectService
+import java.io.File
 
 class RouterVerticle(val startupToken: String, var config: JvmConfig) : AbstractVerticle() {
 
     private val logger = LoggerFactory.getLogger(javaClass)
     private val deployments = mutableMapOf<String, String>()
-    private val projectService = ProjectService(config)
+    private val javaHome = System.getProperty("java.home").replace("${File.separator}jre", "")
+    private val projectService = ProjectService(config, javaHome)
 
     var httpPort = 0
         private set
@@ -43,7 +45,8 @@ class RouterVerticle(val startupToken: String, var config: JvmConfig) : Abstract
             setReplyTimeout(5 * 60 * 1000)
         }
 
-        val sockJs = SockJSHandler.create(vertx).bridge(bridgeOptions, bridgeEventHandler())
+        val sockJs = SockJSHandler.create(vertx)
+        sockJs.bridge(bridgeOptions, bridgeEventHandler())
 
         router.route("/jvmcode/ws/*").handler(sockJs)
 

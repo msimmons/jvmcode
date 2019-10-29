@@ -74,6 +74,10 @@
           "default": "/usr/bin/java",
           "description": "Path to java command to execute to start the server"
         },
+        "jvmcode.srcLocation": {
+          "type": "string",
+          "description": "The location of the JDK source code; defaults to either java_home/src.zip or java_home/lib/src.zip"
+        },
         "jvmcode.logLevel": {
           "type": "string",
           "enum": [
@@ -106,6 +110,16 @@
           ],
           "description": "A list of packages to exclude from dependency list.  Matches all packages with the given prefix"
         },
+        "jvmcode.jmodIncludes": {
+          "type": "array",
+          "default": [
+            "java.base",
+            "java.compiler",
+            "java.sql",
+            "java.sql.rowset"
+          ],
+          "description": "A list of modules (jdk >= 9) to include from java_home/jmods"
+        },
         "jvmcode.sourceExtensions": {
           "type": "array",
           "default": [
@@ -115,7 +129,7 @@
             "groovy",
             "scala"
           ],
-          "description": "A list of extensions used to look for source files in dependency jars"
+          "description": "A list of extensions used to look for source files in dependency source jars"
         }
       }
     }
