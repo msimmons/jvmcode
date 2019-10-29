@@ -36,6 +36,7 @@ class ProjectServiceTest {
 
     @Test
     fun systemJdkTest11() {
+        org.junit.Assume.assumeTrue(File(javaHome11).exists())
         val config = JvmConfig(setOf(), setOf("java"), setOf("java.base", "java.sql"))
         val service = ProjectService(config, javaHome11)
         val project = service.getJvmProject()
