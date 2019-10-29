@@ -18,7 +18,7 @@ class JarEntryData(
 
         fun create(path: String, isJmod: Boolean) : JarEntryData {
             val parts = path.split("/")
-            val filtered = parts.filterIndexed { index, part ->
+            val filtered = parts.filterIndexed { index, _ ->
                 when(isJmod) {
                     true -> index > 0 && parts[0] == "classes"
                     else -> true
