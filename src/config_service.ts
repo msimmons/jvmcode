@@ -13,10 +13,10 @@ export class ConfigService {
      */
     public static getConfig() : JvmConfig {
         let configuration = vscode.workspace.getConfiguration('jvmcode')
-        let excludes: string[] = configuration.get('excludes')
-        let extensions: string[] = configuration.get('sourceExtensions')
-        let jmodIncludes: string[] = configuration.get('jmodIncludes')
-        let srcLocation: string = configuration.get('srcLocation')
+        let excludes: string[] = configuration.get('excludes') as string[]
+        let extensions: string[] = configuration.get('sourceExtensions') as string[]
+        let jmodIncludes: string[] = configuration.get('jmodIncludes') as string[]
+        let srcLocation: string = configuration.get('srcLocation') as string
         return { excludes: excludes, extensions: extensions, jmodIncludes: jmodIncludes, srcLocation: srcLocation}
     }
 }
