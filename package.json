@@ -143,13 +143,13 @@
   },
   "devDependencies": {
     "@types/mocha": "^2.2.48",
-    "@types/node": "^8.10.18",
+    "@types/node": "^8.10.58",
     "mocha": "^3.5.0",
-    "typescript": "^2.9.1",
-    "vscode": "^1.1.18"
+    "typescript": "^2.9.2",
+    "vscode": "^1.1.36"
   },
   "dependencies": {
     "node-uuid": "^1.4.8",
-    "vertx3-eventbus-client": "^3.5.2"
+    "vertx3-eventbus-client": "^3.8.3"
   }
 }
