@@ -45,9 +45,9 @@ export class JvmServer {
         this.status = Status.STARTING;
         // Setup command line and arguments for starting the server
         let configuration = vscode.workspace.getConfiguration('jvmcode')
-        let command : string = configuration.get('javaCommand')
-        let options : string[] = configuration.get('javaOptions')
-        let logLevel : string = configuration.get('logLevel')
+        let command : string = configuration.get('javaCommand') as string
+        let options : string[] = configuration.get('javaOptions') as string[]
+        let logLevel : string = configuration.get('logLevel') as string
         let jarFile = this.context.asAbsolutePath('out/jvmcode.jar')
         let cacheDirOpt = '-Dvertx.cacheDirBase=' + this.context.extensionPath + '.vertx'
         let args = options.concat([cacheDirOpt, '-jar', jarFile, logLevel, this.startupToken])

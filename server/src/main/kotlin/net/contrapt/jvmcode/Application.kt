@@ -3,8 +3,8 @@ package net.contrapt.jvmcode
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import io.vertx.core.Vertx
-import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
+import io.vertx.core.json.jackson.DatabindCodec
 import io.vertx.core.logging.LoggerFactory
 import net.contrapt.jvmcode.model.JvmConfig
 
@@ -16,7 +16,7 @@ open class Application {
         val vertx = Vertx.vertx()
 
         // Configure Jackson as needed
-        Json.mapper.apply {
+        DatabindCodec.mapper().apply {
             registerModule(KotlinModule())
             configure(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES, false)
             configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
@@ -24,7 +24,7 @@ open class Application {
 
         // Read standard in for config
         val configString = System.`in`.bufferedReader().readLine()
-        val config = Json.mapper.readValue(configString, JvmConfig::class.java)
+        val config = DatabindCodec.mapper().readValue(configString, JvmConfig::class.java)
 
         // Unhandled exceptions get published on the event bus
         vertx.exceptionHandler { e ->

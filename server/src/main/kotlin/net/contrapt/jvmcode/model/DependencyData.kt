@@ -5,6 +5,7 @@ import java.io.File
 class DependencyData (
     val fileName: String,
     val sourceFileName: String?,
+    val jmod: String?,
     val groupId: String,
     val artifactId: String,
     val version: String,
@@ -37,7 +38,7 @@ class DependencyData (
          */
         fun create(jarFile: String) : DependencyData {
             val fileName = jarFile.split(File.separator).last()
-            return DependencyData(jarFile, null, "", fileName, "")
+            return DependencyData(jarFile, null, null, "", fileName, "")
         }
 
     }

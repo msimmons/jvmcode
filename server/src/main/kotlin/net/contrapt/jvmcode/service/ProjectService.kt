@@ -7,7 +7,7 @@ import java.io.InputStream
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
 
-class ProjectService(var config: JvmConfig) {
+class ProjectService(var config: JvmConfig, val javaHome : String) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -24,14 +24,26 @@ class ProjectService(var config: JvmConfig) {
     // Map of entry FQCN to entry data and dependency it belongs to
     private val entryMap = mutableMapOf<String, Pair<JarEntryData, DependencyData>>()
 
-    private val javaVersion : String
-    private val javaHome : String
+    val javaVersion : String
 
     init {
-        javaVersion = System.getProperty("java.version")
-        javaHome = System.getProperty("java.home").replace("${File.separator}jre", "")
-        jdkSource =  DependencySource.create(javaHome, javaVersion)
+        javaVersion = getVersion()
+        jdkSource =  DependencySource.create(config, javaHome, javaVersion)
         userSource = DependencySource(DependencySource.USER, "User")
+    }
+
+    /**
+     * Try to find the 'release' file to get the version, otherwise use system property
+     */
+    private fun getVersion() : String {
+        val file = File(javaHome+File.separator+"release")
+        if (file.exists()) {
+            val versionEntry = File(javaHome + File.separator + "release").readLines().firstOrNull {
+                it.startsWith("JAVA_VERSION")
+            }
+            return versionEntry?.split("=")?.get(1)?.replace("\"", "") ?: System.getProperty("java.version")
+        }
+        else return System.getProperty("java.version")
     }
 
     /**
@@ -83,16 +95,17 @@ class ProjectService(var config: JvmConfig) {
      */
     fun getJarData(dependencyData: DependencyData) : JarData {
         val pkgMap = mutableMapOf<String, MutableSet<JarEntryData>>()
+        val isJmod = dependencyData.fileName.endsWith(".jmod")
         try {
             val jarFile = JarFile(dependencyData.fileName)
             jarFile.entries().toList().forEach { entry ->
-                if ( entry.isDirectory ) pkgMap.put(pathToPackage(entry.name), mutableSetOf())
-                else if (entry.name.contains("$")) { }
-                else {
-                    val packageName = pathToPackage(entry.name)
-                    val entryData = pathToJarEntry(packageName, entry.name)
-                    pkgMap.getOrPut(packageName, { sortedSetOf() }).add(entryData)
-                    entryMap.put(entryData.fqcn(), Pair(entryData, dependencyData))
+                val jed = JarEntryData.create(entry.name, isJmod)
+                when (jed.type) {
+                    JarEntryType.PACKAGE -> pkgMap.putIfAbsent(jed.pkg, sortedSetOf())
+                    else -> {
+                        pkgMap.getOrPut(jed.pkg, { sortedSetOf()}).add(jed)
+                        entryMap.put(jed.fqcn(), Pair(jed, dependencyData))
+                    }
                 }
             }
             return JarData(dependencyData.fileName,
@@ -119,7 +132,7 @@ class ProjectService(var config: JvmConfig) {
         val entryRecord = entryMap[entry.fqcn()]
         if ( entryRecord == null ) return entry
         val dependency = entryRecord.second
-        if (dependency.sourceFileName != null && entry.type == JarEntryType.CLASS) return getContentFromSourceJar(dependency.sourceFileName, entry)
+        if (dependency.sourceFileName != null && entry.type == JarEntryType.CLASS) return getContentFromSourceJar(dependency.sourceFileName, dependency.jmod, entry)
         else return getContentFromJar(dependency.fileName, entry)
     }
 
@@ -133,10 +146,11 @@ class ProjectService(var config: JvmConfig) {
         return components.joinToString(File.pathSeparator) { it }
     }
 
-    private fun getContentFromSourceJar(fileName: String, entry: JarEntryData) : JarEntryData {
+    private fun getContentFromSourceJar(fileName: String, jmod: String?, entry: JarEntryData) : JarEntryData {
         try {
             val jarFile = JarFile(fileName)
-            val entryPath = "${entry.pkg.replace(".", File.separator)}${File.separator}${entry.name}"
+            val prefix = if (jmod == null) "" else "${jmod}${File.separator}"
+            val entryPath = "${prefix}${entry.pkg.replace(".", File.separator)}${File.separator}${entry.name}"
             var jarEntry : JarEntry? = null
             jarEntry = config.extensions.fold(jarEntry) { curEntry, ext ->
                 if (curEntry == null) jarFile.getJarEntry("${entryPath}.${ext}") else curEntry
@@ -160,13 +174,12 @@ class ProjectService(var config: JvmConfig) {
     private fun getContentFromJar(fileName: String, entry: JarEntryData) : JarEntryData {
         try {
             val jarFile = JarFile(fileName)
-            val ext = if (entry.type == JarEntryType.CLASS) ".class" else ""
-            val entryPath = "${entry.pkg.replace(".", File.separator)}${File.separator}${entry.name}${ext}"
-            val jarEntry = jarFile.getJarEntry(entryPath)
+            val jarEntry = jarFile.getJarEntry(entry.path)
             jarFile.getInputStream(jarEntry).use {
                 entry.text = when (entry.type) {
                     JarEntryType.RESOURCE -> getResourceFromJar(it)
                     JarEntryType.CLASS -> getClassFromJar(it)
+                    JarEntryType.PACKAGE -> throw IllegalStateException()
                 }
             }
             return entry
@@ -201,15 +214,8 @@ class ProjectService(var config: JvmConfig) {
             JarEntryType.CLASS -> fileName.replace(".class", "")
             else -> fileName
         }
-        return JarEntryData(name, type, packageName)
+        return JarEntryData(name, type, packageName, "")
     }
 
-    /**
-     * Turn the given jar entry path into a package name
-     */
-    private fun pathToPackage(path: String) : String {
-        val parts = path.split("/")
-        return parts.take(parts.size-1).joinToString(".") { it }
-    }
 
 }
