@@ -1,46 +1,10 @@
-buildscript {
-    repositories {
-        mavenCentral()
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-        maven {
-            url "https://raw.githubusercontent.com/msimmons/m2repo/master"
-        }
-    }
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "net.contrapt:kt2ts:1.0.0"
-    }
-}
-
-group 'net.contrapt'
-version '1.0-SNAPSHOT'
-
-apply plugin: 'kotlin'
-apply plugin: net.contrapt.kt2ts.Kt2TsPlugin
-
-compileKotlin {
-    kotlinOptions {
-        jvmTarget = '1.8'
-    }
-}
-
-repositories {
-    mavenCentral()
-}
-
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    compile project(':model')
     compile "io.vertx:vertx-core:$vertx_version"
     compile "io.vertx:vertx-web:$vertx_version"
     compile "ch.qos.logback:logback-classic:1.2.3"
     compile "com.fasterxml.jackson.module:jackson-module-kotlin:2.9.+"
-
-    testCompile "junit:junit:4.12"
-    testCompile "io.vertx:vertx-unit:$vertx_version"
-    testCompile 'io.kotlintest:kotlintest:2.0.7'
-
+    compile 'com.github.h0tk3y.betterParse:better-parse-jvm:0.4.0-alpha-3'
 }
 
 jar {
@@ -50,7 +14,7 @@ jar {
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
 }
 
-task deploy(type: Copy, dependsOn: ['deployJar', 'deployTs']) {
+task deploy(type: Copy, dependsOn: ['deployJar']) {
 }
 
 task deployJar(type: Copy, dependsOn: ['build']) {
@@ -58,28 +22,5 @@ task deployJar(type: Copy, dependsOn: ['build']) {
         include jar.archiveName
         rename jar.archiveName, 'jvmcode.jar'
     }
-    into "${project.rootDir}/../out"
+    into "${project.rootDir}/out"
 }
-
-task deployTs(type: Copy, dependsOn: ['kt2ts']) {
-    // Typescript defs
-    from ("${project.buildDir}/kt2ts") {
-        include "models.d.ts"
-        rename "models.d.ts", "index.d.ts"
-    }
-    into "${project.rootDir}/../node_modules/server-models"
-}
-
-wrapper {
-    gradleVersion=gradle_version
-}
-
-k2ts {
-    jarFile = "${project.buildDir}/libs/${jar.archiveName}"
-    packages += [
-          "net.contrapt.jvmcode.model"
-    ]
-    outFile = "models.d.ts"
-    moduleName = "server-models"
-}
-kt2ts.dependsOn = ['jar']

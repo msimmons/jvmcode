@@ -23,6 +23,8 @@ jobs:
         auth:
           username: $DOCKER_USER
           password: $DOCKER_PASSWORD
+    environment:
+      ORG_GRADLE_PROJECT_git_m2repo_uri: /home/work/m2repo
     steps:
       - checkout
       - restore_cache:
@@ -31,7 +33,7 @@ jobs:
       - restore_cache:
           keys:
             *npm_cache_keys
-      - run: cd server && ./gradlew build
+      - run: ./gradlew build
       - run: 
           shell: /bin/bash --login -eo pipefail 
           command: |

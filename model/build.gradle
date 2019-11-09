@@ -1,0 +1,49 @@
+apply plugin: net.contrapt.kt2ts.Kt2TsPlugin
+apply plugin: 'maven-publish'
+
+jar {
+    baseName = 'jvmcode-model'
+}
+
+task sourceJar(type: Jar) {
+    baseName = 'jvmcode-model'
+    classifier 'sources'
+    from sourceSets.main.kotlin
+}
+
+task deploy(type: Copy, dependsOn: ['deployTs']) {
+}
+
+task deployTs(type: Copy, dependsOn: ['kt2ts']) {
+    // Typescript defs
+    from ("${project.buildDir}/kt2ts") {
+        include "models.d.ts"
+        rename "models.d.ts", "index.d.ts"
+    }
+    into "${project.rootDir}/node_modules/server-models"
+}
+
+k2ts {
+    jarFile = "${project.buildDir}/libs/${jar.archiveName}"
+    packages += [
+          "net.contrapt.jvmcode.model"
+    ]
+    outFile = "models.d.ts"
+    moduleName = "server-models"
+}
+kt2ts.dependsOn = ['jar']
+
+publishing {
+    repositories {
+        maven {
+            url = "$git_m2repo_uri"
+        }
+    }
+    publications {
+        model(MavenPublication) {
+            artifactId = jar.baseName
+            from components.java
+            artifact tasks.sourceJar
+        }
+    }
+}

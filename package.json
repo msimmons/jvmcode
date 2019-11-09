@@ -2,7 +2,7 @@
   "name": "jvmcode",
   "displayName": "JVMCode",
   "description": "Event Bus Bridge to JVM Extensions",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "publisher": "contrapt",
   "engines": {
     "vscode": "^1.29.0"
@@ -135,7 +135,7 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile; server/gradlew build deploy -b server/build.gradle",
+    "vscode:prepublish": "npm run compile; ./gradlew build deploy",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "postinstall": "node ./node_modules/vscode/bin/install",

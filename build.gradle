@@ -1,0 +1,44 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+        maven {
+            url "https://raw.githubusercontent.com/msimmons/m2repo/master"
+        }
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "net.contrapt:kt2ts:1.0.0"
+    }
+}
+
+subprojects {
+    group 'net.contrapt.jvmcode'
+    version "${jvmcode_version}"
+
+    apply plugin: 'kotlin'
+
+    compileKotlin {
+        kotlinOptions {
+            jvmTarget = '1.8'
+        }
+    }
+
+    repositories {
+        mavenCentral()
+        maven { setUrl("https://dl.bintray.com/hotkeytlt/maven") }
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+
+    dependencies {
+        compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+
+        testCompile "io.vertx:vertx-unit:$vertx_version"
+        testCompile "io.kotlintest:kotlintest-runner-junit5:3.4.2"
+    }
+}
