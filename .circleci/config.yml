@@ -2,15 +2,15 @@ version: 2
 
 references:
   jvm_cache_keys: &jvm_cache_keys
-    - v1-jvm-deps-{{ checksum "server/build.gradle" }}-{{ checksum "server/gradle.properties" }}
-    - v1-jvm-deps-{{ checksum "server/build.gradle" }}-
+    - v1-jvm-deps-{{ checksum "build.gradle" }}-{{ checksum "gradle.properties" }}
+    - v1-jvm-deps-{{ checksum "build.gradle" }}-
     - v1-jvm-deps-
   nvm-cache-keys: &npm_cache_keys
     - v1-nvm-deps-{{ checksum "package.json" }}
     - v1-nvm-deps-
 
   jvm_cache_key: &jvm_cache_key
-    v1-jvm-deps-{{ checksum "server/build.gradle" }}-{{ checksum "server/gradle.properties" }}
+    v1-jvm-deps-{{ checksum "build.gradle" }}-{{ checksum "gradle.properties" }}
 
   npm_cache_key: &npm_cache_key
     v1-nvm-deps-{{ checksum "package.json" }}
