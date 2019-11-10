@@ -32,7 +32,7 @@ class Dependency(
         /**
          * Create a user added dependency
          */
-        fun create(jarFile: String): DependencyData {
+        fun create(jarFile: String): Dependency {
             val fileName = jarFile.split(File.separator).last()
             return Dependency(jarFile, null, null, "", fileName, "")
         }

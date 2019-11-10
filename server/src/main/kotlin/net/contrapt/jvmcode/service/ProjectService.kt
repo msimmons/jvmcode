@@ -11,18 +11,18 @@ class ProjectService(var config: JvmConfig, val javaHome : String) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    private val jdkSource : DependencySourceData
+    private val jdkSource : DependencySource
     //TODO store user added ones persistently?
-    private val userSource: DependencySourceData
+    private val userSource: DependencySource
 
     // All the external dependencies being tracked
-    private val externalSource = mutableMapOf<String, DependencySourceData>()
+    private val externalSource = mutableMapOf<String, DependencySource>()
 
     // Classpath data added by other extensions or the user
-    private val classDirs = mutableSetOf<ClasspathData>()
+    private val classDirs = mutableSetOf<Classpath>()
 
     // Map of entry FQCN to entry data and dependency it belongs to
-    private val entryMap = mutableMapOf<String, Pair<JarEntryData, DependencyData>>()
+    private val entryMap = mutableMapOf<String, Pair<JarEntryData, Dependency>>()
 
     val javaVersion : String
 
@@ -49,7 +49,7 @@ class ProjectService(var config: JvmConfig, val javaHome : String) {
     /**
      * Get a JvmProject representation of current dependencies and classpath
      */
-    fun getJvmProject(config: JvmConfig = this.config) : JvmProjectData {
+    fun getJvmProject(config: JvmConfig = this.config) : JvmProject {
         this.config = config
         val sorted = listOf(jdkSource, userSource) + externalSource.values
         return JvmProject(sorted, classDirs, getClasspath())
@@ -80,7 +80,7 @@ class ProjectService(var config: JvmConfig, val javaHome : String) {
     /**
      * Process update of project dependency information from an external source
      */
-    fun updateProject(source: String, jvmProject: JvmProjectData) {
+    fun updateProject(source: String, jvmProject: JvmProject) {
         externalSource.remove(source)
         classDirs.removeIf { it.source == source }
         externalSource[source] = DependencySource(source, source).apply {
@@ -93,7 +93,7 @@ class ProjectService(var config: JvmConfig, val javaHome : String) {
      * For the given dependency, find all the entries contained in the jar file and organize them by package
      * in the resulting data structures [JarData] -> [JarEntryData]
      */
-    fun getJarData(dependencyData: DependencyData) : JarData {
+    fun getJarData(dependencyData: Dependency) : JarData {
         val pkgMap = mutableMapOf<String, MutableSet<JarEntryData>>()
         val isJmod = dependencyData.fileName.endsWith(".jmod")
         try {
