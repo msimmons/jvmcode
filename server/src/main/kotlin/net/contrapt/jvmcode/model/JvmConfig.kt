@@ -1,6 +1,6 @@
 package net.contrapt.jvmcode.model
 
-class JvmConfig(
+data class JvmConfig(
         val excludes: Collection<String>,
         val extensions: Collection<String>,
         val jmodIncludes: Collection<String> = emptySet(),

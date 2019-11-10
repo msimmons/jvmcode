@@ -11,12 +11,12 @@ class ProjectService(var config: JvmConfig, val javaHome : String) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    private val jdkSource : DependencySource
+    private val jdkSource : DependencySourceData
     //TODO store user added ones persistently?
-    private val userSource: DependencySource
+    private val userSource: DependencySourceData
 
     // All the external dependencies being tracked
-    private val externalSource = mutableMapOf<String, DependencySource>()
+    private val externalSource = mutableMapOf<String, DependencySourceData>()
 
     // Classpath data added by other extensions or the user
     private val classDirs = mutableSetOf<ClasspathData>()
@@ -49,7 +49,7 @@ class ProjectService(var config: JvmConfig, val javaHome : String) {
     /**
      * Get a JvmProject representation of current dependencies and classpath
      */
-    fun getJvmProject(config: JvmConfig = this.config) : JvmProject {
+    fun getJvmProject(config: JvmConfig = this.config) : JvmProjectData {
         this.config = config
         val sorted = listOf(jdkSource, userSource) + externalSource.values
         return JvmProject(sorted, classDirs, getClasspath())
@@ -60,7 +60,7 @@ class ProjectService(var config: JvmConfig, val javaHome : String) {
      * TODO allow a source file?
      */
     fun addDependency(jarFile: String) {
-        userSource.dependencies.add(DependencyData.create(jarFile))
+        userSource.dependencies.add(Dependency.create(jarFile))
     }
 
     /**
@@ -71,7 +71,7 @@ class ProjectService(var config: JvmConfig, val javaHome : String) {
         if (cp != null) {
             cp.classDirs.add(classDir)
         } else {
-            classDirs.add(ClasspathData(DependencySource.USER, "user", "user").apply {
+            classDirs.add(Classpath(DependencySource.USER, "user", "user").apply {
                 classDirs.add(classDir)
             })
         }
@@ -80,7 +80,7 @@ class ProjectService(var config: JvmConfig, val javaHome : String) {
     /**
      * Process update of project dependency information from an external source
      */
-    fun updateProject(source: String, jvmProject: JvmProject) {
+    fun updateProject(source: String, jvmProject: JvmProjectData) {
         externalSource.remove(source)
         classDirs.removeIf { it.source == source }
         externalSource[source] = DependencySource(source, source).apply {

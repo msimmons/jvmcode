@@ -1,5 +1,8 @@
+apply plugin: net.contrapt.kt2ts.Kt2TsPlugin
+
 dependencies {
     compile project(':model')
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     compile "io.vertx:vertx-core:$vertx_version"
     compile "io.vertx:vertx-web:$vertx_version"
     compile "ch.qos.logback:logback-classic:1.2.3"
@@ -14,8 +17,27 @@ jar {
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
 }
 
-task deploy(type: Copy, dependsOn: ['deployJar']) {
+task deploy(type: Copy, dependsOn: ['deployJar', 'deployTs']) {
 }
+
+task deployTs(type: Copy, dependsOn: ['kt2ts']) {
+    // Typescript defs
+    from ("${project.buildDir}/kt2ts") {
+        include "models.d.ts"
+        rename "models.d.ts", "index.d.ts"
+    }
+    into "${project.rootDir}/node_modules/server-models"
+}
+
+k2ts {
+    jarFile = "${project.buildDir}/libs/${jar.archiveName}"
+    packages += [
+          "net.contrapt.jvmcode.model"
+    ]
+    outFile = "models.d.ts"
+    moduleName = "server-models"
+}
+kt2ts.dependsOn = ['jar']
 
 task deployJar(type: Copy, dependsOn: ['build']) {
     from ("${project.buildDir}/libs") {

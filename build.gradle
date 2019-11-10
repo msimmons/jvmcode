@@ -36,8 +36,6 @@ subprojects {
     }
 
     dependencies {
-        compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-
         testCompile "io.vertx:vertx-unit:$vertx_version"
         testCompile "io.kotlintest:kotlintest-runner-junit5:3.4.2"
     }
