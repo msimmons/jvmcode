@@ -5,7 +5,7 @@ import java.io.File
 class DependencySource(
         override val name: String,
         override val description: String,
-        override val dependencies: MutableCollection<DependencyData> = mutableSetOf()
+        override val dependencies: MutableCollection<Dependency> = mutableSetOf()
 ) : DependencySourceData {
 
     companion object {

@@ -10,5 +10,5 @@ package net.contrapt.jvmcode.model
 interface DependencySourceData {
     val name: String
     val description: String
-    val dependencies: MutableCollection<DependencyData>
+    val dependencies: MutableCollection<out DependencyData>
 }
