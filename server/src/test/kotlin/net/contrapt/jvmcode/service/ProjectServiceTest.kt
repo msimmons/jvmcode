@@ -1,10 +1,17 @@
 package net.contrapt.jvmcode.service
 
-import io.kotlintest.matchers.*
+import io.kotlintest.matchers.beGreaterThan
+import io.kotlintest.matchers.endWith
+import io.kotlintest.matchers.haveSubstring
+import io.kotlintest.matchers.startWith
+import io.kotlintest.should
+import io.kotlintest.shouldBe
+import io.kotlintest.shouldNotBe
 import net.contrapt.jvmcode.model.DependencySource
 import net.contrapt.jvmcode.model.JarEntryType
 import net.contrapt.jvmcode.model.JvmConfig
-import org.junit.Test
+import org.junit.jupiter.api.Assumptions.assumeTrue
+import org.junit.jupiter.api.Test
 import java.io.File
 
 class ProjectServiceTest {
@@ -36,7 +43,7 @@ class ProjectServiceTest {
 
     @Test
     fun systemJdkTest11() {
-        org.junit.Assume.assumeTrue(File(javaHome11).exists())
+        assumeTrue(File(javaHome11).exists())
         val config = JvmConfig(setOf(), setOf("java"), setOf("java.base", "java.sql"))
         val service = ProjectService(config, javaHome11)
         val project = service.getJvmProject()

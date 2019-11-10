@@ -2,15 +2,15 @@ version: 2
 
 references:
   jvm_cache_keys: &jvm_cache_keys
-    - v1-jvm-deps-{{ checksum "server/build.gradle" }}-{{ checksum "server/gradle.properties" }}
-    - v1-jvm-deps-{{ checksum "server/build.gradle" }}-
+    - v1-jvm-deps-{{ checksum "build.gradle" }}-{{ checksum "gradle.properties" }}
+    - v1-jvm-deps-{{ checksum "build.gradle" }}-
     - v1-jvm-deps-
   nvm-cache-keys: &npm_cache_keys
     - v1-nvm-deps-{{ checksum "package.json" }}
     - v1-nvm-deps-
 
   jvm_cache_key: &jvm_cache_key
-    v1-jvm-deps-{{ checksum "server/build.gradle" }}-{{ checksum "server/gradle.properties" }}
+    v1-jvm-deps-{{ checksum "build.gradle" }}-{{ checksum "gradle.properties" }}
 
   npm_cache_key: &npm_cache_key
     v1-nvm-deps-{{ checksum "package.json" }}
@@ -23,6 +23,8 @@ jobs:
         auth:
           username: $DOCKER_USER
           password: $DOCKER_PASSWORD
+    environment:
+      ORG_GRADLE_PROJECT_git_m2repo_uri: /home/work/m2repo
     steps:
       - checkout
       - restore_cache:
@@ -31,7 +33,7 @@ jobs:
       - restore_cache:
           keys:
             *npm_cache_keys
-      - run: cd server && ./gradlew build
+      - run: ./gradlew build
       - run: 
           shell: /bin/bash --login -eo pipefail 
           command: |

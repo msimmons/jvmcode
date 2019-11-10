@@ -1,7 +1,7 @@
 package net.contrapt.jvmcode.model
 
-import io.kotlintest.matchers.shouldBe
-import org.junit.Test
+import io.kotlintest.shouldBe
+import org.junit.jupiter.api.Test
 
 class JarEntryDataTest {
 

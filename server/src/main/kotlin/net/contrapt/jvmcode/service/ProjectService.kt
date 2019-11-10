@@ -132,7 +132,7 @@ class ProjectService(var config: JvmConfig, val javaHome : String) {
         val entryRecord = entryMap[entry.fqcn()]
         if ( entryRecord == null ) return entry
         val dependency = entryRecord.second
-        if (dependency.sourceFileName != null && entry.type == JarEntryType.CLASS) return getContentFromSourceJar(dependency.sourceFileName, dependency.jmod, entry)
+        if (dependency.sourceFileName != null && entry.type == JarEntryType.CLASS) return getContentFromSourceJar(dependency.sourceFileName ?: "", dependency.jmod, entry)
         else return getContentFromJar(dependency.fileName, entry)
     }
 
