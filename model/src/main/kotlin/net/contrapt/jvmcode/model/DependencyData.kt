@@ -22,8 +22,8 @@ interface DependencyData : Comparable<DependencyData> {
     val groupId: String
     val artifactId: String
     val version: String
-    val scopes: MutableSet<String>
-    val modules: MutableSet<String>
+    val scopes: Set<String>
+    val modules: Set<String>
     val transitive: Boolean
     var resolved: Boolean
 

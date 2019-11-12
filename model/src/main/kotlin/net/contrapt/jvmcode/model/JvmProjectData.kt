@@ -10,5 +10,4 @@ package net.contrapt.jvmcode.model
 interface JvmProjectData {
     val dependencySources: Collection<DependencySourceData>
     val classDirs: Collection<ClasspathData>
-    val classpath: String
 }

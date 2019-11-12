@@ -36,7 +36,7 @@ class ProjectServiceTest {
         resourceEntry.text shouldNotBe null
         val classEntry = jarEntries.packages.first { it.name == "java.lang" }.entries.first { it.type == JarEntryType.CLASS }
         val javaEntry = service.getJarEntryContents(classEntry)
-        if (File(depData.sourceFileName).exists()) {
+        if (File(depData.sourceFileName ?: "").exists()) {
             javaEntry.text shouldNotBe null
         }
     }
@@ -59,7 +59,7 @@ class ProjectServiceTest {
         resourceEntry.text shouldNotBe null
         val classEntry = jarEntries.packages.first { it.name == "java.lang" }.entries.first { it.type == JarEntryType.CLASS }
         val javaEntry = service.getJarEntryContents(classEntry)
-        if (File(depData.sourceFileName).exists()) {
+        if (File(depData.sourceFileName ?: "").exists()) {
             javaEntry.text shouldNotBe null
         }
     }
@@ -81,7 +81,7 @@ class ProjectServiceTest {
     fun addDependencyTest() {
         val config = JvmConfig(setOf("com.sun"), setOf("java"))
         val service = ProjectService(config, javaHomeSys)
-        val path = javaClass.classLoader.getResource("postgresql-42.1.4.jar").path
+        val path = javaClass.classLoader?.getResource("postgresql-42.1.4.jar")?.path ?: ""
         service.addDependency(path)
         val deps = service.getJvmProject().dependencySources
         deps.size shouldBe 2
@@ -98,12 +98,12 @@ class ProjectServiceTest {
     @Test
     fun getClasspathTest() {
         val service = ProjectService(JvmConfig(setOf(), setOf()), javaHomeSys)
-        val path1 = javaClass.classLoader.getResource("postgresql-42.1.4.jar").path
+        val path1 = javaClass.classLoader?.getResource("postgresql-42.1.4.jar")?.path ?: ""
         service.addDependency(path1)
         var classpath = service.getClasspath()
         classpath should endWith("postgresql-42.1.4.jar")
         // Add a second jar file
-        val path2 = javaClass.classLoader.getResource("jd-gui-1.4.0.jar").path
+        val path2 = javaClass.classLoader?.getResource("jd-gui-1.4.0.jar")?.path ?: ""
         service.addDependency(path2)
         classpath = service.getClasspath()
         classpath should haveSubstring("postgresql-42.1.4.jar:")

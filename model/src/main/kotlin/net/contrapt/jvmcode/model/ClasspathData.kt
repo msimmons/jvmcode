@@ -13,6 +13,6 @@ interface ClasspathData {
     val source: String
     val name: String
     val module: String
-    val sourceDirs: MutableSet<String>
-    val classDirs: MutableSet<String>
+    val sourceDirs: Set<String>
+    val classDirs: Set<String>
 }
