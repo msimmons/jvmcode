@@ -9,7 +9,7 @@ class AddClassDir(vertx: Vertx, val projectService: ProjectService) : AbstractHa
 
     override fun processMessage(message: Message<JsonObject>): JsonObject {
         val classDir = message.body().getString("classDir")
-        projectService.addClassDirectory(classDir)
+        projectService.addUserClassDirectory(classDir)
         val project = projectService.getJvmProject()
         return JsonObject.mapFrom(project)
     }

@@ -1,10 +1,11 @@
-package net.contrapt.jvmcode.model
+package net.contrapt.jvmcode.service.model
 
+import net.contrapt.jvmcode.model.DependencyData
 import java.io.File
 
 class Dependency(
         override val fileName: String,
-        override var sourceFileName: String?,
+        override val sourceFileName: String?,
         override val jmod: String?,
         override val groupId: String,
         override val artifactId: String,
@@ -12,7 +13,7 @@ class Dependency(
         override val scopes: MutableSet<String> = mutableSetOf(),
         override val modules: MutableSet<String> = mutableSetOf(),
         override val transitive: Boolean = false,
-        override var resolved: Boolean = false
+        override val resolved: Boolean = false
 ) : DependencyData, Comparable<DependencyData>  {
 
     override fun equals(other: Any?): Boolean {

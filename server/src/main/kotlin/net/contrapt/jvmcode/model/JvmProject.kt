@@ -1,7 +1,7 @@
 package net.contrapt.jvmcode.model
 
 class JvmProject(
-        override val dependencySources: Collection<DependencySource>,
-        override val classDirs: Collection<Classpath>,
+        val dependencySources: Collection<DependencySourceData>,
+        val classDirs: Collection<ClasspathData>,
         val classpath: String = ""
-) : JvmProjectData
+)

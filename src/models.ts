@@ -1,4 +1,4 @@
-import { DependencySource, DependencyData, JarPackageData, JarEntryData} from "server-models"
+import { DependencySourceData, DependencyData, JarPackageData, JarEntryData} from "server-models"
 
 export enum NodeType {
     SOURCE,
@@ -14,10 +14,10 @@ export interface TreeNode {
 }
 
 export class DependencySourceNode implements TreeNode {
-    data: DependencySource
+    data: DependencySourceData
     type = NodeType.SOURCE
     dependencies: DependencyNode[]
-    constructor(data: DependencySource) { 
+    constructor(data: DependencySourceData) { 
         this.data = data 
         this.dependencies = data.dependencies.map((d) => { return new DependencyNode(d) })
     }

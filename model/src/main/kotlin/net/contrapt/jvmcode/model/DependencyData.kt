@@ -17,7 +17,7 @@ package net.contrapt.jvmcode.model
  */
 interface DependencyData : Comparable<DependencyData> {
     val fileName: String
-    var sourceFileName: String?
+    val sourceFileName: String?
     val jmod: String?
     val groupId: String
     val artifactId: String
@@ -25,7 +25,7 @@ interface DependencyData : Comparable<DependencyData> {
     val scopes: Set<String>
     val modules: Set<String>
     val transitive: Boolean
-    var resolved: Boolean
+    val resolved: Boolean
 
     override fun compareTo(other: DependencyData): Int {
         return fileName.compareTo(other.fileName)

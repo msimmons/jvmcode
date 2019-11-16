@@ -1,7 +1,7 @@
 'use strict';
 
 import * as vscode from 'vscode'
-import { DependencySource, JarEntryData, JvmProject } from "server-models"
+import { DependencySourceData, JarEntryData, JvmProject } from "server-models"
 import { DependencyTreeProvider } from './dependency_tree_provider';
 import { JarContentProvider } from './jar_content_provider';
 import { ProjectService } from './project_service';
@@ -48,7 +48,7 @@ export class ProjectController {
      * Alert components that dependencies have been updated
      * @param dependencies 
      */
-    public updateDependencies(dependencies: DependencySource[]) {
+    public updateDependencies(dependencies: DependencySourceData[]) {
         this.dependencyTree.update()
     }
 

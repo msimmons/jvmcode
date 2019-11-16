@@ -2,6 +2,7 @@ package net.contrapt.jvmcode.service
 
 import io.vertx.core.logging.LoggerFactory
 import net.contrapt.jvmcode.model.*
+import net.contrapt.jvmcode.service.model.*
 import java.io.File
 import java.io.InputStream
 import java.util.jar.JarEntry
@@ -11,25 +12,27 @@ class ProjectService(var config: JvmConfig, val javaHome : String) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    private val jdkSource : DependencySource
+    private val jdkSource : JDKDependencySource
+
     //TODO store user added ones persistently?
-    private val userSource: DependencySource
+    private val userSource: UserDependencySource
+    // Classpath data added by user
+    private val userClasspath = UserClasspath()
 
     // All the external dependencies being tracked
-    private val externalSource = mutableMapOf<String, DependencySource>()
-
-    // Classpath data added by other extensions or the user
-    private val classDirs = mutableSetOf<Classpath>()
+    private val externalSource = mutableSetOf<DependencySourceData>()
+    // Classpath data added by other extensions
+    private val externalClasspath = mutableSetOf<ClasspathData>()
 
     // Map of entry FQCN to entry data and dependency it belongs to
-    private val entryMap = mutableMapOf<String, Pair<JarEntryData, Dependency>>()
+    private val entryMap = mutableMapOf<String, Pair<JarEntryData, DependencyData>>()
 
     val javaVersion : String
 
     init {
         javaVersion = getVersion()
-        jdkSource =  DependencySource.create(config, javaHome, javaVersion)
-        userSource = DependencySource(DependencySource.USER, "User")
+        jdkSource =  JDKDependencySource.create(config, javaHome, javaVersion)
+        userSource = UserDependencySource()
     }
 
     /**
@@ -51,49 +54,41 @@ class ProjectService(var config: JvmConfig, val javaHome : String) {
      */
     fun getJvmProject(config: JvmConfig = this.config) : JvmProject {
         this.config = config
-        val sorted = listOf(jdkSource, userSource) + externalSource.values
-        return JvmProject(sorted, classDirs, getClasspath())
+        val sorted = listOf(jdkSource, userSource) + externalSource
+        return JvmProject(sorted, externalClasspath + userClasspath, getClasspath())
     }
 
     /**
      * User adds a single JAR file dependency
-     * TODO allow a source file?
+     * TODO add an optional source jar
      */
-    fun addDependency(jarFile: String) {
+    fun addUserDependency(jarFile: String) {
         userSource.dependencies.add(Dependency.create(jarFile))
     }
 
     /**
      * User adds an output directory
+     * TODO add an optional source dir
      */
-    fun addClassDirectory(classDir: String) {
-        val cp = classDirs.firstOrNull { it.source == DependencySource.USER }
-        if (cp != null) {
-            cp.classDirs.add(classDir)
-        } else {
-            classDirs.add(Classpath(DependencySource.USER, "user", "user").apply {
-                classDirs.add(classDir)
-            })
-        }
+    fun addUserClassDirectory(classDir: String) {
+        userClasspath.classDirs.add(classDir)
     }
 
     /**
      * Process update of project dependency information from an external source
      */
-    fun updateProject(source: String, jvmProject: JvmProject) {
-        externalSource.remove(source)
-        classDirs.removeIf { it.source == source }
-        externalSource[source] = DependencySource(source, source).apply {
-            dependencies.addAll(jvmProject.dependencySources.flatMap { if (it.name == source) it.dependencies else mutableListOf() })
-        }
-        classDirs.addAll(jvmProject.classDirs)
+    fun updateProject(request: ProjectUpdateRequest) {
+        externalSource.removeIf { it.source == request.source }
+        externalClasspath.removeIf { it.source == request.source }
+        externalSource.addAll(request.dependencySources)
+        externalClasspath.addAll(request.classDirs)
     }
 
     /**
      * For the given dependency, find all the entries contained in the jar file and organize them by package
      * in the resulting data structures [JarData] -> [JarEntryData]
      */
-    fun getJarData(dependencyData: Dependency) : JarData {
+    fun getJarData(dependencyData: DependencyData) : JarData {
         val pkgMap = mutableMapOf<String, MutableSet<JarEntryData>>()
         val isJmod = dependencyData.fileName.endsWith(".jmod")
         try {
@@ -140,9 +135,10 @@ class ProjectService(var config: JvmConfig, val javaHome : String) {
      * Return the full classpath implied by the current dependencies (minus jdk dependencies)
      */
     fun getClasspath() : String {
-        val components = classDirs.flatMap { it.classDirs } +
+        val components = userClasspath.classDirs +
+                externalClasspath.flatMap { it.classDirs } +
                 userSource.dependencies.map { it.fileName } +
-                externalSource.values.asSequence().flatMap { it.dependencies.asSequence().map { it.fileName } }
+                externalSource.asSequence().flatMap { it.dependencies.asSequence().map { it.fileName } }
         return components.joinToString(File.pathSeparator) { it }
     }
 

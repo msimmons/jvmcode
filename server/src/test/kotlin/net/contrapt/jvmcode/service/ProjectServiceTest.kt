@@ -7,9 +7,9 @@ import io.kotlintest.matchers.startWith
 import io.kotlintest.should
 import io.kotlintest.shouldBe
 import io.kotlintest.shouldNotBe
-import net.contrapt.jvmcode.model.DependencySource
 import net.contrapt.jvmcode.model.JarEntryType
 import net.contrapt.jvmcode.model.JvmConfig
+import net.contrapt.jvmcode.service.model.DependencySource
 import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.Test
 import java.io.File
@@ -26,7 +26,7 @@ class ProjectServiceTest {
         val project = service.getJvmProject()
         project.dependencySources.size shouldBe 2 // System and User
         val depSource = project.dependencySources.first()
-        depSource.name shouldBe DependencySource.SYSTEM
+        depSource.source shouldBe DependencySource.SYSTEM
         depSource.dependencies.size shouldBe 1
         val depData = depSource.dependencies.first()
         val jarEntries = service.getJarData(depData)
@@ -49,7 +49,7 @@ class ProjectServiceTest {
         val project = service.getJvmProject()
         project.dependencySources.size shouldBe 2 // System and User
         val depSource = project.dependencySources.first()
-        depSource.name shouldBe DependencySource.SYSTEM
+        depSource.source shouldBe DependencySource.SYSTEM
         depSource.dependencies.size shouldBe 2
         val depData = depSource.dependencies.first()
         val jarEntries = service.getJarData(depData)
@@ -82,7 +82,7 @@ class ProjectServiceTest {
         val config = JvmConfig(setOf("com.sun"), setOf("java"))
         val service = ProjectService(config, javaHomeSys)
         val path = javaClass.classLoader?.getResource("postgresql-42.1.4.jar")?.path ?: ""
-        service.addDependency(path)
+        service.addUserDependency(path)
         val deps = service.getJvmProject().dependencySources
         deps.size shouldBe 2
         val depSource = deps.last()
@@ -99,17 +99,17 @@ class ProjectServiceTest {
     fun getClasspathTest() {
         val service = ProjectService(JvmConfig(setOf(), setOf()), javaHomeSys)
         val path1 = javaClass.classLoader?.getResource("postgresql-42.1.4.jar")?.path ?: ""
-        service.addDependency(path1)
+        service.addUserDependency(path1)
         var classpath = service.getClasspath()
         classpath should endWith("postgresql-42.1.4.jar")
         // Add a second jar file
         val path2 = javaClass.classLoader?.getResource("jd-gui-1.4.0.jar")?.path ?: ""
-        service.addDependency(path2)
+        service.addUserDependency(path2)
         classpath = service.getClasspath()
         classpath should haveSubstring("postgresql-42.1.4.jar:")
         classpath should endWith("jd-gui-1.4.0.jar")
         // Add a class directory
-        service.addClassDirectory("/home/mark/classes")
+        service.addUserClassDirectory("/home/mark/classes")
         classpath = service.getClasspath()
         classpath should startWith("/home/mark/classes:")
         classpath should endWith("jd-gui-1.4.0.jar")

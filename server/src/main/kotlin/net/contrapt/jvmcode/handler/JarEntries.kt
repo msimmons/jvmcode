@@ -3,7 +3,7 @@ package net.contrapt.jvmcode.handler
 import io.vertx.core.Vertx
 import io.vertx.core.eventbus.Message
 import io.vertx.core.json.JsonObject
-import net.contrapt.jvmcode.model.Dependency
+import net.contrapt.jvmcode.service.model.Dependency
 import net.contrapt.jvmcode.service.ProjectService
 
 class JarEntries(vertx: Vertx, val projectService: ProjectService) : AbstractHandler(vertx, true) {
