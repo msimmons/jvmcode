@@ -1,6 +1,5 @@
 package net.contrapt.jvmcode.service.model
 
-import net.contrapt.jvmcode.model.DependencyData
 import net.contrapt.jvmcode.model.DependencySourceData
 import net.contrapt.jvmcode.model.JvmConfig
 import java.io.File
@@ -8,7 +7,7 @@ import java.io.File
 class DependencySource(
         override val source: String,
         override val description: String,
-        override val dependencies: Collection<DependencyData>
+        override val dependencies: Collection<Dependency>
 ) : DependencySourceData {
 
     companion object {
