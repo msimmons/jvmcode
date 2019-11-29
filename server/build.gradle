@@ -14,10 +14,11 @@ buildscript {
     }
 }
 
-group 'net.contrapt'
+group 'net.contrapt.jvmcode'
 version '1.0-SNAPSHOT'
 
 apply plugin: 'kotlin'
+apply plugin:'maven-publish'
 apply plugin: net.contrapt.kt2ts.Kt2TsPlugin
 
 compileKotlin {
@@ -28,6 +29,7 @@ compileKotlin {
 
 repositories {
     mavenCentral()
+    maven { setUrl("https://dl.bintray.com/hotkeytlt/maven") }
 }
 
 dependencies {
@@ -36,6 +38,7 @@ dependencies {
     compile "io.vertx:vertx-web:$vertx_version"
     compile "ch.qos.logback:logback-classic:1.2.3"
     compile "com.fasterxml.jackson.module:jackson-module-kotlin:2.9.+"
+    compile 'com.github.h0tk3y.betterParse:better-parse-jvm:0.4.0-alpha-3'
 
     testCompile "junit:junit:4.12"
     testCompile "io.vertx:vertx-unit:$vertx_version"
@@ -49,6 +52,17 @@ jar {
     }
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
 }
+
+task modelJar(type: Jar) {
+    baseName "${project.name}-model"
+    from sourceSets.main.output
+    include 'net/contrapt/jvmcode/model/**'
+}
+
+artifacts {
+    archives modelJar
+}
+
 
 task deploy(type: Copy, dependsOn: ['deployJar', 'deployTs']) {
 }
@@ -83,3 +97,12 @@ k2ts {
     moduleName = "server-models"
 }
 kt2ts.dependsOn = ['jar']
+
+publishing {
+    publications {
+        model(MavenPublication){
+            artifactId 'jvmcode-model'
+            artifact modelJar
+        }
+    }
+}

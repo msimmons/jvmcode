@@ -4,7 +4,7 @@ import * as vscode from 'vscode'
 import { DependencySource, DependencyData, ClasspathData, JarEntryData, JarPackageData, JvmProject} from "server-models"
 import { readdirSync, statSync, existsSync } from 'fs'
 import { JvmServer } from './jvm_server';
-import { JarEntryNode, DependencySourceNode, DependencyNode, JarPackageNode } from './models';
+import { JarEntryNode, DependencySourceNode, DependencyNode, JarPackageNode, CompilationContext } from './models';
 import { ConfigService } from './config_service';
 import * as path from 'path'
 
@@ -20,11 +20,14 @@ export class ProjectService {
     private classDirs: ClasspathData[] = []
     private classpath: string
     private projectListeners = [] // Array of dependency callbacks
+    // A Map of source directories to associated compilation contexts
+    private compilationContexts : Map<String, CompilationContext> = new Map()
 
     public constructor(context: vscode.ExtensionContext, server: JvmServer) {
         this.context = context
         this.server = server
         this.server.registerConsumer('jvmcode.project', this.projectListener)
+        this.server.registerConsumer('jvmcode.language', this.languageListener)
     }
 
     /**
@@ -43,6 +46,22 @@ export class ProjectService {
             this.projectListeners.forEach((listener) => {
                 listener(jvmProject)
             })
+        }
+    }
+
+    /**
+     * List for language service registrations
+     * @param callback 
+     */
+    private languageListener = (error, result) => {
+        if (error || !result) {
+            console.error('Got a language event with bad payload', error)
+        }
+        else {
+            let languageInfo = result.body
+            // Name of language
+            // What file extensions it covers
+            // Is there any need for other listeners?
         }
     }
 
@@ -189,7 +208,36 @@ export class ProjectService {
      * Get the current classpath
      */
     public getClasspath() : string {
-        return this.classpath
+        return this.classpath ? this.classpath : ""
+    }
+
+    /**
+     * Request that a buffer be parsed by an appropriate language service
+     * @param file 
+     */
+    public requestParse(file: vscode.Uri) {
+
+    }
+
+    /**
+     * Request that a file be compiled by an appropriate language service
+     * @param file 
+     */
+    public requestCompile(file: vscode.Uri) {
+        // Are there any appropriate services?
+        // Find dependent files to add to compile list
+        // Send compile request
+    }
+
+    /**
+     * 
+     * @param file The file for which context is requested
+     */
+    public getCompilationContext(file: vscode.Uri) : CompilationContext {
+        let compilationContext = new CompilationContext()
+        compilationContext.classpath = this.classpath
+        compilationContext.outputDir = this.classDirs[0].classDirs[0]
+        return new CompilationContext()
     }
 
     private getFiles(dir: string) : string[] {

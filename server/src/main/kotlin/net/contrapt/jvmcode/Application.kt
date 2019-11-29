@@ -32,6 +32,7 @@ open class Application {
             logger.error("Unhandled exception", e)
         }
         vertx.deployVerticle(RouterVerticle(startupToken, config))
+        vertx.deployVerticle(LanguageVerticle())
     }
 
     companion object {

@@ -2,14 +2,19 @@
 
 import * as vscode from 'vscode'
 import { JvmServer } from './jvm_server'
-import { JarEntryNode, dependencyLabel } from './models';
+import { JarEntryNode, dependencyLabel, CompilationContext } from './models';
 import { ProjectService } from './project_service';
 import { ProjectController } from './project_controller';
 import { StatsController } from './stats_controller';
+import { ClasspathData } from 'server-models';
+import { LanguageService } from './language_service';
+import { LanguageController } from './language_controller';
 
 export let server: JvmServer
 export let projectService: ProjectService
 export let projectController: ProjectController
+export let languageService: LanguageService
+export let languageController: LanguageController
 let statsController: StatsController
 export let extensionContext: vscode.ExtensionContext
 
@@ -22,6 +27,9 @@ export function activate(context: vscode.ExtensionContext) {
         server.start()
         projectService = new ProjectService(context, server)
         projectController = new ProjectController(projectService)
+        languageService = new LanguageService(server)
+        languageController = new LanguageController(projectService, languageService)
+        languageController.start()
         statsController = new StatsController(server)
     }
 

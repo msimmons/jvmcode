@@ -87,3 +87,18 @@ export class JarEntryNode implements TreeNode {
         return this.name
     }
 }
+
+export enum SourceType {
+    MAIN,
+    TEST
+}
+
+export class CompilationContext {
+    sourceRoot: string
+    sourceType: SourceType
+    classpath : string
+    outputDir : string
+    sourcepath : string
+    generatedSrcDir : string
+    options: string[]
+}
