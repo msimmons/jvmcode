@@ -5,7 +5,7 @@ import com.github.h0tk3y.betterParse.parser.AlternativesFailure
 import com.github.h0tk3y.betterParse.parser.ParseException
 import com.github.h0tk3y.betterParse.parser.ParseResult
 import com.github.h0tk3y.betterParse.parser.Parsed
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class JavaGrammarTest {
 

@@ -1,49 +1,13 @@
-buildscript {
-    repositories {
-        mavenCentral()
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-        maven {
-            url "https://raw.githubusercontent.com/msimmons/m2repo/master"
-        }
-    }
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "net.contrapt:kt2ts:1.0.0"
-    }
-}
-
-group 'net.contrapt.jvmcode'
-version '1.0-SNAPSHOT'
-
-apply plugin: 'kotlin'
-apply plugin:'maven-publish'
 apply plugin: net.contrapt.kt2ts.Kt2TsPlugin
 
-compileKotlin {
-    kotlinOptions {
-        jvmTarget = '1.8'
-    }
-}
-
-repositories {
-    mavenCentral()
-    maven { setUrl("https://dl.bintray.com/hotkeytlt/maven") }
-}
-
 dependencies {
+    compile project(':model')
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     compile "io.vertx:vertx-core:$vertx_version"
     compile "io.vertx:vertx-web:$vertx_version"
     compile "ch.qos.logback:logback-classic:1.2.3"
     compile "com.fasterxml.jackson.module:jackson-module-kotlin:2.9.+"
     compile 'com.github.h0tk3y.betterParse:better-parse-jvm:0.4.0-alpha-3'
-
-    testCompile "junit:junit:4.12"
-    testCompile "io.vertx:vertx-unit:$vertx_version"
-    testCompile 'io.kotlintest:kotlintest:2.0.7'
-
 }
 
 jar {
@@ -67,25 +31,13 @@ artifacts {
 task deploy(type: Copy, dependsOn: ['deployJar', 'deployTs']) {
 }
 
-task deployJar(type: Copy, dependsOn: ['build']) {
-    from ("${project.buildDir}/libs") {
-        include jar.archiveName
-        rename jar.archiveName, 'jvmcode.jar'
-    }
-    into "${project.rootDir}/../out"
-}
-
 task deployTs(type: Copy, dependsOn: ['kt2ts']) {
     // Typescript defs
     from ("${project.buildDir}/kt2ts") {
         include "models.d.ts"
         rename "models.d.ts", "index.d.ts"
     }
-    into "${project.rootDir}/../node_modules/server-models"
-}
-
-wrapper {
-    gradleVersion=gradle_version
+    into "${project.rootDir}/node_modules/server-models"
 }
 
 k2ts {
@@ -98,11 +50,10 @@ k2ts {
 }
 kt2ts.dependsOn = ['jar']
 
-publishing {
-    publications {
-        model(MavenPublication){
-            artifactId 'jvmcode-model'
-            artifact modelJar
-        }
+task deployJar(type: Copy, dependsOn: ['build']) {
+    from ("${project.buildDir}/libs") {
+        include jar.archiveName
+        rename jar.archiveName, 'jvmcode.jar'
     }
+    into "${project.rootDir}/out"
 }

@@ -1,2 +1,3 @@
 rootProject.name = 'jvmcode'
+include 'server', 'model'
 

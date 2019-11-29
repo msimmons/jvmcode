@@ -1,5 +1,3 @@
-import * as vscode from 'vscode'
-import { DependencySource} from "server-models"
 import { TreeDataProvider, TreeItem, TreeItemCollapsibleState, EventEmitter } from 'vscode'
 import { DependencyNode, JarPackageNode, TreeNode, NodeType, DependencySourceNode } from './models'
 import { ProjectService } from './project_service';

@@ -1,0 +1,31 @@
+apply plugin: 'maven-publish'
+
+dependencies {
+    compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    testCompile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+}
+
+jar {
+    baseName = 'jvmcode-model'
+}
+
+task sourceJar(type: Jar) {
+    baseName = 'jvmcode-model'
+    classifier 'sources'
+    from sourceSets.main.kotlin
+}
+
+publishing {
+    repositories {
+        maven {
+            url = "$git_m2repo_uri"
+        }
+    }
+    publications {
+        model(MavenPublication) {
+            artifactId = jar.baseName
+            from components.java
+            artifact tasks.sourceJar
+        }
+    }
+}

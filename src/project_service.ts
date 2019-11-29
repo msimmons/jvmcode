@@ -1,7 +1,7 @@
 'use strict';
 
 import * as vscode from 'vscode'
-import { DependencySource, DependencyData, ClasspathData, JarEntryData, JarPackageData, JvmProject} from "server-models"
+import { DependencySourceData, DependencyData, ClasspathData, JarEntryData, JarPackageData, JvmProject} from "server-models"
 import { readdirSync, statSync, existsSync } from 'fs'
 import { JvmServer } from './jvm_server';
 import { JarEntryNode, DependencySourceNode, DependencyNode, JarPackageNode, CompilationContext } from './models';
@@ -76,7 +76,7 @@ export class ProjectService {
     /**
      * Create source nodes from the given dependency data
      */
-    private createSourceNodes(sourceData: DependencySource[]) : DependencySourceNode[] {
+    private createSourceNodes(sourceData: DependencySourceData[]) : DependencySourceNode[] {
         return sourceData.filter((ds) => { return ds.dependencies.length > 0 }).map((ds) => {
             return new DependencySourceNode(ds)
         })
