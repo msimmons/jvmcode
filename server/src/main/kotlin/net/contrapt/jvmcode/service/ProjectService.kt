@@ -17,12 +17,12 @@ class ProjectService(var config: JvmConfig, val javaHome : String) {
     //TODO store user added ones persistently?
     private val userSource: UserDependencySource
     // Classpath data added by user
-    private val userClasspath = UserClasspath()
+    private val userPath = UserPath()
 
     // All the external dependencies being tracked
     private val externalSource = mutableSetOf<DependencySourceData>()
     // Classpath data added by other extensions
-    private val externalClasspath = mutableSetOf<ClasspathData>()
+    private val externalPaths = mutableSetOf<PathData>()
 
     // Map of entry FQCN to entry data and dependency it belongs to
     private val entryMap = mutableMapOf<String, Pair<JarEntryData, DependencyData>>()
@@ -55,7 +55,7 @@ class ProjectService(var config: JvmConfig, val javaHome : String) {
     fun getJvmProject(config: JvmConfig = this.config) : JvmProject {
         this.config = config
         val sorted = listOf(jdkSource, userSource) + externalSource
-        return JvmProject(sorted, externalClasspath + userClasspath, getClasspath())
+        return JvmProject(sorted, externalPaths + userPath, getClasspath())
     }
 
     /**
@@ -71,7 +71,7 @@ class ProjectService(var config: JvmConfig, val javaHome : String) {
      * TODO add an optional source dir
      */
     fun addUserClassDirectory(classDir: String) {
-        userClasspath.classDirs.add(classDir)
+        userPath.classDirs.add(classDir)
     }
 
     /**
@@ -79,9 +79,9 @@ class ProjectService(var config: JvmConfig, val javaHome : String) {
      */
     fun updateProject(request: ProjectUpdateRequest) {
         externalSource.removeIf { it.source == request.source }
-        externalClasspath.removeIf { it.source == request.source }
+        externalPaths.removeIf { it.source == request.source }
         externalSource.addAll(request.dependencySources)
-        externalClasspath.addAll(request.classDirs)
+        externalPaths.addAll(request.paths)
     }
 
     /**
@@ -135,8 +135,8 @@ class ProjectService(var config: JvmConfig, val javaHome : String) {
      * Return the full classpath implied by the current dependencies (minus jdk dependencies)
      */
     fun getClasspath() : String {
-        val components = userClasspath.classDirs +
-                externalClasspath.flatMap { it.classDirs } +
+        val components = userPath.classDirs +
+                externalPaths.flatMap { it.classDirs } +
                 userSource.dependencies.map { it.fileName } +
                 externalSource.asSequence().flatMap { it.dependencies.asSequence().map { it.fileName } }
         return components.joinToString(File.pathSeparator) { it }
