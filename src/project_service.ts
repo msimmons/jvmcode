@@ -1,10 +1,10 @@
 'use strict';
 
 import * as vscode from 'vscode'
-import { DependencySourceData, DependencyData, ClasspathData, JarEntryData, JarPackageData, JvmProject} from "server-models"
+import { DependencyData, JarEntryData, JarPackageData, JvmProject} from "server-models"
 import { readdirSync, statSync, existsSync } from 'fs'
 import { JvmServer } from './jvm_server';
-import { JarEntryNode, DependencySourceNode, DependencyNode, JarPackageNode, CompilationContext } from './models';
+import { JarEntryNode, DependencySourceNode, DependencyNode, JarPackageNode, CompilationContext, ClasspathRootNode, DependencyRootNode, TreeNode } from './models';
 import { ConfigService } from './config_service';
 import * as path from 'path'
 
@@ -16,8 +16,8 @@ export class ProjectService {
 
     private context: vscode.ExtensionContext
     private server: JvmServer
-    private sourceNodes: DependencySourceNode[]
-    private classDirs: ClasspathData[] = []
+    private classDirNode: ClasspathRootNode
+    private depedencyRootNode: DependencyRootNode
     private classpath: string
     private projectListeners = [] // Array of dependency callbacks
     // A Map of source directories to associated compilation contexts
@@ -40,8 +40,8 @@ export class ProjectService {
         }
         else {
             let jvmProject = result.body as JvmProject
-            this.sourceNodes = this.createSourceNodes(jvmProject.dependencySources)
-            this.classDirs = jvmProject.classDirs
+            this.depedencyRootNode = new DependencyRootNode(jvmProject.dependencySources)
+            this.classDirNode = new ClasspathRootNode(jvmProject.classDirs)
             this.classpath = jvmProject.classpath
             this.projectListeners.forEach((listener) => {
                 listener(jvmProject)
@@ -74,12 +74,10 @@ export class ProjectService {
     }
 
     /**
-     * Create source nodes from the given dependency data
+     * Return the root nodes for the tree view 
      */
-    private createSourceNodes(sourceData: DependencySourceData[]) : DependencySourceNode[] {
-        return sourceData.filter((ds) => { return ds.dependencies.length > 0 }).map((ds) => {
-            return new DependencySourceNode(ds)
-        })
+    public getRootNodes() : TreeNode[] {
+        return [this.classDirNode, this.depedencyRootNode]
     }
 
     /**
@@ -111,7 +109,7 @@ export class ProjectService {
      * Return all the dependency source nodes
      */
     public getSourceNodes() : DependencySourceNode[] {
-        return this.sourceNodes
+        return this.depedencyRootNode.sourceNodes
     }
 
     /**
@@ -148,7 +146,7 @@ export class ProjectService {
      */
     public async getJarEntryNodes() : Promise<JarEntryNode[]> {
         let packages : JarPackageNode[][] = []
-        for (var node of this.sourceNodes) {
+        for (var node of this.depedencyRootNode.sourceNodes) {
             for (var dep of node.dependencies) {
                 packages.push(await this.getPackageNodes(dep))
             }
@@ -170,7 +168,7 @@ export class ProjectService {
      */
     public getClasses() : JarEntryData[] {
         let entries = []
-        this.classDirs.forEach((cp) => {
+        this.classDirNode.data.forEach((cp) => {
             cp.classDirs.forEach((dir) => {
                 let files = this.getFiles(dir).filter((file) => {return file.indexOf('$') <= 0})
                 entries = entries.concat(files.map((file) => {
@@ -236,7 +234,7 @@ export class ProjectService {
     public getCompilationContext(file: vscode.Uri) : CompilationContext {
         let compilationContext = new CompilationContext()
         compilationContext.classpath = this.classpath
-        compilationContext.outputDir = this.classDirs[0].classDirs[0]
+        compilationContext.outputDir = this.classDirNode.data[0].classDirs[0]
         return new CompilationContext()
     }
 

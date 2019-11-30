@@ -1,27 +1,27 @@
 package net.contrapt.jvmcode.model
 
 import java.util.*
-import javax.tools.Diagnostic
+
 import javax.tools.JavaFileObject
 
-data class Diagnostic(
-        val file: String,
-        val line: Long,
-        val column: Long,
-        val message: String,
-        val severity: String
-) {
+data class JavaDiagnostic(
+    override val file: String,
+    override val line: Long,
+    override val column: Long,
+    override val message: String,
+    override val severity: String
+) : Diagnostic {
     val source = "javac"
 
     companion object {
 
-        fun from(javacDiagnostic: Diagnostic<out JavaFileObject>): net.contrapt.jvmcode.model.Diagnostic {
+        fun from(javacDiagnostic: javax.tools.Diagnostic<out JavaFileObject>): JavaDiagnostic {
             val file = javacDiagnostic.source.name
             val line = javacDiagnostic.lineNumber
             val column = javacDiagnostic.columnNumber
             val message = javacDiagnostic.getMessage(Locale.getDefault())
             val severity = javacDiagnostic.kind.name
-            return Diagnostic(file, line, column, message, severity)
+            return JavaDiagnostic(file, line, column, message, severity)
         }
     }
 }

@@ -1,10 +1,10 @@
 import { TreeDataProvider, TreeItem, TreeItemCollapsibleState, EventEmitter } from 'vscode'
-import { DependencyNode, JarPackageNode, TreeNode, NodeType, DependencySourceNode } from './models'
+import { DependencyNode, JarPackageNode, TreeNode, NodeType, DependencySourceNode, ClasspathRootNode, DependencyRootNode } from './models'
 import { ProjectService } from './project_service';
 
-export class DependencyTreeProvider implements TreeDataProvider<TreeNode> {
+export class ProjectTreeProvider implements TreeDataProvider<TreeNode> {
 
-    public viewId = 'jvmcode.dependency-tree';
+    public viewId = 'jvmcode.project-tree';
     
     private service: ProjectService
     private onDidChangeEmitter = new EventEmitter<TreeNode>()
@@ -23,7 +23,7 @@ export class DependencyTreeProvider implements TreeDataProvider<TreeNode> {
 
     public getTreeItem(element: TreeNode) : TreeItem {
         let item = new TreeItem(element.treeLabel(), TreeItemCollapsibleState.Collapsed)
-        if ( element.type === NodeType.CLASS || element.type === NodeType.RESOURCE) {
+        if ( element.type === NodeType.CLASS || element.type === NodeType.RESOURCE || element.type === NodeType.CLASSPATH ) {
             item.collapsibleState = TreeItemCollapsibleState.None
             item.command = {title: 'Open Entry', command: 'jvmcode.jar-entry', arguments: [element]}
         }
@@ -31,7 +31,9 @@ export class DependencyTreeProvider implements TreeDataProvider<TreeNode> {
     }
 
     public getChildren(element: TreeNode) : TreeNode[] | Thenable<TreeNode[]> {
-        if ( !element ) return this.service.getSourceNodes()
+        if ( !element ) return this.service.getRootNodes()
+        else if ( element.type === NodeType.CLASSPATH_ROOT ) return (element as ClasspathRootNode).classpathNodes
+        else if ( element.type === NodeType.DEPENDENCY_ROOT ) return (element as DependencyRootNode).sourceNodes
         else if ( element.type === NodeType.SOURCE ) return (element as DependencySourceNode).dependencies
         else if ( element.type === NodeType.DEPENDENCY ) return this.service.getPackageNodes(element as DependencyNode)
         else if ( element.type === NodeType.PACKAGE ) return (element as JarPackageNode).entries

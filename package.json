@@ -60,8 +60,8 @@
     "views": {
       "explorer": [
         {
-          "id": "jvmcode.dependency-tree",
-          "name": "JVM Dependencies",
+          "id": "jvmcode.project-tree",
+          "name": "JVM Project",
           "when": "jvmcode.context.isJvmProject"
         }
       ]

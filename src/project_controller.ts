@@ -2,7 +2,7 @@
 
 import * as vscode from 'vscode'
 import { DependencySourceData, JarEntryData, JvmProject } from "server-models"
-import { DependencyTreeProvider } from './dependency_tree_provider';
+import { ProjectTreeProvider } from './project_tree_provider';
 import { JarContentProvider } from './jar_content_provider';
 import { ProjectService } from './project_service';
 import { JarEntryNode } from './models';
@@ -13,7 +13,7 @@ import { JarEntryNode } from './models';
 export class ProjectController {
 
     private service: ProjectService
-    private dependencyTree: DependencyTreeProvider
+    private dependencyTree: ProjectTreeProvider
     private contentProvider: JarContentProvider
     private isStarted = false
 
@@ -24,7 +24,7 @@ export class ProjectController {
 
     public start() {
         if (this.isStarted) return
-        this.dependencyTree = new DependencyTreeProvider(this.service)
+        this.dependencyTree = new ProjectTreeProvider(this.service)
         vscode.window.registerTreeDataProvider(this.dependencyTree.viewId, this.dependencyTree)
         this.contentProvider = new JarContentProvider()
         vscode.workspace.registerTextDocumentContentProvider(this.contentProvider.scheme, this.contentProvider)

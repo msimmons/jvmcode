@@ -1,6 +1,9 @@
-import { DependencySourceData, DependencyData, JarPackageData, JarEntryData} from "server-models"
+import { DependencySourceData, DependencyData, JarPackageData, JarEntryData, ClasspathData} from "server-models"
 
 export enum NodeType {
+    CLASSPATH_ROOT,
+    DEPENDENCY_ROOT,
+    CLASSPATH,
     SOURCE,
     DEPENDENCY,
     PACKAGE,
@@ -11,6 +14,43 @@ export enum NodeType {
 export interface TreeNode {
     type: NodeType
     treeLabel() : string
+}
+
+export class ClasspathRootNode implements TreeNode {
+    type = NodeType.CLASSPATH_ROOT
+    data: ClasspathData[]
+    classpathNodes: ClasspathNode[]
+    constructor(data: ClasspathData[]) {
+        this.data = data
+        this.classpathNodes = data.map((cp) => {return new ClasspathNode(cp)})
+    }
+    public treeLabel() : string {
+        return 'Source/Class Directories'
+    }
+}
+
+export class DependencyRootNode implements TreeNode {
+    type = NodeType.DEPENDENCY_ROOT
+    data: DependencySourceData[]
+    sourceNodes: DependencySourceNode[]
+    constructor(data: DependencySourceData[]) {
+        this.data = data
+        this.sourceNodes = data.filter((ds) => {return ds.dependencies.length > 0}).map((ds) => {return new DependencySourceNode(ds)})
+    }
+    public treeLabel() : string {
+        return 'External Dependencies'
+    }
+}
+
+export class ClasspathNode implements TreeNode {
+    data: ClasspathData
+    type = NodeType.CLASSPATH
+    constructor(data: ClasspathData) {
+        this.data = data
+    }
+    public treeLabel() : string {
+        return `${this.data.source} (${this.data.name}:${this.data.module})`
+    }
 }
 
 export class DependencySourceNode implements TreeNode {
