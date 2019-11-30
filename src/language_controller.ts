@@ -25,7 +25,7 @@ export class LanguageController {
 
     public registerLanguage(languageId: string, extensions: string[]) {
         // Watch all .java files
-        let pattern = vscode.workspace.rootPath+`/**/*.{${extensions.join(',')}}`
+        let pattern = vscode.workspace.workspaceFolders[0].name+`/**/*.{${extensions.join(',')}}`
         let watcher = vscode.workspace.createFileSystemWatcher(pattern)
         watcher.onDidChange(this.triggerCompile)
         watcher.onDidDelete(this.triggerCompile)
@@ -36,9 +36,9 @@ export class LanguageController {
     triggerCompile = async (uri: vscode.Uri) => {
         // Do we request output, classpath, sourcepath from jvmcode based on file uri?
         let fileName = uri.fsPath
-        let outputDir = vscode.workspace.rootPath+'/build/classes'
+        let outputDir = vscode.workspace.workspaceFolders[0].name+'/build/classes'
         let classpath = this.projectService.getClasspath()
-        let sourcepath = vscode.workspace.rootPath+'/src/main/java'
+        let sourcepath = vscode.workspace.workspaceFolders[0].name+'/src/main/java'
         // TODO Find dependent files also
         let request = {files: [fileName], outputDir: outputDir, classpath: classpath, sourcepath: sourcepath, name: 'what'} as CompileRequest
         let result = await this.languageService.requestCompile(request)

@@ -4,7 +4,7 @@ import * as vscode from 'vscode'
 import { DependencyData, JarEntryData, JarPackageData, JvmProject} from "server-models"
 import { readdirSync, statSync, existsSync } from 'fs'
 import { JvmServer } from './jvm_server';
-import { JarEntryNode, DependencySourceNode, DependencyNode, JarPackageNode, CompilationContext, ClasspathRootNode, DependencyRootNode, TreeNode } from './models';
+import { JarEntryNode, DependencySourceNode, DependencyNode, JarPackageNode, CompilationContext, PathRootNode, DependencyRootNode, TreeNode } from './models';
 import { ConfigService } from './config_service';
 import * as path from 'path'
 
@@ -16,7 +16,7 @@ export class ProjectService {
 
     private context: vscode.ExtensionContext
     private server: JvmServer
-    private classDirNode: ClasspathRootNode
+    private pathRootNode: PathRootNode
     private depedencyRootNode: DependencyRootNode
     private classpath: string
     private projectListeners = [] // Array of dependency callbacks
@@ -41,7 +41,7 @@ export class ProjectService {
         else {
             let jvmProject = result.body as JvmProject
             this.depedencyRootNode = new DependencyRootNode(jvmProject.dependencySources)
-            this.classDirNode = new ClasspathRootNode(jvmProject.classDirs)
+            this.pathRootNode = new PathRootNode(jvmProject.paths)
             this.classpath = jvmProject.classpath
             this.projectListeners.forEach((listener) => {
                 listener(jvmProject)
@@ -77,7 +77,7 @@ export class ProjectService {
      * Return the root nodes for the tree view 
      */
     public getRootNodes() : TreeNode[] {
-        return [this.classDirNode, this.depedencyRootNode]
+        return [this.pathRootNode, this.depedencyRootNode]
     }
 
     /**
@@ -92,8 +92,8 @@ export class ProjectService {
      * Add a new single jar file dependency
      * @param dependency 
      */
-    public async addDependency(jarFile: string) {
-        let reply = await this.server.send('jvmcode.add-dependency', {jarFile: jarFile, config: ConfigService.getConfig()})
+    public async addDependency(jarFile: string, srcFile: string) {
+        let reply = await this.server.send('jvmcode.add-dependency', {jarFile: jarFile, srcFile: srcFile, config: ConfigService.getConfig()})
         this.projectListener(undefined, reply)
     }
 
@@ -102,6 +102,14 @@ export class ProjectService {
      */
     public async addClassDirectory(classDir: string) {
         let reply = await this.server.send('jvmcode.add-classdir', {classDir: classDir})
+        this.projectListener(undefined, reply)
+    }
+
+    /**
+     * Add a source directory
+     */
+    public async addSourceDirectory(sourceDir: string) {
+        let reply = await this.server.send('jvmcode.add-sourcedir', {sourceDir: sourceDir})
         this.projectListener(undefined, reply)
     }
 
@@ -168,7 +176,7 @@ export class ProjectService {
      */
     public getClasses() : JarEntryData[] {
         let entries = []
-        this.classDirNode.data.forEach((cp) => {
+        this.pathRootNode.data.forEach((cp) => {
             cp.classDirs.forEach((dir) => {
                 let files = this.getFiles(dir).filter((file) => {return file.indexOf('$') <= 0})
                 entries = entries.concat(files.map((file) => {
@@ -210,6 +218,17 @@ export class ProjectService {
     }
 
     /**
+     * Get the current source paths
+     */
+    public getSourcePaths() : string[] {
+        let paths = []
+        this.pathRootNode.data.forEach((d) => {
+            paths = paths.concat(d.sourceDirs)
+        })
+        return paths
+    }
+
+    /**
      * Request that a buffer be parsed by an appropriate language service
      * @param file 
      */
@@ -234,7 +253,7 @@ export class ProjectService {
     public getCompilationContext(file: vscode.Uri) : CompilationContext {
         let compilationContext = new CompilationContext()
         compilationContext.classpath = this.classpath
-        compilationContext.outputDir = this.classDirNode.data[0].classDirs[0]
+        compilationContext.outputDir = this.pathRootNode.data[0].classDirs[0]
         return new CompilationContext()
     }
 

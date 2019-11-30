@@ -6,6 +6,7 @@ import { ProjectTreeProvider } from './project_tree_provider';
 import { JarContentProvider } from './jar_content_provider';
 import { ProjectService } from './project_service';
 import { JarEntryNode } from './models';
+import { projectService } from './extension';
 
 /**
  * Responsible for managing various views related to a project
@@ -22,7 +23,7 @@ export class ProjectController {
         this.registerProjectListener()
     }
 
-    public start() {
+    public async start() {
         if (this.isStarted) return
         this.dependencyTree = new ProjectTreeProvider(this.service)
         vscode.window.registerTreeDataProvider(this.dependencyTree.viewId, this.dependencyTree)
@@ -30,7 +31,7 @@ export class ProjectController {
         vscode.workspace.registerTextDocumentContentProvider(this.contentProvider.scheme, this.contentProvider)
         vscode.commands.executeCommand('setContext', 'jvmcode.context.isJvmProject', true)
         this.isStarted = true
-        this.service.requestProject()
+        await this.service.requestProject()
     }
 
     /** 
@@ -94,5 +95,17 @@ export class ProjectController {
                 vscode.window.showErrorMessage(error)
             })
         })
+    }
+
+    /**
+     * Return the FQCN or the current file
+     */
+    public getFQCN() : string {
+        let curFile = vscode.window.activeTextEditor.document.fileName
+        curFile = curFile.substring(0, curFile.lastIndexOf('.'))
+        let path = projectService.getSourcePaths().find((p) => { return curFile.startsWith(p)})
+        if (!path) return `No FQCN found for ${curFile} in ${projectService.getSourcePaths()}`
+        path = (path.endsWith('/')) ? path : path + '/'
+        return curFile.replace(path, '').replace(/\//g, '.')
     }
 }

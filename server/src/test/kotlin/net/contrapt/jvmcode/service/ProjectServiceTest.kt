@@ -82,7 +82,7 @@ class ProjectServiceTest {
         val config = JvmConfig(setOf("com.sun"), setOf("java"))
         val service = ProjectService(config, javaHomeSys)
         val path = javaClass.classLoader?.getResource("postgresql-42.1.4.jar")?.path ?: ""
-        service.addUserDependency(path)
+        service.addUserDependency(path, null)
         val deps = service.getJvmProject().dependencySources
         deps.size shouldBe 2
         val depSource = deps.last()
@@ -99,12 +99,12 @@ class ProjectServiceTest {
     fun getClasspathTest() {
         val service = ProjectService(JvmConfig(setOf(), setOf()), javaHomeSys)
         val path1 = javaClass.classLoader?.getResource("postgresql-42.1.4.jar")?.path ?: ""
-        service.addUserDependency(path1)
+        service.addUserDependency(path1, null)
         var classpath = service.getClasspath()
         classpath should endWith("postgresql-42.1.4.jar")
         // Add a second jar file
         val path2 = javaClass.classLoader?.getResource("jd-gui-1.4.0.jar")?.path ?: ""
-        service.addUserDependency(path2)
+        service.addUserDependency(path2, null)
         classpath = service.getClasspath()
         classpath should haveSubstring("postgresql-42.1.4.jar:")
         classpath should endWith("jd-gui-1.4.0.jar")

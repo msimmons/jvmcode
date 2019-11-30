@@ -60,18 +60,23 @@ class ProjectService(var config: JvmConfig, val javaHome : String) {
 
     /**
      * User adds a single JAR file dependency
-     * TODO add an optional source jar
      */
-    fun addUserDependency(jarFile: String) {
-        userSource.dependencies.add(Dependency.create(jarFile))
+    fun addUserDependency(jarFile: String, srcFile: String?) {
+        userSource.dependencies.add(Dependency.create(jarFile, srcFile))
     }
 
     /**
      * User adds an output directory
-     * TODO add an optional source dir
      */
     fun addUserClassDirectory(classDir: String) {
         userPath.classDirs.add(classDir)
+    }
+
+    /**
+     * User adds a source directory
+     */
+    fun addUserSourceDirectory(sourceDir: String) {
+        userPath.sourceDirs.add(sourceDir)
     }
 
     /**

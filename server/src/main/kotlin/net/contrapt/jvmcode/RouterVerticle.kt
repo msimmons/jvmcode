@@ -214,6 +214,11 @@ class RouterVerticle(val startupToken: String, var config: JvmConfig) : Abstract
         vertx.eventBus().consumer<JsonObject>("jvmcode.add-classdir", AddClassDir(vertx, projectService))
 
         /**
+         * Add a single source directory to the sourcepath
+         */
+        vertx.eventBus().consumer<JsonObject>("jvmcode.add-sourcedir", AddSourceDir(vertx, projectService))
+
+        /**
          * Return the classpath for the current set of dependencies
          */
         vertx.eventBus().consumer<JsonObject>("jvmcode.classpath", GetClasspath(vertx, projectService))

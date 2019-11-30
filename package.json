@@ -49,6 +49,10 @@
         "title": "JVM: Add Class Directory"
       },
       {
+        "command": "jvmcode.add-sourcedir",
+        "title": "JVM: Add Source Directory"
+      },
+      {
         "command": "jvmcode.find-class",
         "title": "JVM: Find Class"
       },

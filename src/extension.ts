@@ -6,7 +6,6 @@ import { JarEntryNode, dependencyLabel, CompilationContext } from './models';
 import { ProjectService } from './project_service';
 import { ProjectController } from './project_controller';
 import { StatsController } from './stats_controller';
-import { ClasspathData } from 'server-models';
 import { LanguageService } from './language_service';
 import { LanguageController } from './language_controller';
 
@@ -118,7 +117,10 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.add-dependency', () => {
         vscode.window.showOpenDialog({filters: {'Dependency': ['jar']}, canSelectMany: false}).then((jarFile) => {
             if (!jarFile || jarFile.length === 0) return
-            projectService.addDependency(jarFile[0]['path'])
+            vscode.window.showOpenDialog({filters: {'Source': ['jar', 'zip']}, canSelectMany: false}).then((srcFile) => {
+                let srcPath = (!srcFile || srcFile.length === 0) ? undefined : srcFile[0]['path']
+                projectService.addDependency(jarFile[0]['path'], srcPath)
+            })
         })
     }))
 
@@ -127,10 +129,39 @@ export function activate(context: vscode.ExtensionContext) {
      */
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.add-classdir', () => {
         projectController.start()
-        vscode.window.showInputBox({placeHolder: 'Class directory'}).then((classDir) => {
-            if (!classDir) return
-            projectService.addClassDirectory(classDir)
+        let classOptions = {placeHolder: 'Class Directory', defaultUri: vscode.workspace.workspaceFolders[0].uri, canSelectMany: false, canSelectFolders: true, canSelectFiles: false}
+        vscode.window.showOpenDialog(classOptions).then((cd) => {
+            if (!cd) return
+            projectService.addClassDirectory(cd[0]['path'])
         })
+    }))
+
+    /**
+     * Allows the user to manually enter a source directory
+     */
+    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.add-sourcedir', () => {
+        projectController.start()
+        let sourceOptions = {placeHolder: 'Source Directory', defaultUri: vscode.workspace.workspaceFolders[0].uri, canSelectMany: false, canSelectFolders: true, canSelectFiles: false}
+        vscode.window.showOpenDialog(sourceOptions).then((cd) => {
+            if (!cd) return
+            projectService.addSourceDirectory(cd[0]['path'])
+        })
+    }))
+
+    /**
+     * Return the classpath as a string (mostly for use in tasks)
+     */
+    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.classpath', () : string => {
+        projectController.start()
+        return projectService.getClasspath()
+    }))
+
+    /**
+     * Return the fqcn of the current file (for use in tasks)
+     */
+    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.fqcn', () : string => {
+        projectController.start()
+        return projectController.getFQCN()
     }))
 
     /**

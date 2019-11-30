@@ -10,8 +10,9 @@ class AddDependency(vertx: Vertx, val projectService: ProjectService) : Abstract
 
     override fun processMessage(message: Message<JsonObject>): JsonObject {
         val jarFile = message.body().getString("jarFile")
+        val srcFile = message.body().getString("srcFile")
         val config = message.body().getJsonObject("config").mapTo(JvmConfig::class.java)
-        projectService.addUserDependency(jarFile)
+        projectService.addUserDependency(jarFile, srcFile)
         return JsonObject.mapFrom(projectService.getJvmProject(config))
     }
 
