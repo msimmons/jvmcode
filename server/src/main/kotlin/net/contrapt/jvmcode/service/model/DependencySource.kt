@@ -12,7 +12,6 @@ class DependencySource(
 
     companion object {
         val SYSTEM = "System"
-        val USER = "User"
 
         /**
          * Create the dependency source from incoming data

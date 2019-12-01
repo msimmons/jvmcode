@@ -28,14 +28,14 @@ suite("Extension Tests", () => {
 
     test("Dependencies and jar entries", async () => {
         let root = myExtension.extensionContext.extensionPath
-        await myExtension.projectService.addDependency(`${root}/server/src/test/resources/postgresql-42.1.4.jar`)
+        await myExtension.projectService.addDependency(`${root}/server/src/test/resources/postgresql-42.1.4.jar`, '')
         let jars = await myExtension.projectService.getJarEntryNodes()
         assert(jars.length > 4000, "Has some jar entries")
     })
 
     test("Classes", async () => {
         let root = myExtension.extensionContext.extensionPath
-        await myExtension.projectService.addClassDirectory(`${root}/server/build/classes/kotlin/main`)
+        await myExtension.projectService.addPath({source: '', name: '', module: '', sourceDirs: [], classDirs: [`${root}/server/build/classes/kotlin/main`]})
         let classes = myExtension.projectService.getClasses()
         assert(classes.length > 40)
     })

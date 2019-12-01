@@ -66,17 +66,27 @@ class ProjectService(var config: JvmConfig, val javaHome : String) {
     }
 
     /**
-     * User adds an output directory
+     * User adds a path component
      */
-    fun addUserClassDirectory(classDir: String) {
-        userPath.classDirs.add(classDir)
+    fun addUserPath(pathData: PathData) {
+        pathData.classDirs.forEach { userPath.classDirs.add(it) }
+        pathData.sourceDirs.forEach { userPath.sourceDirs.add(it) }
     }
 
     /**
-     * User adds a source directory
+     * Update all user project info in single operation (for restoring user settings)
      */
-    fun addUserSourceDirectory(sourceDir: String) {
-        userPath.sourceDirs.add(sourceDir)
+    fun updateUserProject(request: ProjectUpdateRequest) {
+        request.dependencySources.forEach {
+            userSource.dependencies.clear()
+            userSource.dependencies.addAll(it.dependencies)
+        }
+        request.paths.forEach {
+            userPath.classDirs.clear()
+            userPath.sourceDirs.clear()
+            userPath.classDirs.addAll(it.classDirs)
+            userPath.sourceDirs.addAll(it.sourceDirs)
+        }
     }
 
     /**

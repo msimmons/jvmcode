@@ -189,9 +189,13 @@ class RouterVerticle(val startupToken: String, var config: JvmConfig) : Abstract
 
         /**
          * Update project info (dependencies, classpath) -- likely called by other extensions such as Gradle or Maven integration
-         * { source: string, project: JvmProject }
          */
         vertx.eventBus().consumer<JsonObject>("jvmcode.update-project", UpdateProject(vertx, projectService))
+
+        /**
+         * Update project info (dependencies, classpath) for user defined project
+         */
+        vertx.eventBus().consumer<JsonObject>("jvmcode.update-user-project", UpdateUserProject(vertx, projectService))
 
         /**
          * Return the jar entries for the given dependency
@@ -209,14 +213,9 @@ class RouterVerticle(val startupToken: String, var config: JvmConfig) : Abstract
         vertx.eventBus().consumer<JsonObject>("jvmcode.add-dependency", AddDependency(vertx, projectService))
 
         /**
-         * Add a single class directory to the classpath
+         * Add one or more path components (from the user)
          */
-        vertx.eventBus().consumer<JsonObject>("jvmcode.add-classdir", AddClassDir(vertx, projectService))
-
-        /**
-         * Add a single source directory to the sourcepath
-         */
-        vertx.eventBus().consumer<JsonObject>("jvmcode.add-sourcedir", AddSourceDir(vertx, projectService))
+        vertx.eventBus().consumer<JsonObject>("jvmcode.add-path", AddPath(vertx, projectService))
 
         /**
          * Return the classpath for the current set of dependencies

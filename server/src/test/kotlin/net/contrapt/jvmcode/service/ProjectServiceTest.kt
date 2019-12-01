@@ -10,6 +10,7 @@ import io.kotlintest.shouldNotBe
 import net.contrapt.jvmcode.model.JarEntryType
 import net.contrapt.jvmcode.model.JvmConfig
 import net.contrapt.jvmcode.service.model.DependencySource
+import net.contrapt.jvmcode.service.model.UserPath
 import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.Test
 import java.io.File
@@ -109,7 +110,7 @@ class ProjectServiceTest {
         classpath should haveSubstring("postgresql-42.1.4.jar:")
         classpath should endWith("jd-gui-1.4.0.jar")
         // Add a class directory
-        service.addUserClassDirectory("/home/mark/classes")
+        service.addUserPath(UserPath().apply { classDirs.add("/home/mark/classes") })
         classpath = service.getClasspath()
         classpath should startWith("/home/mark/classes:")
         classpath should endWith("jd-gui-1.4.0.jar")

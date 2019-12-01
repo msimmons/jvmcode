@@ -25,7 +25,7 @@ export function activate(context: vscode.ExtensionContext) {
         server = new JvmServer(context)
         server.start()
         projectService = new ProjectService(context, server)
-        projectController = new ProjectController(projectService)
+        projectController = new ProjectController(context, projectService)
         languageService = new LanguageService(server)
         languageController = new LanguageController(projectService, languageService)
         languageController.start()
@@ -74,34 +74,9 @@ export function activate(context: vscode.ExtensionContext) {
      * Allow the user to find any class in the projects current dependencies
      * Maybe show local project classes first, if no match, show dependency classes (possibly pre-filtered)
      */
-    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.find-class', () => {
-        projectController.start() // TODO This won't work correctly first time -- async timing
-        let jarEntries = projectService.getJarEntryNodes()
-        let classes = projectService.getClasses()
-        Promise.all([jarEntries]).then((results) => {
-            let quickPick = vscode.window.createQuickPick()
-            let classItems = classes.map((c) => {
-                return { label: c.name, detail: c.pkg, entry: c } as vscode.QuickPickItem
-            })
-            let jarItems = results[0].map((r) => {
-                let detail = r.data.pkg + ' (' + dependencyLabel(r.dependency) + ')'
-                return { label: r.name, detail: detail, entry: r } as vscode.QuickPickItem
-            })
-            quickPick.items = classItems.concat(jarItems)
-            quickPick.onDidAccept(selection => {
-                quickPick.dispose()
-                if (quickPick.selectedItems.length) {
-                    projectController.openJarEntry(quickPick.selectedItems[0]['entry'])
-                }
-            })
-            quickPick.onDidChangeSelection(selection => {
-                //console.log(`change ${selection}`)
-            })
-            quickPick.onDidChangeActive(event => {
-                //console.log(`active ${event} ${quickPick.activeItems}`)
-            })
-            quickPick.show()
-        })
+    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.find-class', async () => {
+        await projectController.start() // TODO This won't work correctly first time -- async timing
+        projectController.findClass()
     }))
 
     /**
@@ -115,13 +90,8 @@ export function activate(context: vscode.ExtensionContext) {
      * Allows the user to manually enter a jar dependency
      */
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.add-dependency', () => {
-        vscode.window.showOpenDialog({filters: {'Dependency': ['jar']}, canSelectMany: false}).then((jarFile) => {
-            if (!jarFile || jarFile.length === 0) return
-            vscode.window.showOpenDialog({filters: {'Source': ['jar', 'zip']}, canSelectMany: false}).then((srcFile) => {
-                let srcPath = (!srcFile || srcFile.length === 0) ? undefined : srcFile[0]['path']
-                projectService.addDependency(jarFile[0]['path'], srcPath)
-            })
-        })
+        projectController.start()
+        projectController.addDependency()
     }))
 
     /**
@@ -129,11 +99,7 @@ export function activate(context: vscode.ExtensionContext) {
      */
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.add-classdir', () => {
         projectController.start()
-        let classOptions = {placeHolder: 'Class Directory', defaultUri: vscode.workspace.workspaceFolders[0].uri, canSelectMany: false, canSelectFolders: true, canSelectFiles: false}
-        vscode.window.showOpenDialog(classOptions).then((cd) => {
-            if (!cd) return
-            projectService.addClassDirectory(cd[0]['path'])
-        })
+        projectController.addClassDir()
     }))
 
     /**
@@ -141,11 +107,7 @@ export function activate(context: vscode.ExtensionContext) {
      */
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.add-sourcedir', () => {
         projectController.start()
-        let sourceOptions = {placeHolder: 'Source Directory', defaultUri: vscode.workspace.workspaceFolders[0].uri, canSelectMany: false, canSelectFolders: true, canSelectFiles: false}
-        vscode.window.showOpenDialog(sourceOptions).then((cd) => {
-            if (!cd) return
-            projectService.addSourceDirectory(cd[0]['path'])
-        })
+        projectController.addSourceDir()
     }))
 
     /**

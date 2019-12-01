@@ -1,10 +1,10 @@
 'use strict';
 
 import * as vscode from 'vscode'
-import { DependencyData, JarEntryData, JarPackageData, JvmProject} from "server-models"
+import { DependencyData, JarEntryData, JarPackageData, JvmProject, PathData, ProjectUpdateData} from "server-models"
 import { readdirSync, statSync, existsSync } from 'fs'
 import { JvmServer } from './jvm_server';
-import { JarEntryNode, DependencySourceNode, DependencyNode, JarPackageNode, CompilationContext, PathRootNode, DependencyRootNode, TreeNode } from './models';
+import { JarEntryNode, DependencySourceNode, DependencyNode, JarPackageNode, CompilationContext, PathRootNode, DependencyRootNode, TreeNode, PathNode } from './models';
 import { ConfigService } from './config_service';
 import * as path from 'path'
 
@@ -88,7 +88,7 @@ export class ProjectService {
         this.projectListener(undefined, reply)
     }
 
-     /**
+    /**
      * Add a new single jar file dependency
      * @param dependency 
      */
@@ -98,19 +98,21 @@ export class ProjectService {
     }
 
     /**
-     * Add a class directory to the classpath
+     * Add a path component(s) to the project
      */
-    public async addClassDirectory(classDir: string) {
-        let reply = await this.server.send('jvmcode.add-classdir', {classDir: classDir})
+    public async addPath(userPath: PathData) {
+        let reply = await this.server.send('jvmcode.add-path', userPath)
         this.projectListener(undefined, reply)
     }
 
     /**
-     * Add a source directory
+     * Update the user project (mostly for when the workspace is opened and user settings are restored )
      */
-    public async addSourceDirectory(sourceDir: string) {
-        let reply = await this.server.send('jvmcode.add-sourcedir', {sourceDir: sourceDir})
-        this.projectListener(undefined, reply)
+    public async updateUserProject(userProject: ProjectUpdateData) {
+        let reply = await this.server.send('jvmcode.update-user-project', userProject).catch((e) => {
+            console.log(e)
+        })
+        console.log(reply)
     }
 
     /**

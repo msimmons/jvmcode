@@ -7,6 +7,6 @@ class UserPath(
         override val classDirs: MutableSet<String> = mutableSetOf()
 ) : PathData {
     override val source: String = "USER"
-    override val name: String = "USER"
-    override val module: String = "USER"
+    override val name: String = "User"
+    override val module: String = "All"
 }

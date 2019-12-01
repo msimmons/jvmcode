@@ -7,5 +7,5 @@ class UserDependencySource(
         override val dependencies: MutableCollection<DependencyData> = mutableSetOf()
 ) : DependencySourceData {
     override val source: String = "USER"
-    override val description: String = "User entered"
+    override val description: String = "User"
 }

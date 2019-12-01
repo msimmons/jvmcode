@@ -83,7 +83,7 @@ export class SourceDirNode implements TreeNode {
         this.path = path
     }
     public treeLabel() : string {
-        return 'Source: ' + this.path.replace(workspace.workspaceFolders[0].name+'/', '')
+        return 'Source: ' + this.path.replace(workspace.workspaceFolders[0].uri.path+'/', '')
     }
     public children() : TreeNode[] {
         return []
@@ -98,7 +98,7 @@ export class ClassDirNode implements TreeNode {
         this.path = path
     }
     public treeLabel() : string {
-        return 'Class: ' + this.path.replace(workspace.workspaceFolders[0].name+'/', '')
+        return 'Class: ' + this.path.replace(workspace.workspaceFolders[0].uri.path+'/', '')
     }
     public children() : TreeNode[] {
         return []
