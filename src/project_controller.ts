@@ -1,12 +1,14 @@
 'use strict';
 
 import * as vscode from 'vscode'
-import { DependencySourceData, JarEntryData, JvmProject, PathData } from "server-models"
+import { JarEntryData, JvmProject } from "server-models"
 import { ProjectTreeProvider } from './project_tree_provider';
 import { JarContentProvider } from './jar_content_provider';
 import { ProjectService } from './project_service';
-import { JarEntryNode, dependencyLabel } from './models';
+import { JarEntryNode, dependencyLabel, PathRootNode, DependencyRootNode, TreeNode, DependencySourceNode, DependencyNode, JarPackageNode, NodeType } from './models';
 import { projectService, projectController } from './extension';
+import { existsSync, readdirSync, statSync } from 'fs';
+import * as path from 'path'
 
 /**
  * Responsible for managing various views related to a project
@@ -20,6 +22,9 @@ export class ProjectController {
     private dependencyTree: ProjectTreeProvider
     private contentProvider: JarContentProvider
     private isStarted = false
+    private pathRootNode: PathRootNode
+    private depedencyRootNode: DependencyRootNode
+    private classpath: string
 
     public constructor(context: vscode.ExtensionContext, service: ProjectService) {
         this.context = context
@@ -30,7 +35,7 @@ export class ProjectController {
 
     public async start() {
         if (this.isStarted) return
-        this.dependencyTree = new ProjectTreeProvider(this.service)
+        this.dependencyTree = new ProjectTreeProvider(this)
         vscode.window.registerTreeDataProvider(this.dependencyTree.viewId, this.dependencyTree)
         this.contentProvider = new JarContentProvider()
         vscode.workspace.registerTextDocumentContentProvider(this.contentProvider.scheme, this.contentProvider)
@@ -46,7 +51,10 @@ export class ProjectController {
     private registerProjectListener() {
         this.service.registerProjectListener((jvmProject: JvmProject) => {
             this.start()
-            this.updateDependencies(jvmProject.dependencySources)
+            this.depedencyRootNode = new DependencyRootNode(jvmProject.dependencySources)
+            this.pathRootNode = new PathRootNode(jvmProject.paths)
+            this.classpath = jvmProject.classpath
+            this.updateDependencies()
             this.saveUserData(jvmProject)
         })
     }
@@ -55,8 +63,106 @@ export class ProjectController {
      * Alert components that dependencies have been updated
      * @param dependencies 
      */
-    public updateDependencies(dependencies: DependencySourceData[]) {
+    public updateDependencies() {
         this.dependencyTree.update()
+    }
+
+    /**
+     * Return the root nodes for the tree view 
+     */
+    public getRootNodes() : TreeNode[] {
+        return [this.pathRootNode, this.depedencyRootNode]
+    }
+
+    /**
+     * Return all the dependency source nodes
+     */
+    public getSourceNodes() : DependencySourceNode[] {
+        return this.depedencyRootNode.sourceNodes
+    }
+
+    /**
+     * Return the children of the given TreeNode -- could require some lazy loading
+     */
+    public async getChildren(node: TreeNode) : Promise<TreeNode[]> {
+        switch (node.type) {
+            case NodeType.DEPENDENCY:
+                let dn = node as DependencyNode
+                dn.packages = await this.getPackageNodes(dn)
+            default:
+                return node.children()
+        }
+    }
+
+    /**
+     * Return all the dependency nodes for the given source
+     */
+    public getDependencyNodes(source: DependencySourceNode) : DependencyNode[] {
+        let nodes = source.data.dependencies.filter((d) => { return !d.transitive }).map((d) => {
+            return new DependencyNode(d)
+        })
+        source.dependencies = nodes
+        return nodes
+    }
+
+    /**
+     * Return all the package nodes for the given dependency; this resolves all the entries in the jar file as well
+     */
+    public async getPackageNodes(dependency: DependencyNode) : Promise<JarPackageNode[]> {
+        if (dependency.packages) return dependency.packages
+        try {
+            let packages = await this.service.getPackages(dependency.data)
+            let nodes = packages.map((pkgData) => { return new JarPackageNode(dependency, pkgData) })
+            dependency.packages = nodes
+            return nodes
+        }
+        catch(error) {
+            vscode.window.showErrorMessage(error.message)
+            return []
+        }
+    }
+
+    /**
+     * Return all classes in registered class directories (returned as JarEntryData for uniformity)
+     */
+    public getClasses() : JarEntryData[] {
+        let entries = []
+        this.pathRootNode.data.forEach((cp) => {
+            cp.classDirs.forEach((dir) => {
+                let files = this.getFiles(dir).filter((file) => {return file.indexOf('$') <= 0})
+                entries = entries.concat(files.map((file) => {
+                    file = file.replace(dir, '').replace('.class', '')
+                    let ndx = file.lastIndexOf('/')
+                    let name = file.substr(ndx+1)
+                    let pkg = file.substr(1, ndx-1).replace(/\//g, '.')
+                    return { type: 'CLASS', name: name, pkg: pkg } as JarEntryData
+                })
+            )})
+        })
+        return entries
+    }
+
+    /**
+     * Return all the JarEntryNodes accross all dependencies, has the effect of resolving all packages in each
+     * dependency
+     */
+    public async getJarEntryNodes() : Promise<JarEntryNode[]> {
+        let packages : JarPackageNode[][] = []
+        for (var node of this.depedencyRootNode.sourceNodes) {
+            for (var dep of node.dependencies) {
+                packages.push(await this.getPackageNodes(dep))
+            }
+        }
+        // Wait for all the packages to resolve, than get the entries
+        return Promise.all(packages).then((depPkgs) => {
+            let jarEntries = []
+            for (var pkgList of depPkgs) {
+                for (var pkg of pkgList) {
+                    jarEntries = jarEntries.concat(pkg.entries)
+                }
+            }
+            return jarEntries
+        })
     }
 
     /**
@@ -68,7 +174,8 @@ export class ProjectController {
     }
 
     /**
-     * Open the text editor with the node's content if available 
+     * Open the text editor with the node's content if available
+     * TODO Optional goto symbol location
      * @param entryNode 
      */
     private openJarEntryContent(entryNode: JarEntryNode) {
@@ -108,15 +215,16 @@ export class ProjectController {
      * adds external dependeny classes as needed (to limit size of list which could be quite large)
      */
     public findClass() {
-        let jarEntries = projectService.getJarEntryNodes()
-        let classes = projectService.getClasses()
+        let jarEntries = this.getJarEntryNodes()
+        let classes = this.getClasses()
         Promise.all([jarEntries]).then((results) => {
             let quickPick = vscode.window.createQuickPick()
+            quickPick.matchOnDescription = true
             let classItems = classes.map((c) => {
-                return { label: c.name, description: c.pkg, detail: c.pkg, entry: c } as vscode.QuickPickItem
+                return { label: c.name, description: c.pkg, detail: 'hello', entry: c } as vscode.QuickPickItem
             })
             let jarItems = results[0].map((r) => {
-                let detail = r.data.pkg + ' (' + dependencyLabel(r.dependency) + ')'
+                let detail = dependencyLabel(r.dependency)
                 return { label: r.name, description: r.package.name, detail: detail, entry: r } as vscode.QuickPickItem
             })
             quickPick.items = classItems
@@ -180,6 +288,24 @@ export class ProjectController {
     }
 
     /**
+     * Get the current classpath
+     */
+    public getClasspath() : string {
+        return this.classpath ? this.classpath : ""
+    }
+
+    /**
+     * Get the current source paths
+     */
+    public getSourcePaths() : string[] {
+        let paths = []
+        this.pathRootNode.data.forEach((d) => {
+            paths = paths.concat(d.sourceDirs)
+        })
+        return paths
+    }
+
+    /**
      * Save any user data in the current project
      */
     private saveUserData(project: JvmProject) {
@@ -209,21 +335,35 @@ export class ProjectController {
     }
 
     /**
-     * Return the FQCN or the current file
+     * Return the FQCN of the current file
      */
     public getFQCN() : string {
         let curFile = vscode.window.activeTextEditor.document.fileName
         curFile = curFile.substring(0, curFile.lastIndexOf('.'))
-        let path = projectService.getSourcePaths().find((p) => { return curFile.startsWith(p)})
-        if (!path) return `No FQCN found for ${curFile} in ${projectService.getSourcePaths()}`
+        let path = this.getSourcePaths().find((p) => { return curFile.startsWith(p)})
+        if (!path) return `No FQCN found for ${curFile} in ${this.getSourcePaths()}`
         path = (path.endsWith('/')) ? path : path + '/'
         return curFile.replace(path, '').replace(/\//g, '.')
     }
 
     public file2fqcn(filename: string) : string {
-        let path = projectService.getSourcePaths().find((p) => { return filename.startsWith(p)})
-        if (!path) return `No FQCN found for ${filename} in ${projectService.getSourcePaths()}`
+        let path = this.getSourcePaths().find((p) => { return filename.startsWith(p)})
+        if (!path) return `No FQCN found for ${filename} in ${this.getSourcePaths()}`
         path = (path.endsWith('/')) ? path : path + '/'
         return filename.replace(path, '').replace(/\//g, '.')
+    }
+
+    private getFiles(dir: string) : string[] {
+        let files = []
+        if (!existsSync(dir)) return files
+        readdirSync(dir).forEach((entry) => {
+            let file = path.join(dir, entry)
+            if (statSync(file).isDirectory()) {
+                files = files.concat(this.getFiles(file))
+            } else {
+                files.push(file)
+            }
+        })
+        return files
     }
 }

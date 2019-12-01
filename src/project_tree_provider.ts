@@ -1,16 +1,16 @@
-import { TreeDataProvider, TreeItem, TreeItemCollapsibleState, EventEmitter } from 'vscode'
+import { TreeDataProvider, TreeItem, TreeItemCollapsibleState, EventEmitter, ThemeIcon } from 'vscode'
 import { TreeNode } from './models'
-import { ProjectService } from './project_service';
+import { ProjectController } from './project_controller';
 
 export class ProjectTreeProvider implements TreeDataProvider<TreeNode> {
 
     public viewId = 'jvmcode.project-tree';
     
-    private service: ProjectService
+    private controller: ProjectController
     private onDidChangeEmitter = new EventEmitter<TreeNode>()
 
-    constructor(service: ProjectService) {
-        this.service = service
+    constructor(controller: ProjectController) {
+        this.controller = controller
     }
 
     public update() {
@@ -23,16 +23,21 @@ export class ProjectTreeProvider implements TreeDataProvider<TreeNode> {
 
     public getTreeItem(element: TreeNode) : TreeItem {
         let item = new TreeItem(element.treeLabel(), TreeItemCollapsibleState.Collapsed)
+        item.contextValue = element.context
+        item.iconPath = ThemeIcon.Folder
         if ( element.isTerminal ) {
+            item.iconPath = ThemeIcon.File
             item.collapsibleState = TreeItemCollapsibleState.None
+        }
+        if ( element.isOpenable ) {
             item.command = {title: 'Open Entry', command: 'jvmcode.jar-entry', arguments: [element]}
         }
         return item
     }
 
     public getChildren(element: TreeNode) : TreeNode[] | Thenable<TreeNode[]> {
-        if ( !element ) return this.service.getRootNodes()
-        else return element.children()
+        if ( !element ) return this.controller.getRootNodes()
+        else return this.controller.getChildren(element)
     }
 
 }

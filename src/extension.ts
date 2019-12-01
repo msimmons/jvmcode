@@ -24,12 +24,13 @@ export function activate(context: vscode.ExtensionContext) {
     if (!server) {
         server = new JvmServer(context)
         server.start()
-        projectService = new ProjectService(context, server)
+        projectService = new ProjectService(server)
         projectController = new ProjectController(context, projectService)
         languageService = new LanguageService(server)
         languageController = new LanguageController(projectService, languageService)
         languageController.start()
         statsController = new StatsController(server)
+        statsController.start()
     }
 
     //
@@ -111,11 +112,18 @@ export function activate(context: vscode.ExtensionContext) {
     }))
 
     /**
+     * Allows removal of a user specified path or dependency (from the project view)
+     */
+    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.remove', (event) => {
+        console.log('Remove', event)
+    }))
+
+    /**
      * Return the classpath as a string (mostly for use in tasks)
      */
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.classpath', () : string => {
         projectController.start()
-        return projectService.getClasspath()
+        return projectController.getClasspath()
     }))
 
     /**
@@ -131,10 +139,10 @@ export function activate(context: vscode.ExtensionContext) {
      */
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.exec-class', () => {
         projectController.start()
-        let classes = projectService.getClasses().map((c) => {return c.pkg + '.' + c.name})
+        let classes = projectController.getClasses().map((c) => {return c.pkg + '.' + c.name})
         vscode.window.showQuickPick(classes).then((mainClass) => {
             if (!mainClass) return
-            let cp = projectService.getClasspath()
+            let cp = projectController.getClasspath()
             let def = {type: 'jvmcode'} as vscode.TaskDefinition
             let args = cp ? ['-cp', cp] : []
             args = args.concat([mainClass])

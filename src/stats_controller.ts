@@ -9,10 +9,14 @@ import { JvmServer } from './jvm_server';
 export class StatsController {
 
     private statusItem : vscode.StatusBarItem
-
+    private server: JvmServer
 
     public constructor(server: JvmServer) {
-        this.registerStatsListener(server)
+        this.server = server
+    }
+
+    public start() {
+        this.registerStatsListener(this.server)
     }
 
     /**

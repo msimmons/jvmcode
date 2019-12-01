@@ -59,6 +59,10 @@
       {
         "command": "jvmcode.exec-class",
         "title": "JVM: Execute Class"
+      },
+      {
+        "command": "jvmcode.remove",
+        "title": "Remove"
       }
     ],
     "views": {
@@ -67,6 +71,14 @@
           "id": "jvmcode.project-tree",
           "name": "JVM Project",
           "when": "jvmcode.context.isJvmProject"
+        }
+      ]
+    },
+    "menus": {
+      "view/item/context": [
+        {
+          "command": "jvmcode.remove",
+          "when": "viewItem == 'removable'"
         }
       ]
     },

@@ -37,7 +37,7 @@ export class LanguageController {
         // Do we request output, classpath, sourcepath from jvmcode based on file uri?
         let fileName = uri.fsPath
         let outputDir = vscode.workspace.workspaceFolders[0].uri.path+'/build/classes'
-        let classpath = this.projectService.getClasspath()
+        let classpath = ''//this.projectService.getClasspath()
         let sourcepath = vscode.workspace.workspaceFolders[0].uri.path+'/src/main/java'
         // TODO Find dependent files also
         let request = {files: [fileName], outputDir: outputDir, classpath: classpath, sourcepath: sourcepath, name: 'what'} as CompileRequest

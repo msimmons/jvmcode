@@ -18,6 +18,7 @@ export interface TreeNode {
     type: NodeType
     treeLabel() : string
     isTerminal: boolean
+    isOpenable: boolean
     children() : TreeNode[]
     context? : string
 }
@@ -27,6 +28,7 @@ export class PathRootNode implements TreeNode {
     data: PathData[]
     pathNodes: PathNode[]
     isTerminal = false
+    isOpenable = false
     constructor(data: PathData[]) {
         this.data = data
         this.pathNodes = data.map((cp) => {return new PathNode(cp)})
@@ -44,6 +46,7 @@ export class DependencyRootNode implements TreeNode {
     data: DependencySourceData[]
     sourceNodes: DependencySourceNode[]
     isTerminal = false
+    isOpenable = false
     constructor(data: DependencySourceData[]) {
         this.data = data
         this.sourceNodes = data.filter((ds) => {return ds.dependencies.length > 0}).map((ds) => {return new DependencySourceNode(ds)})
@@ -62,10 +65,12 @@ export class PathNode implements TreeNode {
     sourceDirs: SourceDirNode[]
     classDirs: ClassDirNode[]
     isTerminal = false
+    isOpenable = false
     constructor(data: PathData) {
         this.data = data
-        this.classDirs = data.classDirs.map((cd) => { return new ClassDirNode(cd)})
-        this.sourceDirs = data.sourceDirs.map((sd) => { return new SourceDirNode(sd)})
+        let isRemovable = (data.source.toLowerCase() === 'user')
+        this.classDirs = data.classDirs.map((cd) => { return new ClassDirNode(cd, isRemovable)})
+        this.sourceDirs = data.sourceDirs.map((sd) => { return new SourceDirNode(sd, isRemovable)})
     }
     public treeLabel() : string {
         return `${this.data.source} (${this.data.name}:${this.data.module})`
@@ -79,8 +84,11 @@ export class SourceDirNode implements TreeNode {
     path: string
     type = NodeType.SOURCE_DIR
     isTerminal = true
-    constructor(path: string) {
+    isOpenable = false
+    context?: string
+    constructor(path: string, isRemovable: boolean) {
         this.path = path
+        this.context = isRemovable ? 'removable' : undefined
     }
     public treeLabel() : string {
         return 'Source: ' + this.path.replace(workspace.workspaceFolders[0].uri.path+'/', '')
@@ -94,8 +102,11 @@ export class ClassDirNode implements TreeNode {
     path: string
     type = NodeType.CLASS_DIR
     isTerminal = true
-    constructor(path: string) {
+    isOpenable = false
+    context: string
+    constructor(path: string, isRemovable: boolean) {
         this.path = path
+        this.context = isRemovable ? 'removable' : undefined
     }
     public treeLabel() : string {
         return 'Class: ' + this.path.replace(workspace.workspaceFolders[0].uri.path+'/', '')
@@ -110,6 +121,7 @@ export class DependencySourceNode implements TreeNode {
     type = NodeType.SOURCE
     dependencies: DependencyNode[]
     isTerminal = false
+    isOpenable = false
     constructor(data: DependencySourceData) { 
         this.data = data 
         this.dependencies = data.dependencies.map((d) => { return new DependencyNode(d) })
@@ -127,7 +139,11 @@ export class DependencyNode implements TreeNode {
     packages: JarPackageNode[]
     type = NodeType.DEPENDENCY
     isTerminal = false
-    constructor(data: DependencyData) { this.data = data}
+    isOpenable = false
+    constructor(data: DependencyData) { 
+        this.data = data
+        // packages are lazily loaded thru controller
+    }
     public treeLabel() : string  {
         return dependencyLabel(this.data)
     }
@@ -156,6 +172,7 @@ export class JarPackageNode implements TreeNode {
     type = NodeType.PACKAGE
     entries: JarEntryNode[]
     isTerminal = false
+    isOpenable = false
     constructor(dependency: DependencyNode, data: JarPackageData) { 
         this.data = data
         this.dependency = dependency.data
@@ -181,6 +198,7 @@ export class JarEntryNode implements TreeNode {
     content: string
     contentName: string
     isTerminal = true
+    isOpenable = true
     constructor(pkgNode: JarPackageNode, data: JarEntryData) { 
         this.data = data
         this.package = pkgNode.data

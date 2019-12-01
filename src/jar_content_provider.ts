@@ -9,7 +9,7 @@ import { Uri } from 'vscode';
 export class JarContentProvider implements vscode.TextDocumentContentProvider {
 
     /**
-     * Uri is of the form kradle-jarcontent://groupId.artifactId.version/package/name
+     * Uri is of the form jvmcode-jar://groupId.artifactId.version/package/name
      */
 	public scheme = 'jvmcode-jar';
 
