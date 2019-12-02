@@ -3,6 +3,7 @@ apply plugin: net.contrapt.kt2ts.Kt2TsPlugin
 dependencies {
     compile project(':model')
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     compile "io.vertx:vertx-core:$vertx_version"
     compile "io.vertx:vertx-web:$vertx_version"
     compile "ch.qos.logback:logback-classic:1.2.3"
