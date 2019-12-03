@@ -120,7 +120,7 @@ export class ProjectController {
             cp.classDirs.forEach((dir) => {
                 let files = this.getFiles(dir).filter((file) => {return file.indexOf('$') <= 0})
                 entries = entries.concat(files.map((file) => {
-                    let path = dir.replace(vscode.workspace.workspaceFolders[0].name+'/', '')
+                    let path = dir.replace(vscode.workspace.workspaceFolders[0].uri.path+'/', `${cp.source}:`)
                     file = file.replace(dir, '').replace('.class', '')
                     let ndx = file.lastIndexOf('/')
                     let name = file.substr(ndx+1)
