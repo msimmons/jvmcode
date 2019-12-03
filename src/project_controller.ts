@@ -5,10 +5,11 @@ import { JarEntryData, JvmProject } from "server-models"
 import { ProjectTreeProvider } from './project_tree_provider';
 import { JarContentProvider } from './jar_content_provider';
 import { ProjectService } from './project_service';
-import { JarEntryNode, dependencyLabel, PathRootNode, DependencyRootNode, TreeNode, DependencySourceNode, DependencyNode, JarPackageNode, NodeType, PathNode, SourceDirNode, ClassDirNode } from './models';
+import { JarEntryNode, dependencyLabel, PathRootNode, DependencyRootNode, TreeNode, DependencySourceNode, DependencyNode, JarPackageNode, NodeType, SourceDirNode, ClassDirNode, CompilationContext, FileContext } from './models';
 import { projectService, projectController } from './extension';
 import { existsSync, readdirSync, statSync } from 'fs';
-import * as path from 'path'
+import * as PathHelper from 'path'
+import { ConfigService } from './config_service';
 
 /**
  * Responsible for managing various views related to a project
@@ -349,6 +350,36 @@ export class ProjectController {
     }
 
     /**
+     * Return the compilation context for the given file uri
+     * Finding the output dir is a hack because gradle sucks at this!
+     */
+    public getFileContext(file: vscode.Uri) : FileContext {
+        let context = new FileContext()
+        let config = ConfigService.getConfig()
+        let filePath = file.path
+        let fileExt = PathHelper.extname(filePath).replace('.', '')
+        let sourceDir = undefined
+        let pathData = this.pathRootNode.data.find((pd) => {
+            sourceDir = pd.sourceDirs.find((d) => {
+                return filePath.startsWith(d)
+            })
+            return sourceDir
+        })
+        let entry = config.outputDirMap.find((od) => { return od.startsWith(`${fileExt}:`) })
+        context.path = filePath
+        context.sourceDir = sourceDir
+        if (pathData && entry) {
+            let keyword = entry.split(':')[1]
+            context.outputDir = pathData.classDirs.find((d) => { return d.includes(keyword) })
+            return context
+        }
+        else {
+            vscode.window.showErrorMessage(`Could not find output directory for ${filePath}`)
+            return undefined
+        }
+    }
+
+    /**
      * Return the FQCN of the current file
      */
     public getFQCN() : string {
@@ -371,7 +402,7 @@ export class ProjectController {
         let files = []
         if (!existsSync(dir)) return files
         readdirSync(dir).forEach((entry) => {
-            let file = path.join(dir, entry)
+            let file = PathHelper.join(dir, entry)
             if (statSync(file).isDirectory()) {
                 files = files.concat(this.getFiles(file))
             } else {

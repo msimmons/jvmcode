@@ -28,7 +28,7 @@ export function activate(context: vscode.ExtensionContext) {
         projectController = new ProjectController(context, projectService)
         // We don't start the project controller unless we get a request or there are user items
         languageService = new LanguageService(server)
-        languageController = new LanguageController(languageService)
+        languageController = new LanguageController(languageService, projectController)
         languageController.start()
         statsController = new StatsController(server)
         statsController.start()

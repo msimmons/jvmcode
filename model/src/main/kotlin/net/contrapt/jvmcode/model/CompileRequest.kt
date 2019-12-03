@@ -10,6 +10,7 @@ package net.contrapt.jvmcode.model
  * @property sourcepath The sourcepath to use for compilation (?)
  */
 interface CompileRequest {
+    val languageId: String
     val files: Collection<String>
     val name: String
     val outputDir: String

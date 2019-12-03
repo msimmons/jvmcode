@@ -2,7 +2,11 @@
 
 import * as vscode from 'vscode'
 import { LanguageService } from './language_service'
-import { CompileRequest, CompileResult } from 'server-models'
+import { CompileRequest, CompileResult, LanguageRequest, ParseRequest } from 'server-models'
+import { languageService } from './extension';
+import { ConfigService } from './config_service';
+import { PathRootNode } from './models';
+import { ProjectController } from './project_controller';
 
 /**
  * Responsible for managing JVM language services
@@ -10,55 +14,69 @@ import { CompileRequest, CompileResult } from 'server-models'
 export class LanguageController {
 
     private languageService: LanguageService
-    private problems: vscode.DiagnosticCollection
-    private isStarted = false
+    private projectController: ProjectController
+    private problemCollections = new Map<string, vscode.DiagnosticCollection>()
 
-    public constructor(languageService: LanguageService) {
+    public constructor(languageService: LanguageService, projectController: ProjectController) {
         this.languageService = languageService
+        this.projectController = projectController
+        this.registerLanguageListener()
     }
 
     public start() {
-        if (this.isStarted) return
-        this.registerLanguage('java', ['java'])
-        this.isStarted = true
+        // Temporarily trigger the language verticle to send request
+        languageService.startLanguage()
     }
 
     /** 
      * Register a consumer for language requests
      */
     private registerLanguageListener() {
-        this.languageService.registerLanguageListener((languageInfo: any) => {
-            this.start()
+        this.languageService.registerLanguageListener((languageRequest: LanguageRequest) => {
+            this.registerLanguage(languageRequest)
         })
     }
 
-    public registerLanguage(languageId: string, extensions: string[]) {
-        // Watch all .java files
-        let pattern = vscode.workspace.workspaceFolders[0].uri.path+`/**/*.{${extensions.join(',')}}`
+    public registerLanguage(request: LanguageRequest) {
+        // Watch files with the requested extensions
+        let pattern = vscode.workspace.workspaceFolders[0].uri.path+`/**/*.{${request.extensions.join(',')}}`
         let watcher = vscode.workspace.createFileSystemWatcher(pattern)
-        watcher.onDidChange(this.triggerCompile)
-        watcher.onDidDelete(this.triggerCompile)
+        watcher.onDidChange(this.requestCompile(request.languageId))
+        watcher.onDidDelete(this.requestCompile(request.languageId))
+        vscode.workspace.onDidOpenTextDocument(this.requestParse)
         // Create diagnostics collection -- should the problems be managed by the language extension?
-        this.problems = vscode.languages.createDiagnosticCollection('vsc-java')
+        this.problemCollections.set(request.name, vscode.languages.createDiagnosticCollection(request.name))
     }
 
-    triggerCompile = async (uri: vscode.Uri) => {
-        // Do we request output, classpath, sourcepath from jvmcode based on file uri?
-        let fileName = uri.fsPath
-        let outputDir = vscode.workspace.workspaceFolders[0].uri.path+'/build/classes'
-        let classpath = ''//this.projectService.getClasspath()
-        let sourcepath = vscode.workspace.workspaceFolders[0].uri.path+'/src/main/java'
-        // TODO Find dependent files also
-        let request = {files: [fileName], outputDir: outputDir, classpath: classpath, sourcepath: sourcepath, name: 'what'} as CompileRequest
-        let result = await this.languageService.requestCompile(request)
-        this.problems.clear()
-        result.diagnostics.forEach(d => {
-            let uri = vscode.Uri.file(d.file)
-            let existing = this.problems.get(uri)
-            let range = new vscode.Range(d.line-1, d.column-1, d.line-1, d.column-1)
-            let severity = d.severity === 'ERROR' ? vscode.DiagnosticSeverity.Error : vscode.DiagnosticSeverity.Warning 
-            let diagnostic = new vscode.Diagnostic(range, d.message, severity)
-            this.problems.set(uri, existing.concat(diagnostic))
-        })
+    /**
+     * Request compilation and put the diagnostics in the right place
+     */
+    requestCompile(languageId: string) {
+        return async (uri: vscode.Uri) => {
+            let context = this.projectController.getFileContext(uri)
+            let classpath = this.projectController.getClasspath()
+            // TODO Find dependent files also
+            let request = {languageId: languageId, files: [context.path], outputDir: context.outputDir, classpath: classpath, sourcepath: context.sourceDir, name: 'vsc-java'} as CompileRequest
+            let result = await this.languageService.requestCompile(request)
+            let problems = this.problemCollections.get(result.name)
+            problems.clear()
+            result.diagnostics.forEach(d => {
+                let uri = vscode.Uri.file(d.file)
+                let existing = problems.get(uri)
+                let range = new vscode.Range(d.line-1, d.column-1, d.line-1, d.column-1)
+                let severity = d.severity === 'ERROR' ? vscode.DiagnosticSeverity.Error : vscode.DiagnosticSeverity.Warning 
+                let diagnostic = new vscode.Diagnostic(range, d.message, severity)
+                problems.set(uri, existing.concat(diagnostic))
+            })
+        }
     }
+
+    /**
+     * Request parse and deal with the results
+     */
+    requestParse = async (doc: vscode.TextDocument) => {
+        let request = {languageId: doc.languageId, file: doc.uri.path} as ParseRequest
+        let result = await this.languageService.requestParse(request)
+    }
+
 }

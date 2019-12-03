@@ -22,7 +22,7 @@ class ProjectServiceTest {
 
     @Test
     fun systemJdkTest() {
-        val config = JvmConfig(setOf(), setOf("java"))
+        val config = JvmConfig(setOf(), setOf("java"), setOf())
         val service = ProjectService(config, javaHomeSys)
         val project = service.getJvmProject()
         project.dependencySources.size shouldBe 2 // System and User
@@ -45,7 +45,7 @@ class ProjectServiceTest {
     @Test
     fun systemJdkTest11() {
         assumeTrue(File(javaHome11).exists())
-        val config = JvmConfig(setOf(), setOf("java"), setOf("java.base", "java.sql"))
+        val config = JvmConfig(setOf(), setOf("java"), setOf(), setOf("java.base", "java.sql"))
         val service = ProjectService(config, javaHome11)
         val project = service.getJvmProject()
         project.dependencySources.size shouldBe 2 // System and User
@@ -67,7 +67,7 @@ class ProjectServiceTest {
 
     @Test
     fun systemJdkWithExcludesTest() {
-        val config = JvmConfig(setOf("com.sun"), setOf("java"))
+        val config = JvmConfig(setOf("com.sun"), setOf("java"), setOf())
         val service = ProjectService(config, javaHomeSys)
         val deps = service.getJvmProject().dependencySources
         deps.size shouldBe 2
@@ -80,7 +80,7 @@ class ProjectServiceTest {
 
     @Test
     fun addDependencyTest() {
-        val config = JvmConfig(setOf("com.sun"), setOf("java"))
+        val config = JvmConfig(setOf("com.sun"), setOf("java"), setOf())
         val service = ProjectService(config, javaHomeSys)
         val path = javaClass.classLoader?.getResource("postgresql-42.1.4.jar")?.path ?: ""
         service.addUserDependency(path, null)
@@ -98,7 +98,7 @@ class ProjectServiceTest {
 
     @Test
     fun getClasspathTest() {
-        val service = ProjectService(JvmConfig(setOf(), setOf()), javaHomeSys)
+        val service = ProjectService(JvmConfig(setOf(), setOf(), setOf()), javaHomeSys)
         val path1 = javaClass.classLoader?.getResource("postgresql-42.1.4.jar")?.path ?: ""
         service.addUserDependency(path1, null)
         var classpath = service.getClasspath()

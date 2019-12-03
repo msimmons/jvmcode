@@ -1,4 +1,4 @@
-package net.contrapt.jvmcode.parser
+package net.contrapt.jvmcode.language
 
 import com.github.h0tk3y.betterParse.combinators.*
 import com.github.h0tk3y.betterParse.grammar.Grammar

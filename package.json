@@ -159,7 +159,17 @@
             "scala"
           ],
           "description": "A list of extensions used to look for source files in dependency source jars"
-        }
+        },
+        "jvmcode.outputDirMap": {
+          "type": "array",
+          "default": [
+            "java:java",
+            "kt:kotlin",
+            "groovy:groovy",
+            "scala:scala"
+          ],
+          "description": "Helps map source file extension to the a directory containing the given keyword: 'ext:keyword' (this is a hack)"
+        }      
       }
     }
   },

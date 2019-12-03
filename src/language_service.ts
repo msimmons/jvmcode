@@ -2,7 +2,7 @@
 
 import * as vscode from 'vscode'
 import { JvmServer } from './jvm_server';
-import { CompileRequest, CompileResult } from 'server-models'
+import { CompileRequest, CompileResult, ParseRequest } from 'server-models'
 import { server } from './extension';
 
 /**
@@ -19,7 +19,7 @@ export class LanguageService {
     }
 
     /**
-     * List for language service registrations
+     * Listen for language service registrations
      * @param callback 
      */
     private languageListener = (error, result) => {
@@ -31,9 +31,6 @@ export class LanguageService {
             this.languageListeners.forEach((listener) => {
                 listener(languageInfo)
             })
-            // Name of language
-            // What file extensions it covers
-            // Is there any need for other listeners?
         }
     }
 
@@ -46,11 +43,19 @@ export class LanguageService {
     }
 
     /**
+     * Indicate we are ready for language verticle to start
+     */
+    public startLanguage() {
+        server.send('jvmcode.start-language', {})
+    }
+
+    /**
      * Request that a buffer be parsed by an appropriate language service
      * @param file 
      */
-    public requestParse(file: vscode.Uri) {
-
+    public async requestParse(request: ParseRequest) {
+        let reply = await server.send('jvmcode.request-parse', request)
+        return reply.body
     }
 
     /**

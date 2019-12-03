@@ -1,5 +1,6 @@
-package net.contrapt.jvmcode.model
+package net.contrapt.jvmcode.language
 
+import net.contrapt.jvmcode.model.Diagnostic
 import java.util.*
 
 import javax.tools.JavaFileObject

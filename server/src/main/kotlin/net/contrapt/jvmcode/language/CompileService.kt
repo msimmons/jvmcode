@@ -1,4 +1,4 @@
-package net.contrapt.jvmcode.service
+package net.contrapt.jvmcode.language
 
 import javax.tools.Diagnostic
 import javax.tools.DiagnosticCollector
@@ -13,7 +13,7 @@ class CompileService {
         val collector = DiagnosticCollector<JavaFileObject>()
         val fileManager = compiler.getStandardFileManager(collector, null, null)
         val compilationUnits = fileManager.getJavaFileObjects(fileName)
-        val options = listOf("-d", outputDir, "-cp", outputDir, "-sourcepath", sourcepath, "-deprecation", "-Xlint")
+        val options = listOf("-d", outputDir, "-cp", classpath, "-sourcepath", sourcepath, "-deprecation", "-Xlint")
         val compileTask = compiler.getTask(null, fileManager, collector, options, null, compilationUnits)
         compileTask.call()
         return collector.diagnostics

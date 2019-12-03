@@ -221,6 +221,12 @@ export class JarEntryNode implements TreeNode {
     }
 }
 
+export class FileContext {
+    path: string
+    sourceDir: string
+    outputDir: string
+}
+
 export enum SourceType {
     MAIN,
     TEST

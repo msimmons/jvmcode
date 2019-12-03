@@ -3,10 +3,10 @@ package net.contrapt.jvmcode.handler
 import io.vertx.core.Vertx
 import io.vertx.core.eventbus.Message
 import io.vertx.core.json.JsonObject
-import net.contrapt.jvmcode.model.JavaCompileRequest
-import net.contrapt.jvmcode.model.JavaCompileResult
-import net.contrapt.jvmcode.model.JavaDiagnostic
-import net.contrapt.jvmcode.service.CompileService
+import net.contrapt.jvmcode.language.JavaCompileRequest
+import net.contrapt.jvmcode.language.JavaCompileResult
+import net.contrapt.jvmcode.language.JavaDiagnostic
+import net.contrapt.jvmcode.language.CompileService
 
 class RequestCompile(vertx: Vertx, val compileService: CompileService) : AbstractHandler(vertx) {
 
