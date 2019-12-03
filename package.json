@@ -29,10 +29,6 @@
         "title": "JVM: Start Server"
       },
       {
-        "command": "jvmcode.echo",
-        "title": "JVM: Echo Message"
-      },
-      {
         "command": "jvmcode.log-level",
         "title": "JVM: Set Log Level"
       },
@@ -61,8 +57,8 @@
         "title": "JVM: Execute Class"
       },
       {
-        "command": "jvmcode.remove",
-        "title": "Remove"
+        "command": "jvmcode.remove-user-item",
+        "title": "JVM: Remove User Item"
       }
     ],
     "views": {
@@ -77,8 +73,24 @@
     "menus": {
       "view/item/context": [
         {
-          "command": "jvmcode.remove",
-          "when": "viewItem == 'removable'"
+          "command": "jvmcode.remove-user-item",
+          "when": "viewItem == 'user-item'",
+          "group": "JVM"
+        },
+        {
+          "command": "jvmcode.add-dependency",
+          "when": "viewItem == 'user-source'",
+          "group": "JVM"
+        },
+        {
+          "command": "jvmcode.add-sourcedir",
+          "when": "viewItem == 'user-path'",
+          "group": "JVM"
+        },
+        {
+          "command": "jvmcode.add-classdir",
+          "when": "viewItem == 'user-path'",
+          "group": "JVM"
         }
       ]
     },

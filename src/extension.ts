@@ -2,7 +2,7 @@
 
 import * as vscode from 'vscode'
 import { JvmServer } from './jvm_server'
-import { JarEntryNode, dependencyLabel, CompilationContext } from './models';
+import { JarEntryNode, TreeNode } from './models';
 import { ProjectService } from './project_service';
 import { ProjectController } from './project_controller';
 import { StatsController } from './stats_controller';
@@ -15,7 +15,7 @@ export let projectController: ProjectController
 export let languageService: LanguageService
 export let languageController: LanguageController
 let statsController: StatsController
-export let extensionContext: vscode.ExtensionContext
+export let extensionContext: vscode.ExtensionContext // Allows test to access the context?
 
 export function activate(context: vscode.ExtensionContext) {
     extensionContext = context
@@ -26,8 +26,9 @@ export function activate(context: vscode.ExtensionContext) {
         server.start()
         projectService = new ProjectService(server)
         projectController = new ProjectController(context, projectService)
+        // We don't start the project controller unless we get a request or there are user items
         languageService = new LanguageService(server)
-        languageController = new LanguageController(projectService, languageService)
+        languageController = new LanguageController(languageService)
         languageController.start()
         statsController = new StatsController(server)
         statsController.start()
@@ -40,18 +41,6 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.start', () => {
         server = new JvmServer(context)
         server.start()
-    }))
-
-    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.echo', () => {
-        vscode.window.showInputBox().then((message) => {
-            if (message) {
-                server.send('jvmcode.echo', { message: message }).then((reply) => {
-                    vscode.window.showInformationMessage('Got reply: ' + JSON.stringify(reply.body))
-                }).catch((error) => {
-                    vscode.window.showErrorMessage('Got error: ' + error.message)
-                })
-            }
-        })
     }))
 
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.log-level', () => {
@@ -73,7 +62,6 @@ export function activate(context: vscode.ExtensionContext) {
 
     /**
      * Allow the user to find any class in the projects current dependencies
-     * Maybe show local project classes first, if no match, show dependency classes (possibly pre-filtered)
      */
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.find-class', async () => {
         await projectController.start() // TODO This won't work correctly first time -- async timing
@@ -114,8 +102,8 @@ export function activate(context: vscode.ExtensionContext) {
     /**
      * Allows removal of a user specified path or dependency (from the project view)
      */
-    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.remove', (event) => {
-        console.log('Remove', event)
+    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.remove-user-item', (event) => {
+        projectController.removeUserItem(event as TreeNode)
     }))
 
     /**

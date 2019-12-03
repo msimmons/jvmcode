@@ -5,7 +5,7 @@ import { JarEntryData, JvmProject } from "server-models"
 import { ProjectTreeProvider } from './project_tree_provider';
 import { JarContentProvider } from './jar_content_provider';
 import { ProjectService } from './project_service';
-import { JarEntryNode, dependencyLabel, PathRootNode, DependencyRootNode, TreeNode, DependencySourceNode, DependencyNode, JarPackageNode, NodeType } from './models';
+import { JarEntryNode, dependencyLabel, PathRootNode, DependencyRootNode, TreeNode, DependencySourceNode, DependencyNode, JarPackageNode, NodeType, PathNode, SourceDirNode, ClassDirNode } from './models';
 import { projectService, projectController } from './extension';
 import { existsSync, readdirSync, statSync } from 'fs';
 import * as path from 'path'
@@ -95,17 +95,6 @@ export class ProjectController {
     }
 
     /**
-     * Return all the dependency nodes for the given source
-     */
-    public getDependencyNodes(source: DependencySourceNode) : DependencyNode[] {
-        let nodes = source.data.dependencies.filter((d) => { return !d.transitive }).map((d) => {
-            return new DependencyNode(d)
-        })
-        source.dependencies = nodes
-        return nodes
-    }
-
-    /**
      * Return all the package nodes for the given dependency; this resolves all the entries in the jar file as well
      */
     public async getPackageNodes(dependency: DependencyNode) : Promise<JarPackageNode[]> {
@@ -131,11 +120,12 @@ export class ProjectController {
             cp.classDirs.forEach((dir) => {
                 let files = this.getFiles(dir).filter((file) => {return file.indexOf('$') <= 0})
                 entries = entries.concat(files.map((file) => {
+                    let path = dir.replace(vscode.workspace.workspaceFolders[0].name+'/', '')
                     file = file.replace(dir, '').replace('.class', '')
                     let ndx = file.lastIndexOf('/')
                     let name = file.substr(ndx+1)
                     let pkg = file.substr(1, ndx-1).replace(/\//g, '.')
-                    return { type: 'CLASS', name: name, pkg: pkg } as JarEntryData
+                    return { type: 'CLASS', name: name, pkg: pkg, path: path } as JarEntryData
                 })
             )})
         })
@@ -221,12 +211,9 @@ export class ProjectController {
             let quickPick = vscode.window.createQuickPick()
             quickPick.matchOnDescription = true
             let classItems = classes.map((c) => {
-                return { label: c.name, description: c.pkg, detail: 'hello', entry: c } as vscode.QuickPickItem
+                return { label: c.name, description: `${c.pkg} (${c.path})`, detail: 'No Detail Shows', entry: c } as vscode.QuickPickItem
             })
-            let jarItems = results[0].map((r) => {
-                let detail = dependencyLabel(r.dependency)
-                return { label: r.name, description: r.package.name, detail: detail, entry: r } as vscode.QuickPickItem
-            })
+            let jarItems = undefined
             quickPick.items = classItems
             quickPick.onDidAccept(selection => {
                 quickPick.dispose()
@@ -234,14 +221,23 @@ export class ProjectController {
                     projectController.openJarEntry(quickPick.selectedItems[0]['entry'])
                 }
             })
-            quickPick.onDidChangeSelection(selection => {
-            })
-            quickPick.onDidChangeActive(event => {
-            })
             quickPick.onDidChangeValue(event => {
                 if (event.length > 0 && quickPick.activeItems.length === 0) {
+                    if (!jarItems) {
+                        quickPick.busy = true
+                        Promise.all([jarEntries]).then((results) => {
+                            jarItems = results[0].map((r) => {
+                                let detail = dependencyLabel(r.dependency)
+                                return { label: r.name, description: `${r.package.name} (${detail})`, detail: detail, entry: r } as vscode.QuickPickItem
+                            })
+                        }).catch((reason) => {
+                            console.error(reason)
+                            jarItems = []
+                        })
+                        quickPick.busy = false
+                    }
                     quickPick.items = quickPick.items.concat(jarItems.filter((ji) => {
-                        return ji.label.toLowerCase().startsWith(event.toLowerCase())
+                        return ji.label.toLowerCase().includes(event.toLowerCase())
                     }))
                 }
                 else if (event.length === 0) {
@@ -288,6 +284,25 @@ export class ProjectController {
     }
 
     /**
+     * Remove the given user item
+     */
+    public removeUserItem(item: TreeNode) {
+        switch (item.type) {
+            case NodeType.CLASS_DIR:
+                projectService.removePath((item as ClassDirNode).path)
+                break
+            case NodeType.SOURCE_DIR:
+                projectService.removePath((item as SourceDirNode).path)
+                break
+            case NodeType.DEPENDENCY:
+                projectService.removeDependency((item as DependencyNode).data.fileName)
+                break
+            default:
+                break
+        }
+    }
+
+    /**
      * Get the current classpath
      */
     public getClasspath() : string {
@@ -329,7 +344,6 @@ export class ProjectController {
             let paths = (userPaths) ? [userPaths] : []
             await this.start()
             let project = {dependencySources: dependencySources, paths: paths, source: 'USER'}
-            console.log(project)
             await projectService.updateUserProject(project)
         }
     }

@@ -11,6 +11,7 @@ import { server } from './extension';
 export class LanguageService {
 
     private server: JvmServer
+    private languageListeners = [] // Array of language callbacks
 
     public constructor(server: JvmServer) {
         this.server = server
@@ -27,10 +28,29 @@ export class LanguageService {
         }
         else {
             let languageInfo = result.body
+            this.languageListeners.forEach((listener) => {
+                listener(languageInfo)
+            })
             // Name of language
             // What file extensions it covers
             // Is there any need for other listeners?
         }
+    }
+
+    /**
+     * Register a listener for incoming language requests
+     * @param callback(project: JvmProject)
+     */
+    public registerLanguageListener(callback) {
+        this.languageListeners.push(callback)
+    }
+
+    /**
+     * Request that a buffer be parsed by an appropriate language service
+     * @param file 
+     */
+    public requestParse(file: vscode.Uri) {
+
     }
 
     /**

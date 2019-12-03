@@ -66,11 +66,13 @@ export class PathNode implements TreeNode {
     classDirs: ClassDirNode[]
     isTerminal = false
     isOpenable = false
+    context = undefined
     constructor(data: PathData) {
         this.data = data
-        let isRemovable = (data.source.toLowerCase() === 'user')
-        this.classDirs = data.classDirs.map((cd) => { return new ClassDirNode(cd, isRemovable)})
-        this.sourceDirs = data.sourceDirs.map((sd) => { return new SourceDirNode(sd, isRemovable)})
+        let isUser = (data.source.toLowerCase() === 'user')
+        this.context = isUser ? 'user-path' : undefined
+        this.classDirs = data.classDirs.map((cd) => { return new ClassDirNode(cd, isUser)})
+        this.sourceDirs = data.sourceDirs.map((sd) => { return new SourceDirNode(sd, isUser)})
     }
     public treeLabel() : string {
         return `${this.data.source} (${this.data.name}:${this.data.module})`
@@ -86,9 +88,9 @@ export class SourceDirNode implements TreeNode {
     isTerminal = true
     isOpenable = false
     context?: string
-    constructor(path: string, isRemovable: boolean) {
+    constructor(path: string, isUser: boolean) {
         this.path = path
-        this.context = isRemovable ? 'removable' : undefined
+        this.context = isUser ? 'user-item' : undefined
     }
     public treeLabel() : string {
         return 'Source: ' + this.path.replace(workspace.workspaceFolders[0].uri.path+'/', '')
@@ -104,9 +106,9 @@ export class ClassDirNode implements TreeNode {
     isTerminal = true
     isOpenable = false
     context: string
-    constructor(path: string, isRemovable: boolean) {
+    constructor(path: string, isUser: boolean) {
         this.path = path
-        this.context = isRemovable ? 'removable' : undefined
+        this.context = isUser ? 'user-item' : undefined
     }
     public treeLabel() : string {
         return 'Class: ' + this.path.replace(workspace.workspaceFolders[0].uri.path+'/', '')
@@ -122,9 +124,12 @@ export class DependencySourceNode implements TreeNode {
     dependencies: DependencyNode[]
     isTerminal = false
     isOpenable = false
+    context = undefined
     constructor(data: DependencySourceData) { 
         this.data = data 
-        this.dependencies = data.dependencies.map((d) => { return new DependencyNode(d) })
+        let isUser = data.source.toLocaleLowerCase() === 'user'
+        this.context = isUser ? 'user-source' : undefined
+        this.dependencies = data.dependencies.map((d) => { return new DependencyNode(d, isUser) })
     }
     public treeLabel() : string {
         return this.data.description
@@ -140,8 +145,10 @@ export class DependencyNode implements TreeNode {
     type = NodeType.DEPENDENCY
     isTerminal = false
     isOpenable = false
-    constructor(data: DependencyData) { 
+    context = undefined
+    constructor(data: DependencyData, isUser: boolean) { 
         this.data = data
+        this.context = isUser ? 'user-item' : undefined
         // packages are lazily loaded thru controller
     }
     public treeLabel() : string  {

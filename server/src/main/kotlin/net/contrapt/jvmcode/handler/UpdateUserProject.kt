@@ -6,6 +6,10 @@ import io.vertx.core.json.JsonObject
 import net.contrapt.jvmcode.service.ProjectService
 import net.contrapt.jvmcode.service.model.ProjectUpdateRequest
 
+/**
+ * Handles message from a user supplied project (usually when restoring a workspace) and publishes
+ * results back
+ */
 class UpdateUserProject(vertx: Vertx, val projectService: ProjectService) : AbstractHandler(vertx) {
 
     override fun processMessage(message: Message<JsonObject>): JsonObject {

@@ -66,11 +66,26 @@ class ProjectService(var config: JvmConfig, val javaHome : String) {
     }
 
     /**
+     * Remove a user dependency
+     */
+    fun removeUserDependency(jarFile: String) {
+        userSource.dependencies.removeIf { it.fileName == jarFile }
+    }
+
+    /**
      * User adds a path component
      */
     fun addUserPath(pathData: PathData) {
         pathData.classDirs.forEach { userPath.classDirs.add(it) }
         pathData.sourceDirs.forEach { userPath.sourceDirs.add(it) }
+    }
+
+    /**
+     * Remove a user path component
+     */
+    fun removeUserPath(path: String) {
+        userPath.classDirs.remove(path)
+        userPath.sourceDirs.remove(path)
     }
 
     /**

@@ -1,6 +1,5 @@
 'use strict';
 
-import * as vscode from 'vscode'
 import { DependencyData, JarEntryData, JarPackageData, JvmProject, PathData, ProjectUpdateData} from "server-models"
 import { JvmServer } from './jvm_server';
 import { JarEntryNode, CompilationContext } from './models';
@@ -13,14 +12,11 @@ import { ConfigService } from './config_service';
 export class ProjectService {
 
     private server: JvmServer
-    private projectListeners = [] // Array of dependency callbacks
-    // A Map of source directories to associated compilation contexts
-    private compilationContexts : Map<String, CompilationContext> = new Map()
+    private projectListeners = [] // Array of project callbacks
 
     public constructor(server: JvmServer) {
         this.server = server
         this.server.registerConsumer('jvmcode.project', this.projectListener)
-        this.server.registerConsumer('jvmcode.language', this.languageListener)
     }
 
     /**
@@ -36,22 +32,6 @@ export class ProjectService {
             this.projectListeners.forEach((listener) => {
                 listener(jvmProject)
             })
-        }
-    }
-
-    /**
-     * List for language service registrations
-     * @param callback 
-     */
-    private languageListener = (error, result) => {
-        if (error || !result) {
-            console.error('Got a language event with bad payload', error)
-        }
-        else {
-            let languageInfo = result.body
-            // Name of language
-            // What file extensions it covers
-            // Is there any need for other listeners?
         }
     }
 
@@ -81,10 +61,28 @@ export class ProjectService {
     }
 
     /**
+     * Remove a jar depdnency
+     * @param jarFile
+     */
+    public async removeDependency(jarFile: string) {
+        let reply = await this.server.send('jvmcode.remove-dependency', {jarFile: jarFile})
+        this.projectListener(undefined, reply)
+    }
+
+    /**
      * Add a path component(s) to the project
      */
     public async addPath(userPath: PathData) {
         let reply = await this.server.send('jvmcode.add-path', userPath)
+        this.projectListener(undefined, reply)
+    }
+
+    /**
+     * Remove a user path
+     * @param path
+     */
+    public async removePath(path: string) {
+        let reply = await this.server.send('jvmcode.remove-path', {path: path})
         this.projectListener(undefined, reply)
     }
 
@@ -115,34 +113,5 @@ export class ProjectService {
         let reply = await this.server.send('jvmcode.jar-entry', {jarEntry: jarEntry.data})
         return reply.body
     }
-
-    /**
-     * Request that a buffer be parsed by an appropriate language service
-     * @param file 
-     */
-    public requestParse(file: vscode.Uri) {
-
-    }
-
-    /**
-     * Request that a file be compiled by an appropriate language service
-     * @param file 
-     */
-    public requestCompile(file: vscode.Uri) {
-        // Are there any appropriate services?
-        // Find dependent files to add to compile list
-        // Send compile request
-    }
-
-    /**
-     * 
-     * @param file The file for which context is requested
-     */
-    // public getCompilationContext(file: vscode.Uri) : CompilationContext {
-    //     let compilationContext = new CompilationContext()
-    //     compilationContext.classpath = this.classpath
-    //     compilationContext.outputDir = this.pathRootNode.data[0].classDirs[0]
-    //     return new CompilationContext()
-    // }
 
 }

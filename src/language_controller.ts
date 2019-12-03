@@ -1,7 +1,6 @@
 'use strict';
 
 import * as vscode from 'vscode'
-import { ProjectService } from './project_service';
 import { LanguageService } from './language_service'
 import { CompileRequest, CompileResult } from 'server-models'
 
@@ -10,17 +9,27 @@ import { CompileRequest, CompileResult } from 'server-models'
  */
 export class LanguageController {
 
-    private projectService: ProjectService
     private languageService: LanguageService
     private problems: vscode.DiagnosticCollection
+    private isStarted = false
 
-    public constructor(projectService: ProjectService, languageService: LanguageService) {
-        this.projectService = projectService
+    public constructor(languageService: LanguageService) {
         this.languageService = languageService
     }
 
     public start() {
+        if (this.isStarted) return
         this.registerLanguage('java', ['java'])
+        this.isStarted = true
+    }
+
+    /** 
+     * Register a consumer for language requests
+     */
+    private registerLanguageListener() {
+        this.languageService.registerLanguageListener((languageInfo: any) => {
+            this.start()
+        })
     }
 
     public registerLanguage(languageId: string, extensions: string[]) {

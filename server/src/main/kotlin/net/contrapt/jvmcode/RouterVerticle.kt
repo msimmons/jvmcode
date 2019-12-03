@@ -213,9 +213,19 @@ class RouterVerticle(val startupToken: String, var config: JvmConfig) : Abstract
         vertx.eventBus().consumer<JsonObject>("jvmcode.add-dependency", AddDependency(vertx, projectService))
 
         /**
+         * Remove a single jar file dependency
+         */
+        vertx.eventBus().consumer<JsonObject>("jvmcode.remove-dependency", RemoveDependency(vertx, projectService))
+
+        /**
          * Add one or more path components (from the user)
          */
         vertx.eventBus().consumer<JsonObject>("jvmcode.add-path", AddPath(vertx, projectService))
+
+        /**
+         * Remove a user entered path component
+         */
+        vertx.eventBus().consumer<JsonObject>("jvmcode.remove-path", RemovePath(vertx, projectService))
 
         /**
          * Return the classpath for the current set of dependencies
