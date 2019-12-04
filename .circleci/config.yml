@@ -23,6 +23,11 @@ jobs:
         auth:
           username: $DOCKER_USER
           password: $DOCKER_PASSWORD
+    environment:
+      ORG_GRADLE_PROJECT_gh_registry_uri: ""
+      ORG_GRADLE_PROJECT_gh_registry_user: ""
+      ORG_GRADLE_PROJECT_gh_registry_key: ""
+      ORG_GRADLE_PROJECT_build_tag: ""
     steps:
       - checkout
       - restore_cache:
