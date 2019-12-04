@@ -57,9 +57,9 @@ jobs:
       - store_test_results:
           path: server/build/test-results
       - persist_to_workspace:
-          root: /home/work/build
+          root: /home/work
           paths:
-            - *
+            - build
   publish:
     working_directory: /home/work/build
     docker:
@@ -69,7 +69,7 @@ jobs:
           password: $DOCKER_PASSWORD
     steps:
       - attach_workspace:
-          at: /home/work/build
+          at: /home/work
       - run: 
           command: |
             ORG_GRADLE_PROJECT_gh_registry_uri=$GH_REGISTRY_URI
