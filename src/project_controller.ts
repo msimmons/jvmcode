@@ -208,45 +208,43 @@ export class ProjectController {
     public findClass() {
         let jarEntries = this.getJarEntryNodes()
         let classes = this.getClasses()
-        Promise.all([jarEntries]).then((results) => {
-            let quickPick = vscode.window.createQuickPick()
-            quickPick.matchOnDescription = true
-            let classItems = classes.map((c) => {
-                return { label: c.name, description: `${c.pkg} (${c.path})`, detail: 'No Detail Shows', entry: c } as vscode.QuickPickItem
-            })
-            let jarItems = undefined
-            quickPick.items = classItems
-            quickPick.onDidAccept(selection => {
-                quickPick.dispose()
-                if (quickPick.selectedItems.length) {
-                    projectController.openJarEntry(quickPick.selectedItems[0]['entry'])
-                }
-            })
-            quickPick.onDidChangeValue(event => {
-                if (event.length > 0 && quickPick.activeItems.length === 0) {
-                    if (!jarItems) {
-                        quickPick.busy = true
-                        Promise.all([jarEntries]).then((results) => {
-                            jarItems = results[0].map((r) => {
-                                let detail = dependencyLabel(r.dependency)
-                                return { label: r.name, description: `${r.package.name} (${detail})`, detail: detail, entry: r } as vscode.QuickPickItem
-                            })
-                        }).catch((reason) => {
-                            console.error(reason)
-                            jarItems = []
-                        })
-                        quickPick.busy = false
-                    }
-                    quickPick.items = quickPick.items.concat(jarItems.filter((ji) => {
-                        return ji.label.toLowerCase().includes(event.toLowerCase())
-                    }))
-                }
-                else if (event.length === 0) {
-                    quickPick.items = classItems
-                }
-            })
-            quickPick.show()
+        let quickPick = vscode.window.createQuickPick()
+        quickPick.matchOnDescription = true
+        let classItems = classes.map((c) => {
+            return { label: c.name, description: `${c.pkg} (${c.path})`, detail: 'No Detail Shows', entry: c } as vscode.QuickPickItem
         })
+        let jarItems = undefined
+        quickPick.items = classItems
+        quickPick.onDidAccept(selection => {
+            quickPick.dispose()
+            if (quickPick.selectedItems.length) {
+                projectController.openJarEntry(quickPick.selectedItems[0]['entry'])
+            }
+        })
+        quickPick.onDidChangeValue(event => {
+            if (event.length > 0 && quickPick.activeItems.length === 0) {
+                if (!jarItems) {
+                    quickPick.busy = true
+                    Promise.all([jarEntries]).then((results) => {
+                        jarItems = results[0].map((r) => {
+                            let detail = dependencyLabel(r.dependency)
+                            return { label: r.name, description: `${r.package.name} (${detail})`, detail: detail, entry: r } as vscode.QuickPickItem
+                        })
+                    }).catch((reason) => {
+                        console.error(reason)
+                        jarItems = []
+                    })
+                    quickPick.busy = false
+                }
+                quickPick.items = quickPick.items.concat(jarItems.filter((ji) => {
+                    return ji.label.toLowerCase().includes(event.toLowerCase())
+                }))
+            }
+            else if (event.length === 0) {
+                quickPick.items = classItems
+            }
+        })
+        quickPick.show()
     }
 
     /**
