@@ -20,7 +20,6 @@ task sourceJar(type: Jar) {
 publishing {
     repositories {
         maven {
-            //url = "$git_m2repo_uri"
             url = "${gh_registry_uri}/jvmcode"
             credentials {
                 username = "${gh_registry_user}"
