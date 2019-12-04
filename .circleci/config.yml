@@ -48,7 +48,13 @@ jobs:
             vsce package
             mkdir dist
             cp *.vsix dist
-      - run: ./gradlew publish
+      - run: 
+          command: |
+            ORG_GRADLE_PROJECT_gh_registry_uri=$GH_REGISTRY_URI
+            ORG_GRADLE_PROJECT_gh_registry_user=$GH_REGISTRY_USER
+            ORG_GRADLE_PROJECT_gh_registry_key=$GH_REGISTRY_KEY
+            ORG_GRADLE_PROJECT_build_tag=$CIRCLE_BUILD_NUM
+            ./gradlew publish
       - save_cache:
           key: *jvm_cache_key
           paths:
