@@ -48,7 +48,7 @@ jobs:
             vsce package
             mkdir dist
             cp *.vsix dist
-
+      - run: ./gradlew publish
       - save_cache:
           key: *jvm_cache_key
           paths:
