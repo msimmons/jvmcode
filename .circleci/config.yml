@@ -58,8 +58,8 @@ jobs:
           path: server/build/test-results
       - persist_to_workspace:
           root: /home/work/build
-            paths:
-              - *
+          paths:
+            - *
   publish:
     working_directory: /home/work/build
     docker:
