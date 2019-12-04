@@ -21,6 +21,7 @@ class JavaGrammarTest {
 
     @Test
     fun lineTest() {
+        val result = JavaParseResult(file = "the file")
         var tokens = JavaGrammar.tokenizer.tokenize(getJava())
         while(true) {
             val parsed : ParseResult<Any> = JavaGrammar.lineParser.tryParse(tokens)

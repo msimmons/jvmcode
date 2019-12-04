@@ -119,7 +119,8 @@ object JavaGrammar : Grammar<String>() {
     val DOUBLE by token("double\\b")
     val FLOAT by token("float\\b")
 
-    // Other Tokens
+    // Identifier is dot separated thing
+    // TODO backticked identifiers
     val IDENT by token("[A-Za-z][.\\w]*")
 
     // Rules
@@ -134,10 +135,11 @@ object JavaGrammar : Grammar<String>() {
     // Allow new lines as statement ends?
 
     // Package
-    val packageName by separated(IDENT, DOT, true) map {
-        val token = it.terms.first()
-        val name= it.terms.joinToString(".") { it.text }
-        PackageDecl(name, token)
+    val packageName by IDENT map {
+        val name = it.text
+        val start = it.position
+        val end = start + name.length-1
+        JavaParseSymbol(name, "PACKAGE", JavaParseLocation(start, end), name)
     }
     val packageDecl by (-PACKAGE * packageName * -semis) map {
         it
@@ -145,12 +147,13 @@ object JavaGrammar : Grammar<String>() {
 
     // Imports
     val importName by IDENT * optional(ASTERISK) map {
-        val token = it.t1
         val name = it.t1.text.trim('.')
         val wild = it.t2 != null
-        ImportDecl(name, token, wild)
+        val start = it.t1.position
+        val end = start + it.t1.text.length -1 + (if (wild) 1 else 0)
+        JavaParseSymbol(name, "IMPORT", JavaParseLocation(start, end), name).apply { isWild = wild }
     }
-    val importDecl by (-IMPORT * optional(STATIC) * importName * -SEMI) map {
+    val importDecl by (-IMPORT * optional(STATIC) * importName * -semis) map {
         it.t2.apply { isStatic = it.t1 != null }
     }
     val importDecls by zeroOrMore(importDecl)

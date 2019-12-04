@@ -25,6 +25,10 @@ jobs:
           password: $DOCKER_PASSWORD
     environment:
       ORG_GRADLE_PROJECT_git_m2repo_uri: /home/work/m2repo
+      ORG_GRADLE_PROJECT_gh_registry_uri: $GH_REGISTRY_URI
+      ORG_GRADLE_PROJECT_gh_registry_user: $GH_REGISTRY_USER
+      ORG_GRADLE_PROJECT_gh_registry_key: $GH_REGISTRY_KEY
+      ORG_GRADLE_PROJECT_build_tag: $CIRCLE_BUILD_NUM
     steps:
       - checkout
       - restore_cache:
@@ -64,3 +68,4 @@ workflows:
   build_publish:
     jobs:
       - build
+        context: github_registry

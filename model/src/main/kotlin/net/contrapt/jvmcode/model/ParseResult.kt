@@ -4,5 +4,7 @@ interface ParseResult {
     val languageId: String
     val name: String
     val file: String
-    val symbols: String
+    val pkg: ParseSymbol
+    val imports: Collection<ParseSymbol>
+    val scopes: Collection<ParseScope>
 }
