@@ -1,18 +1,13 @@
 # JVMCode
-How about we provide any non-language specific JVM kind of thing in this
-plugin
+JVM Code will supply all non-language specific info.  Essentially all things realted to .class files
 
 ## TODO
 
 - Dependency Management
   - _Default JDK dependencies_
-  - _Allow manually entered jar dependencies_
-  - _Accept dependencies from other tools (Gradle, Maven)_
-  - _Tree view of jar dependencies_
-    - source: group:artifact:version (DependencyContainer)
-      - jarfile.jar | jmod (DependencyData)
-        - com.package1 (PackageData)
-        - com.package2
+  - _Allow manually entered jar dependencies and paths_
+  - _Accept dependencies and paths from other tools (Gradle, Maven)_
+  - _Tree view of project jar dependencies and paths_
   - _Compiled class output on classpath_
   - Supplier of Classpath
     - To repl shells
@@ -37,5 +32,10 @@ plugin
 ## Use Cases
 - Know what is imported in current scope
 - Suggest types from 1) current package, 2) imported types, 3) all dependencies
-- On choosing a type, insert import statement if necessary
+- On choosing a type, insert import statement if necessary (allow config for ordering imports)
 - Show member and parameter help for dot completions
+
+## See the following
+[Class File Info](https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.3.2)
+
+[Javassist](http://www.javassist.org/)
