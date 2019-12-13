@@ -1,7 +1,7 @@
 'use strict';
 
 import * as vscode from 'vscode'
-import { JarEntryData, JvmProject } from "server-models"
+import { JarEntryData, JvmProject, ClassData } from "server-models"
 import { ProjectTreeProvider } from './project_tree_provider';
 import { JarContentProvider } from './jar_content_provider';
 import { ProjectService } from './project_service';
@@ -112,25 +112,8 @@ export class ProjectController {
         }
     }
 
-    /**
-     * Return all classes in registered class directories (returned as JarEntryData for uniformity)
-     */
-    public getClasses() : JarEntryData[] {
-        let entries = []
-        this.pathRootNode.data.forEach((cp) => {
-            cp.classDirs.forEach((dir) => {
-                let files = this.getFiles(dir).filter((file) => {return file.indexOf('$') <= 0})
-                entries = entries.concat(files.map((file) => {
-                    let path = dir.replace(vscode.workspace.workspaceFolders[0].uri.path+'/', `${cp.source}:`)
-                    file = file.replace(dir, '').replace('.class', '')
-                    let ndx = file.lastIndexOf('/')
-                    let name = file.substr(ndx+1)
-                    let pkg = file.substr(1, ndx-1).replace(/\//g, '.')
-                    return { type: 'CLASS', name: name, pkg: pkg, path: path } as JarEntryData
-                })
-            )})
-        })
-        return entries
+    public async getClassdata() : Promise<ClassData[]> {
+        return await this.service.getClassdata()
     }
 
     /**
@@ -183,6 +166,30 @@ export class ProjectController {
     }
 
     /**
+     * Open the given jar or class entry
+     */
+    public openEntry(entry: JarEntryNode | ClassData) {
+        if (entry instanceof JarEntryNode) this.openJarEntry(entry)
+        else this.openClass(entry)
+    }
+
+    /**
+     * Open the source for the given [ClassData]
+     */
+    public openClass(classData: ClassData) {
+        let file = this.class2source(classData)
+        console.log(file)
+        if (file) {
+            vscode.workspace.openTextDocument(vscode.Uri.file(file)).then((doc) => {
+                vscode.window.showTextDocument(doc)
+            })
+        }
+        else {
+            console.log(classData)
+        }
+    }
+
+    /**
      * Open the contents of a jar entry in a text editor
      */
     public openJarEntry(entryNode: JarEntryNode) {
@@ -207,28 +214,25 @@ export class ProjectController {
      */
     public findClass() {
         let jarEntries = this.getJarEntryNodes()
-        let classes = this.getClasses()
+        let classData = this.getClassdata()
         let quickPick = vscode.window.createQuickPick()
         quickPick.matchOnDescription = true
-        let classItems = classes.map((c) => {
-            return { label: c.name, description: `${c.pkg} (${c.path})`, detail: 'No Detail Shows', entry: c } as vscode.QuickPickItem
-        })
+        let classItems = undefined
         let jarItems = undefined
-        quickPick.items = classItems
         quickPick.onDidAccept(selection => {
             quickPick.dispose()
             if (quickPick.selectedItems.length) {
-                projectController.openJarEntry(quickPick.selectedItems[0]['entry'])
+                projectController.openEntry(quickPick.selectedItems[0]['entry'])
             }
         })
         quickPick.onDidChangeValue(event => {
             if (event.length > 0 && quickPick.activeItems.length === 0) {
                 if (!jarItems) {
                     quickPick.busy = true
-                    Promise.all([jarEntries]).then((results) => {
-                        jarItems = results[0].map((r) => {
+                    jarEntries.then((result) => {
+                        jarItems = result.map((r) => {
                             let detail = dependencyLabel(r.dependency)
-                            return { label: r.name, description: `${r.package.name} (${detail})`, detail: detail, entry: r } as vscode.QuickPickItem
+                            return { label: r.name, description: r.package.name , detail: detail, entry: r } as vscode.QuickPickItem
                         })
                     }).catch((reason) => {
                         console.error(reason)
@@ -244,6 +248,17 @@ export class ProjectController {
                 quickPick.items = classItems
             }
         })
+        classData.then((data) => {
+            classItems = data.map((d) => {
+                let path = d.path.replace(vscode.workspace.workspaceFolders[0].uri.path+'/', '')
+                let name = d.name.substring(d.name.lastIndexOf('.')+1)
+                let pkg = d.name.substring(0, d.name.lastIndexOf('.'))
+                return { label: name, description: pkg, detail: path, entry: d } as vscode.QuickPickItem
+            })
+            quickPick.items = classItems
+            quickPick.busy = false
+        })
+        quickPick.busy = true
         quickPick.show()
     }
 
@@ -408,5 +423,18 @@ export class ProjectController {
             }
         })
         return files
+    }
+
+    /**
+     * Find the corresponding source file for the given class data
+     */
+    private class2source(classData: ClassData) : string {
+        let parts = classData.name.split('.')
+        let pkgPath = parts.slice(0, parts.length-1).join('/')
+        let dir =this.getSourcePaths().find((p) => {
+            let file = PathHelper.join(p, pkgPath, classData.srcFile)
+            return existsSync(file)
+        })
+        return PathHelper.join(dir, pkgPath, classData.srcFile)
     }
 }

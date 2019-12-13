@@ -1,18 +1,27 @@
 package net.contrapt.jvmcode.model
 
+import javassist.bytecode.ClassFile
+
 class JarEntryData(
         val name: String,
         val type: JarEntryType,
         val pkg: String,
-        val path: String,
-        var text: String? = null
+        val path: String
 ) : Comparable<JarEntryData> {
+
+    var text: String? = null
+    var classData : ClassData? = null
 
     override fun compareTo(other: JarEntryData): Int {
         return fqcn().compareTo(other.fqcn())
     }
 
     fun fqcn() = "$pkg.$name"
+    fun resolve(cf: ClassFile) {
+        this.classData = ClassData.create(cf)
+    }
+    fun isResolved() = classData != null
+    fun srcName() = classData?.srcFile ?: name
 
     companion object {
 

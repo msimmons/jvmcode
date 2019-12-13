@@ -127,7 +127,7 @@ export function activate(context: vscode.ExtensionContext) {
      */
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.exec-class', () => {
         projectController.start()
-        let classes = projectController.getClasses().map((c) => {return c.pkg + '.' + c.name})
+        let classes = projectController.oldGetClasses().map((c) => {return c.pkg + '.' + c.name})
         vscode.window.showQuickPick(classes).then((mainClass) => {
             if (!mainClass) return
             let cp = projectController.getClasspath()
