@@ -20,4 +20,8 @@ export class ConfigService {
         let outputDirMap: string[] = configuration.get('outputDirMap') as string[]
         return { excludes: excludes, extensions: extensions, jmodIncludes: jmodIncludes, srcLocation: srcLocation, outputDirMap: outputDirMap }
     }
+
+    public static getJavaCommand() : string {
+        return vscode.workspace.getConfiguration('jvmcode').get('javaCommand') as string
+    }
 }

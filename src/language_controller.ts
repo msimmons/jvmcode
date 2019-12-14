@@ -5,15 +5,17 @@ import { LanguageService } from './language_service'
 import { CompileRequest, CompileResult, LanguageRequest, ParseRequest } from 'server-models'
 import { languageService } from './extension';
 import { ProjectController } from './project_controller';
+import * as provider from './language_providers'
 
 /**
  * Responsible for managing JVM language services
  */
-export class LanguageController {
+export class LanguageController implements vscode.Disposable {
 
     private languageService: LanguageService
     private projectController: ProjectController
     private problemCollections = new Map<string, vscode.DiagnosticCollection>()
+    private disposables : vscode.Disposable[] =  []
 
     public constructor(languageService: LanguageService, projectController: ProjectController) {
         this.languageService = languageService
@@ -44,6 +46,8 @@ export class LanguageController {
         vscode.workspace.onDidOpenTextDocument(this.onDidOpen(request))
         // Create diagnostics collection -- should the problems be managed by the language extension?
         this.problemCollections.set(request.name, vscode.languages.createDiagnosticCollection(request.name))
+        // Register all the providers
+        this.registerProviders(request)
     }
 
     onDidChange(request: LanguageRequest) {
@@ -62,6 +66,27 @@ export class LanguageController {
         return async (doc: vscode.TextDocument) => {
             this.requestParse(doc)
         }
+    }
+
+    /**
+     * Register all the providers (for a specific language?)
+     */
+    public registerProviders(request: LanguageRequest) {
+        let fileSelector = { scheme: 'file', language: request.languageId } as vscode.DocumentSelector
+        let allSelector = { language: request.languageId } as vscode.DocumentSelector
+        this.disposables.push(vscode.languages.registerCodeActionsProvider(fileSelector, new provider.JvmActionProvider())) // Action types?
+        this.disposables.push(vscode.languages.registerCodeLensProvider(fileSelector, new provider.JvmCodeLensProvider()))
+        this.disposables.push(vscode.languages.registerCompletionItemProvider(fileSelector, new provider.JvmCompletionProvider())) // Trigger chars?
+        this.disposables.push(vscode.languages.registerDefinitionProvider(allSelector, new provider.JvmDefinitionProvider()))
+        this.disposables.push(vscode.languages.registerHoverProvider(allSelector, new provider.JvmHoverProvider()))
+        this.disposables.push(vscode.languages.registerImplementationProvider(allSelector, new provider.JvmImplementationProvider()))
+        this.disposables.push(vscode.languages.registerReferenceProvider(allSelector, new provider.JvmReferenceProvider()))
+        this.disposables.push(vscode.languages.registerRenameProvider(fileSelector, new provider.JvmRenameProvider()))
+        this.disposables.push(vscode.languages.registerSignatureHelpProvider(fileSelector, new provider.JvmSignatureProvider())) // Meta for trigger chars
+        let symbolProvider = new provider.JvmSymbolProvider()
+        this.disposables.push(vscode.languages.registerDocumentSymbolProvider(fileSelector, symbolProvider)) // metadata?
+        this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(symbolProvider))
+        this.disposables.push(vscode.languages.registerTypeDefinitionProvider(allSelector, new provider.JvmTypeDefinitionProvider()))
     }
 
     /**
@@ -91,6 +116,10 @@ export class LanguageController {
     async requestParse(doc: vscode.TextDocument) {
         let request = {languageId: doc.languageId, file: doc.uri.path} as ParseRequest
         let result = await this.languageService.requestParse(request)
+    }
+
+    dispose() {
+        this.disposables.forEach(d => d.dispose())
     }
 
 }

@@ -122,7 +122,7 @@ class ProjectService(var config: JvmConfig, val javaHome : String) {
 
     /**
      * For the given dependency, find all the entries contained in the jar file and organize them by package
-     * in the resulting data structures [JarData] -> [JarEntryData]
+     * in the resulting data structures [JarData] -> [JarPackageData]
      */
     fun getJarData(dependencyData: DependencyData) : JarData {
         val pkgMap = mutableMapOf<String, MutableSet<JarEntryData>>()
@@ -135,10 +135,12 @@ class ProjectService(var config: JvmConfig, val javaHome : String) {
                     JarEntryType.PACKAGE -> pkgMap.putIfAbsent(jed.pkg, sortedSetOf())
                     else -> {
                         pkgMap.getOrPut(jed.pkg, { sortedSetOf()}).add(jed)
+                        /** The [entryMap] records this entry by FQCN */
                         entryMap.put(jed.fqcn(), Pair(jed, dependencyData))
                     }
                 }
             }
+            /** The [JarData] is a collection of [JarPackageData] for each non-empty package in the jar file */
             return JarData(dependencyData.fileName,
                     pkgMap.asSequence()
                     .map {
@@ -155,6 +157,9 @@ class ProjectService(var config: JvmConfig, val javaHome : String) {
         }
     }
 
+    /**
+     * Get [ClassData] for all project classes
+     */
     fun getClassData() : ClassDataHolder {
         val paths = userPath.classDirs + externalPaths.flatMap { it.classDirs }
         paths.forEach {dir ->
@@ -169,7 +174,9 @@ class ProjectService(var config: JvmConfig, val javaHome : String) {
     }
 
     /**
-     * Fill in the contents of the given [JarEntryData] -- if a class, try and find the source or TODO decompile
+     * Fill in the contents of the given [JarEntryData]
+     * If it is a class, try and find the source and resolve the [ClassData]
+     * TODO decompile a class
      * If resource, return the contents as is
      */
     fun getJarEntryContents(entry: JarEntryData) : JarEntryData {

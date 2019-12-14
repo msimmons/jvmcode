@@ -1,5 +1,6 @@
 package net.contrapt.jvmcode.model
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import javassist.bytecode.*
 
 /**
@@ -14,8 +15,11 @@ class ClassData(
         val annotations: Collection<String>,
         val fields: Collection<FieldData>,
         val methods: Collection<MethodData>,
+        @get:JsonProperty(value = "isAbstract")
         val isAbstract: Boolean,
+        @get:JsonProperty(value = "isFinal")
         val isFinal: Boolean,
+        @get:JsonProperty(value = "isInterface")
         val isInterface: Boolean
 ) {
     var path: String? = null
@@ -66,7 +70,8 @@ class ClassData(
                 val type = if (signature != null) signature else it.descriptor
                 val params = getParameterInfo(it.codeAttribute)
                 val extension = getExtensionSignature(it.name, params)
-                MethodData(it.name, type, params, it.isConstructor, it.isMethod, it.isStaticInitializer, extension)
+                val isMain = it.name == "main" && (it.accessFlags and AccessFlag.STATIC) != 0
+                MethodData(it.name, type, params, it.isConstructor, it.isMethod, it.isStaticInitializer, isMain, extension)
             }
         }
 
