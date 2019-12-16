@@ -8,6 +8,8 @@ import { ProjectController } from './project_controller';
 import { StatsController } from './stats_controller';
 import { LanguageService } from './language_service';
 import { LanguageController } from './language_controller';
+import { ClassData } from 'server-models'
+import { ConfigService } from './config_service';
 
 export let server: JvmServer
 export let projectService: ProjectService
@@ -29,6 +31,7 @@ export function activate(context: vscode.ExtensionContext) {
         // We don't start the project controller unless we get a request or there are user items
         languageService = new LanguageService(server)
         languageController = new LanguageController(languageService, projectController)
+        context.subscriptions.push(languageController)
         languageController.start()
         statsController = new StatsController(server)
         statsController.start()
@@ -125,16 +128,18 @@ export function activate(context: vscode.ExtensionContext) {
     /**
      * Allow the user to execute the given main application class
      */
-    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.exec-class', () => {
+    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.exec-class', async () => {
         projectController.start()
-        let classes = projectController.getClasses().map((c) => {return c.pkg + '.' + c.name})
+        let classData = await projectController.getClassdata()
+        let classes = classData.filter(cd => cd.methods.find(m => m.isMain)).map(c => c.name)
         vscode.window.showQuickPick(classes).then((mainClass) => {
             if (!mainClass) return
             let cp = projectController.getClasspath()
+            let cmd = ConfigService.getJavaCommand()
             let def = {type: 'jvmcode'} as vscode.TaskDefinition
             let args = cp ? ['-cp', cp] : []
             args = args.concat([mainClass])
-            let exec = new vscode.ProcessExecution('/usr/bin/java', args, {})
+            let exec = new vscode.ProcessExecution(cmd, args, {})
             let task = new vscode.Task(def, vscode.workspace.workspaceFolders[0], mainClass, 'jvmcode', exec, [])
             vscode.tasks.executeTask(task)
         })
@@ -198,6 +203,6 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {
-    server.shutdown()
+export async function deactivate() {
+    await server.shutdown()
 }

@@ -1,9 +1,10 @@
 'use strict';
 
-import { DependencyData, JarEntryData, JarPackageData, JvmProject, PathData, ProjectUpdateData} from "server-models"
+import { DependencyData, JarEntryData, JarPackageData, JvmProject, PathData, ProjectUpdateData, ClassData} from "server-models"
 import { JvmServer } from './jvm_server';
 import { JarEntryNode, CompilationContext } from './models';
 import { ConfigService } from './config_service';
+import { server } from "./extension";
 
 /**
  * Service to make project related requests to JvmServer on behalf of other components.  Also manage caching of 
@@ -93,6 +94,14 @@ export class ProjectService {
         await this.server.send('jvmcode.update-user-project', userProject).catch((e) => {
             console.error(e)
         })
+    }
+
+    /**
+     * Return all of this project's classdata
+     */
+    public async getClassdata() : Promise<ClassData[]> {
+        let result = await server.send('jvmcode.classdata', {})
+        return result.body.data
     }
 
     /**

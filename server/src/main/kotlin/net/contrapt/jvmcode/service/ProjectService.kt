@@ -1,8 +1,11 @@
 package net.contrapt.jvmcode.service
 
+import io.vertx.core.json.Json
 import io.vertx.core.logging.LoggerFactory
+import javassist.bytecode.ClassFile
 import net.contrapt.jvmcode.model.*
 import net.contrapt.jvmcode.service.model.*
+import java.io.DataInputStream
 import java.io.File
 import java.io.InputStream
 import java.util.jar.JarEntry
@@ -26,6 +29,9 @@ class ProjectService(var config: JvmConfig, val javaHome : String) {
 
     // Map of entry FQCN to entry data and dependency it belongs to
     private val entryMap = mutableMapOf<String, Pair<JarEntryData, DependencyData>>()
+
+    // Map of path to class data for all project classes
+    private val classMap = mutableMapOf<String, ClassData>()
 
     val javaVersion : String
 
@@ -116,7 +122,7 @@ class ProjectService(var config: JvmConfig, val javaHome : String) {
 
     /**
      * For the given dependency, find all the entries contained in the jar file and organize them by package
-     * in the resulting data structures [JarData] -> [JarEntryData]
+     * in the resulting data structures [JarData] -> [JarPackageData]
      */
     fun getJarData(dependencyData: DependencyData) : JarData {
         val pkgMap = mutableMapOf<String, MutableSet<JarEntryData>>()
@@ -129,10 +135,12 @@ class ProjectService(var config: JvmConfig, val javaHome : String) {
                     JarEntryType.PACKAGE -> pkgMap.putIfAbsent(jed.pkg, sortedSetOf())
                     else -> {
                         pkgMap.getOrPut(jed.pkg, { sortedSetOf()}).add(jed)
+                        /** The [entryMap] records this entry by FQCN */
                         entryMap.put(jed.fqcn(), Pair(jed, dependencyData))
                     }
                 }
             }
+            /** The [JarData] is a collection of [JarPackageData] for each non-empty package in the jar file */
             return JarData(dependencyData.fileName,
                     pkgMap.asSequence()
                     .map {
@@ -150,15 +158,53 @@ class ProjectService(var config: JvmConfig, val javaHome : String) {
     }
 
     /**
-     * Fill in the contents of the given [JarEntryData] -- if a class, try and find the source or TODO decompile
+     * Get [ClassData] for all project classes
+     */
+    fun getClassData() : ClassDataHolder {
+        val paths = userPath.classDirs + externalPaths.flatMap { it.classDirs }
+        paths.forEach {dir ->
+            File(dir).walkTopDown().filter { it.extension == "class" && !it.name.contains("$") }.forEach {
+                val data = ClassData.create(ClassFile(DataInputStream(it.inputStream())))
+                data.lastModified = it.lastModified()
+                data.path = it.path
+                classMap.put(it.path, data)
+            }
+        }
+        return ClassDataHolder(classMap.values)
+    }
+
+    /**
+     * Fill in the contents of the given [JarEntryData]
+     * If it is a class, try and find the source and resolve the [ClassData]
+     * TODO decompile a class
      * If resource, return the contents as is
      */
     fun getJarEntryContents(entry: JarEntryData) : JarEntryData {
         val entryRecord = entryMap[entry.fqcn()]
         if ( entryRecord == null ) return entry
         val dependency = entryRecord.second
-        if (dependency.sourceFileName != null && entry.type == JarEntryType.CLASS) return getContentFromSourceJar(dependency.sourceFileName ?: "", dependency.jmod, entry)
-        else return getContentFromJar(dependency.fileName, entry)
+        if ( entry.type == JarEntryType.CLASS && !entry.isResolved()) {
+            val jarFile = JarFile(dependency.fileName)
+            val jarEntry = jarFile.getJarEntry(entry.path)
+            val cf = ClassFile(DataInputStream(jarFile.getInputStream(jarEntry)))
+            entry.resolve(cf)
+        }
+        return when (entry.type) {
+            JarEntryType.CLASS -> getSourceContent(dependency.sourceFileName, dependency.jmod, entry)
+            else -> getContentFromJar(dependency.fileName, entry)
+        }
+    }
+
+    /**
+     * Return the source code content for a class if available or fill in content from [ClassData]
+     */
+    private fun getSourceContent(srcFile: String?, jmod: String?, entry: JarEntryData) : JarEntryData {
+        val sourceEntry = when (srcFile) {
+            null -> entry
+            else -> getContentFromSourceJar(srcFile, jmod, entry)
+        }
+        if (sourceEntry.text == null) sourceEntry.text = Json.encodePrettily(entry.classData)
+        return sourceEntry
     }
 
     /**
@@ -176,17 +222,23 @@ class ProjectService(var config: JvmConfig, val javaHome : String) {
         try {
             val jarFile = JarFile(fileName)
             val prefix = if (jmod == null) "" else "${jmod}${File.separator}"
-            val entryPath = "${prefix}${entry.pkg.replace(".", File.separator)}${File.separator}${entry.name}"
-            var jarEntry : JarEntry? = null
+            val entryPath = "${prefix}${entry.pkg.replace(".", File.separator)}${File.separator}${entry.srcName()}"
+            logger.info("${entry.name} -> ${entryPath} in ${fileName}")
+            var jarEntry : JarEntry? = jarFile.getJarEntry(entryPath)
+            // Handles cases where srcName is null by trying various extensions -- a bit of a hack
             jarEntry = config.extensions.fold(jarEntry) { curEntry, ext ->
                 if (curEntry == null) jarFile.getJarEntry("${entryPath}.${ext}") else curEntry
+            }
+            // If still not found, maybe we have the directory wrong, so let's look thru the whole damn file.
+            if ( jarEntry == null ) {
+                jarEntry = jarFile.entries().asSequence().find { it.name.endsWith(entry.srcName()) }
             }
             if (jarEntry == null) {
                 return entry // TODO could use getContentFromJar if we had a decompiler
             } else {
                 val sourceEntry = pathToJarEntry(entry.pkg, jarEntry.name)
                 sourceEntry.text = jarFile.getInputStream(jarEntry).bufferedReader().use {
-                    it.readText()
+                    it.readText() + "/*\n${entry.text}\n*/"
                 }
                 return sourceEntry
             }
@@ -240,7 +292,7 @@ class ProjectService(var config: JvmConfig, val javaHome : String) {
             JarEntryType.CLASS -> fileName.replace(".class", "")
             else -> fileName
         }
-        return JarEntryData(name, type, packageName, "")
+        return JarEntryData(name, type, packageName, path)
     }
 
 

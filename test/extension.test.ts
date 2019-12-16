@@ -22,7 +22,7 @@ suite("Extension Tests", () => {
     }).timeout(3000);
 
     test("No classes", async () => {
-        let reply = await myExtension.projectController.getClasses()
+        let reply = await myExtension.projectController.getClassdata()
         assert.equal(reply.length, 0)
     })
 
@@ -36,7 +36,7 @@ suite("Extension Tests", () => {
     test("Classes", async () => {
         let root = myExtension.extensionContext.extensionPath
         await myExtension.projectService.addPath({source: '', name: '', module: '', sourceDirs: [], classDirs: [`${root}/server/build/classes/kotlin/main`]})
-        let classes = myExtension.projectController.getClasses()
+        let classes = await myExtension.projectController.getClassdata()
         assert(classes.length > 40)
     })
 });

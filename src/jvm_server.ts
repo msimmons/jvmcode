@@ -200,9 +200,9 @@ export class JvmServer {
         return this.send('jvmcode.serve', {path: path, webRoot: webRoot})
     }
 
-    public shutdown() {
+    public async shutdown() {
         this.status = Status.STOP_REQUESTED
-        let reply = this.send('jvmcode.shutdown', {value: this.startupToken})
+        let reply = await this.send('jvmcode.shutdown', {value: this.startupToken})
         this.child.kill('SIGHUP')
         this.channel.clear()
         this.channel.hide()

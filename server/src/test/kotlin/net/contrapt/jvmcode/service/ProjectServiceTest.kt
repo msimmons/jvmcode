@@ -3,10 +3,10 @@ package net.contrapt.jvmcode.service
 import io.kotlintest.matchers.beGreaterThan
 import io.kotlintest.matchers.endWith
 import io.kotlintest.matchers.haveSubstring
-import io.kotlintest.matchers.startWith
 import io.kotlintest.should
 import io.kotlintest.shouldBe
 import io.kotlintest.shouldNotBe
+import io.vertx.core.json.Json
 import net.contrapt.jvmcode.model.JarEntryType
 import net.contrapt.jvmcode.model.JvmConfig
 import net.contrapt.jvmcode.service.model.DependencySource
@@ -110,9 +110,22 @@ class ProjectServiceTest {
         classpath should haveSubstring("postgresql-42.1.4.jar:")
         classpath should endWith("jd-gui-1.4.0.jar")
         // Add a class directory
+/*
         service.addUserPath(UserPath().apply { classDirs.add("/home/mark/classes") })
         classpath = service.getClasspath()
         classpath should startWith("/home/mark/classes:")
         classpath should endWith("jd-gui-1.4.0.jar")
+*/
     }
+
+    @Test
+    fun getClassDataTest() {
+        val service = ProjectService(JvmConfig(setOf(), setOf(), setOf()), javaHome11)
+        val path = UserPath()
+        path.classDirs.add("/home/mark/work/jvmcode/server/build/classes/kotlin/main")
+        service.addUserPath(path)
+        val cd = service.getClassData()
+        cd.data.forEach { println(Json.encodePrettily(it)) }
+    }
+
 }
