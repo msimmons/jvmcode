@@ -30,19 +30,19 @@
     ]
 }
 - source2class (source -> [class])
--- allows finding classes that will change when the source changes
+   - allows finding classes that will change when the source changes
 - class2source (class -> source)
--- allows opening correct source file 
+   - allows opening correct source file 
 - classrefs (referenced -> class)
--- allows deciding what to compile when 'referenced' changes
+   - allows deciding what to compile when 'referenced' changes
 
 When a source file changes:
-- Find all the affected classes through _source2class_
-- For each affected class, find the classes that reference it through _classrefs_
-- For each affected classref, find the source through _class2source_
-- Request compile for all the affected sources
+1. Find all the affected classes through _source2class_
+0. For each affected class, find the classes that reference it through _classrefs_
+0. For each affected classref, find the source through _class2source_
+0. Request compile for all the affected sources
 
 When asked to open source for a class:
-- Find the source file name through _class2source_
-- Resolve the package or jar path
-- Open it
+1. Find the source file name through _class2source_
+0. Resolve the package or jar path
+0. Open it

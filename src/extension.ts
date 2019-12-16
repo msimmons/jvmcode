@@ -140,6 +140,33 @@ export function activate(context: vscode.ExtensionContext) {
         })
     }))
 
+    /**
+     * Test a customexecution task
+     */
+    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.exec-custom', () => {
+        vscode.window.showQuickPick(['foo', 'bar']).then((choice) => {
+            if (!choice) return
+            let def = {type: 'jvmcode'} as vscode.TaskDefinition
+            const writeEmitter = new vscode.EventEmitter<string>();
+            const closeEmitter = new vscode.EventEmitter<any>();
+            const pty: vscode.Pseudoterminal = {
+              onDidWrite: writeEmitter.event,
+              onDidClose: closeEmitter.event,
+              open: () => {
+                  writeEmitter.fire(choice)
+                  writeEmitter.fire('\nDoing stuff\n')
+                  setTimeout(() => { closeEmitter.fire() }, 1000)
+              },
+              close: () => { console.log('Closed')}
+            };
+            let exec = new vscode.CustomExecution(async () => {
+                return pty
+            })
+            let task = new vscode.Task(def, vscode.workspace.workspaceFolders[0], choice, 'jvmcode', exec, [])
+            vscode.tasks.executeTask(task)
+        })
+    }))
+
     /* Export an api for use by other extensions */
     let api = {
         // Send message to the given address (one consumer with result callback)

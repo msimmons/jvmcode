@@ -58,6 +58,10 @@
         "title": "JVM: Execute Class"
       },
       {
+        "command": "jvmcode.exec-custom",
+        "title": "JVM: Execute Custom"
+      },
+      {
         "command": "jvmcode.remove-user-item",
         "title": "JVM: Remove User Item"
       }
@@ -169,7 +173,7 @@
             "scala:scala"
           ],
           "description": "Helps map source file extension to the a directory containing the given keyword: 'ext:keyword' (this is a hack)"
-        }      
+        }
       }
     }
   },
