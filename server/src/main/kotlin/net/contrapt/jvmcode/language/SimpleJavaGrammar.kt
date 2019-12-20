@@ -3,6 +3,8 @@ package net.contrapt.jvmcode.language
 import com.github.h0tk3y.betterParse.grammar.Grammar
 import com.github.h0tk3y.betterParse.lexer.TokenMatch
 import com.github.h0tk3y.betterParse.parser.Parser
+import java.io.File
+import java.util.*
 import kotlin.system.measureTimeMillis
 
 class SimpleJavaGrammar : Grammar<Any>() {
@@ -52,6 +54,7 @@ class SimpleJavaGrammar : Grammar<Any>() {
     val TRY by token("try\\b")
     val CATCH by token("catch\\b")
     val FINALLY by token("finally\\b")
+    val THROWS by token("throws\\b")
     val THROW by token("throw\\b", ignore = true)
     val BREAK by token("break\\b", ignore = true)
     val CONTINUE by token("continue\\b", ignore = true)
@@ -77,112 +80,73 @@ class SimpleJavaGrammar : Grammar<Any>() {
 
     val DOT by token("\\.")
     val ASTERISK by token("\\*")
+
     // RULES
 
-    data class ParseExpression(
-            var context: TokenMatch? = null,
-            var modifiers: MutableCollection<TokenMatch> = mutableListOf(),
-            var type: TokenMatch? = null,
-            var decltype: TokenMatch? = null,
-            var identifier: TokenMatch? = null,
-            var extends: TokenMatch? = null,
-            var implements: MutableCollection<TokenMatch> = mutableListOf()
-    ) {
-
-        fun clear() {
-            context = null
-            modifiers.clear()
-            type = null
-            decltype = null
-            identifier = null
-            extends = null
-            implements.clear()
-        }
-    }
+    val currentTokens = mutableListOf<TokenMatch>()
+    val regexes = listOf(
+        "Pn;".toRegex() to "package",
+        "IM?n;".toRegex() to "import",
+        "M*Dn(<.*>)?[En<>,]*\\{".toRegex() to "typeDef",
+        "@n(\\(.*\\))?".toRegex() to "annotation",
+        "M*n\\(.*\\)(W[n,]*)?[{]".toRegex() to "constructorDef",
+        "M*(<(.*)>)?[Tn](\\[])*n\\(.*\\)(W[n,]*)?[{;]".toRegex() to "methodDef",
+        "M*[Tn](\\[])*n[,n\\[\\]]*(=.*)?;".toRegex() to "fieldDef",
+        "n(\\[.])*[-<>+&]*=.*[;]".toRegex() to "assignment",
+        "R(.*)[;]".toRegex() to "return",
+        "C(.*)[;{]".toRegex() to "control"
+    )
 
     fun tokenizeOnly(text: String) {
         var tokens = this.tokenizer.tokenize(text)
         var tokenCount = 0
         var inComment = false
-        var curExpression = ParseExpression()
         val elapsed = measureTimeMillis {
             tokens.forEach {
                 tokenCount++;
                 when (it.type) {
                     BEGIN_COMMENT -> inComment = true
                     END_COMMENT -> inComment = false
-                    else -> if (!inComment) processToken(it, curExpression)
+                    else -> if (!inComment) processToken(it)
                 }
             }
         }
     }
 
-    private fun createSymbol(expression: ParseExpression) {
-        println(expression)
-        /*
-        val ident = expression.idents.last()
-        val name = ident.text
-        val start = ident.position
-        val end = start + name.length - 1
-        val types = when (expression.initial?.type) {
-            PACKAGE -> ParseSymbolType.TYPEREF to name
-            IMPORT -> ParseSymbolType.TYPEREF to name
-            IDENT -> ParseSymbolType.SYMREF to name
-            TYPE -> ParseSymbolType.SYMDEF to tokens.first().text
-            DECLARE -> ParseSymbolType.TYPEDEF to name
-            else -> ParseSymbolType.TYPEREF to name
+    private fun charForToken(token: TokenMatch) : String {
+        return when (token.type) {
+            MODIFIER -> "M"
+            PACKAGE -> "P"
+            IMPORT -> "I"
+            DECLARE -> "D"
+            TYPE -> "T"
+            EXTENDS, IMPLEMENTS -> "E"
+            IF, ELSE, FOR, WHILE, DO, TRY, CATCH, FINALLY, BREAK, CONTINUE, THROW, SWITCH, CASE, DEFAULT -> "C"
+            NEW -> "N"
+            RETURN -> "R"
+            INSTANCEOF -> "F"
+            THROWS -> "W"
+            IDENT, WILD_IDENT, THIS, SUPER -> "n"
+            CHAR_LITERAL, BIN_LITERAL, HEX_LITERAL, NUM_LITERAL, STRING_LITERAL, UNICODE_LITERAL, OCT_LITERAL, TRUE, FALSE, NULL -> "l"
+            else -> token.text
         }
-        val symbol = JavaParseSymbol(name, JavaParseLocation(start, end)).apply {
-            symbolType = types.first
-            type = types.second
+    }
+    private fun processTokens(terminating: TokenMatch? = null) {
+        if (!currentTokens.isEmpty()) {
+            val term = if (terminating != null) charForToken(terminating) else ""
+            val pattern = currentTokens.joinToString("") { charForToken(it) } + term
+            val match = regexes.firstOrNull { it.first.matches(pattern) }
+            println("$pattern -> ${match?.second} ${currentTokens.first().row}")
         }
-        println("    ${symbol}")
-        return symbol
-*/
+        currentTokens.clear()
     }
 
-    private fun processToken(token: TokenMatch, expression: ParseExpression) {
+    private fun processToken(token: TokenMatch) {
         when (token.type) {
-            PACKAGE -> expression.context = token
-            IMPORT -> expression.context = token
-            MODIFIER -> expression.modifiers.add(token)
-            DECLARE -> expression.context = token
-            VAR -> expression.context = token
-            TYPE -> expression.context = token
-            AT -> expression.context = token
-            EXTENDS, IMPLEMENTS -> expression.context = token
-            IDENT, WILD_IDENT -> {
-                when (expression.context?.type) {
-                    TYPE -> {
-                        expression.context = token
-                        expression.identifier = token
-                    }
-                    AT -> expression.identifier = token
-                    PACKAGE, IMPORT -> expression.identifier = token
-                    DECLARE -> {
-                        expression.decltype = expression.context
-                        expression.identifier = token
-                    }
-                    VAR -> {
-                        expression.decltype = expression.context
-                        expression.identifier = token
-                    }
-                    EXTENDS -> expression.extends = token
-                    IMPLEMENTS -> expression.implements.add(token)
-                    null -> {
-                        expression.context = token
-                        expression.identifier = token
-                        expression.type = token
-                    }
-                }
-            }
-            SEMI, O_BRACE, C_BRACE, O_PAREN, C_PAREN, OPERATOR -> {
-                //if (curTokens.size > 0) println(curTokens)
-                if (expression.identifier != null) {
-                    createSymbol(expression)
-                }
-                expression.clear()
-            }
+            SEMI, O_BRACE, C_BRACE -> { processTokens(token) }
+            WS, LINE_COMMENT -> {}
+            NL -> if (currentTokens.firstOrNull()?.type == AT) processTokens()
+            else -> currentTokens.add(token)
         }
     }
 
@@ -190,7 +154,9 @@ class SimpleJavaGrammar : Grammar<Any>() {
         @JvmStatic
         fun main(args: Array<String>) {
             val grammar = SimpleJavaGrammar()
+            val path = "/Users/mark.simmons/work/jvmcode/server/src/test/resources/Test.java"
             grammar.tokenizeOnly(code)
+            //grammar.tokenizeOnly(File(path).readText())
             //grammar.tryParseToEnd(grammar.tokenizer.tokenize(code))
             //grammar.lenientParse(code)
         }
@@ -210,7 +176,7 @@ import java.math.*;
 import static net.contrapt.FOO;
 
 @ClassAnnotation(value="foo")
-public class TryIt implements Serializable {
+public class TryIt extends Object implements Serializable, Comparable {
 
     static {
     }
@@ -219,7 +185,7 @@ public class TryIt implements Serializable {
 
     String[][] foo, bar[][];
 
-    void aMethod() {
+    private void aMethod() {
        int a;
        int b = 0b10_1010100;
        int c, d = '\n';
@@ -250,7 +216,7 @@ public class TryIt implements Serializable {
     }
     
     @MethodAnnotation
-    public <T extends String<T>> int genericMethod(Class<T> clazz[]);
+    public abstract <T extends String<T>> int genericMethod(Class<T> clazz[]);
     
     static class AnInnerOne<T extends List<String>> {
        public AnInnerOne(@JsonName("foo") int foo)
