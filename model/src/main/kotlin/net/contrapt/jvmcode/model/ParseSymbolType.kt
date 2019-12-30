@@ -9,6 +9,7 @@ enum class ParseSymbolType {
     CONSTRUCTOR,
     METHOD,
     FIELD,
+    VARIABLE,
     TYPEREF, // Type reference
     SYMDEF, // Variable definition
     SYMREF, // Variable reference

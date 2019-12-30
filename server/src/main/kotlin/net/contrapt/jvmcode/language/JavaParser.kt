@@ -233,7 +233,7 @@ class JavaParser : Grammar<Any>() {
                             fieldType = addSymbol(context, t, ParseSymbolType.TYPEREF)
                         }
                         else {
-                            addSymbol(context, t, ParseSymbolType.FIELD, fieldType?.name)
+                            addSymbol(context, t, ParseSymbolType.VARIABLE, fieldType?.name)
                         }
                     }
                     ',' -> {

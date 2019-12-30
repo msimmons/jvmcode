@@ -50,6 +50,7 @@ export class JvmSymbolProvider implements vscode.DocumentSymbolProvider, vscode.
             case "CONSTRUCTOR": kind = vscode.SymbolKind.Constructor; break;
             case "METHOD": kind = vscode.SymbolKind.Method; break;
             case "FIELD": kind = vscode.SymbolKind.Field; break;
+            case "VARIABLE": kind = vscode.SymbolKind.Variable; break;
             case "BLOCK": kind = vscode.SymbolKind.Namespace; break;
             case "CONTROL": kind = vscode.SymbolKind.Namespace; break;
             case "TYPEREF": kind = vscode.SymbolKind.Class; break;
