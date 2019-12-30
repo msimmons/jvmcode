@@ -8,13 +8,14 @@ import net.contrapt.jvmcode.handler.RequestParse
 import net.contrapt.jvmcode.language.CompileService
 import net.contrapt.jvmcode.language.JavaLanguageRequest
 import net.contrapt.jvmcode.language.ParseService
+import net.contrapt.jvmcode.service.SymbolRepository
 
-class LanguageVerticle() : AbstractVerticle() {
+class LanguageVerticle(val symbolRepository: SymbolRepository) : AbstractVerticle() {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     private val compileService = CompileService()
-    private val parseService = ParseService()
+    private val parseService = ParseService(symbolRepository)
 
     override fun start() {
         startLanguage()

@@ -144,7 +144,8 @@ export class ProjectController {
      * @param entryNode 
      */
     private async getJarEntryContent(entryNode: JarEntryNode) : Promise<JarEntryData> {
-        return await this.service.getJarEntryContent(entryNode)
+        if (!entryNode.data.text) return await this.service.getJarEntryContent(entryNode)
+        else return entryNode.data
     }
 
     /**
@@ -154,13 +155,17 @@ export class ProjectController {
      */
     private openJarEntryContent(entryNode: JarEntryNode) {
         if (!entryNode.content) return
-        let jarFile = entryNode.dependency.fileName
-        let pkg = entryNode.package.name
-        let uri = vscode.Uri.parse(this.contentProvider.scheme + '://' + jarFile + '/' + pkg + '/' + entryNode.contentName)
+        let uri = vscode.Uri.parse(`${this.contentProvider.scheme}:///${entryNode.contentName}`)
         vscode.workspace.openTextDocument(uri).then((doc) => {
+            let options : vscode.TextDocumentShowOptions =  {preview: true}
+            if (entryNode.data.parseData) {
+                let symbol = entryNode.data.parseData.symbols.find(s => s.name === entryNode.name)
+                let start = doc.positionAt(symbol.location.start)
+                let end = doc.positionAt(symbol.location.end)
+                options.selection = new vscode.Range(start, end)
+            }
             this.contentProvider.update(uri, entryNode.content)
-            vscode.window.showTextDocument(doc, { preview: true }).then((te) => {
-                // Things to do -- get rid of selection?
+            vscode.window.showTextDocument(doc, options).then((te) => {
             })
         })
     }
@@ -200,7 +205,9 @@ export class ProjectController {
         vscode.window.withProgress({ location: vscode.ProgressLocation.Window, title: entryNode.name}, (progess) => {
             return this.getJarEntryContent(entryNode).then((reply) => {
                 entryNode.content = reply.text
-                entryNode.contentName = reply.name
+                entryNode.contentName = reply.path
+                entryNode.data.classData = reply.classData
+                entryNode.data.parseData = reply.parseData
                 this.openJarEntryContent(entryNode)
             }).catch(error => {
                 vscode.window.showErrorMessage(error)

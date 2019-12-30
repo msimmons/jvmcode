@@ -7,6 +7,7 @@ import io.vertx.core.json.JsonObject
 import io.vertx.core.json.jackson.DatabindCodec
 import io.vertx.core.logging.LoggerFactory
 import net.contrapt.jvmcode.model.JvmConfig
+import net.contrapt.jvmcode.service.SymbolRepository
 
 open class Application {
 
@@ -31,8 +32,9 @@ open class Application {
             vertx.eventBus().publish("jvmcode.exception", JsonObject().put("message", e.message))
             logger.error("Unhandled exception", e)
         }
-        vertx.deployVerticle(RouterVerticle(startupToken, config))
-        vertx.deployVerticle(LanguageVerticle())
+        val symbolRepository = SymbolRepository()
+        vertx.deployVerticle(RouterVerticle(startupToken, config, symbolRepository))
+        vertx.deployVerticle(LanguageVerticle(symbolRepository))
     }
 
     companion object {

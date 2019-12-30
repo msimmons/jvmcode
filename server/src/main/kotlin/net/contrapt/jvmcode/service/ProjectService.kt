@@ -3,6 +3,8 @@ package net.contrapt.jvmcode.service
 import io.vertx.core.json.Json
 import io.vertx.core.logging.LoggerFactory
 import javassist.bytecode.ClassFile
+import net.contrapt.jvmcode.language.JavaParseRequest
+import net.contrapt.jvmcode.language.ParseService
 import net.contrapt.jvmcode.model.*
 import net.contrapt.jvmcode.service.model.*
 import java.io.DataInputStream
@@ -11,7 +13,11 @@ import java.io.InputStream
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
 
-class ProjectService(var config: JvmConfig, val javaHome : String) {
+class ProjectService(
+    var config: JvmConfig, val javaHome : String,
+    val parseService: ParseService,
+    val symbolRepo: SymbolRepository
+) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -27,8 +33,8 @@ class ProjectService(var config: JvmConfig, val javaHome : String) {
     // Classpath data added by other extensions
     private val externalPaths = mutableSetOf<PathData>()
 
-    // Map of entry FQCN to entry data and dependency it belongs to
-    private val entryMap = mutableMapOf<String, Pair<JarEntryData, DependencyData>>()
+    // Map of entry FQCN to the dependency it belongs to
+    private val dependencyMap = mutableMapOf<String, DependencyData>()
 
     // Map of path to class data for all project classes
     private val classMap = mutableMapOf<String, ClassData>()
@@ -135,8 +141,9 @@ class ProjectService(var config: JvmConfig, val javaHome : String) {
                     JarEntryType.PACKAGE -> pkgMap.putIfAbsent(jed.pkg, sortedSetOf())
                     else -> {
                         pkgMap.getOrPut(jed.pkg, { sortedSetOf()}).add(jed)
-                        /** The [entryMap] records this entry by FQCN */
-                        entryMap.put(jed.fqcn(), Pair(jed, dependencyData))
+                        /** The [dependencyMap] records this entry by FQCN */
+                        symbolRepo.saveJarEntry(jed)
+                        dependencyMap.put(jed.fqcn(), dependencyData)
                     }
                 }
             }
@@ -180,9 +187,8 @@ class ProjectService(var config: JvmConfig, val javaHome : String) {
      * If resource, return the contents as is
      */
     fun getJarEntryContents(entry: JarEntryData) : JarEntryData {
-        val entryRecord = entryMap[entry.fqcn()]
-        if ( entryRecord == null ) return entry
-        val dependency = entryRecord.second
+        val dependency = dependencyMap[entry.fqcn()]
+        if ( dependency == null ) return entry
         if ( entry.type == JarEntryType.CLASS && !entry.isResolved()) {
             val jarFile = JarFile(dependency.fileName)
             val jarEntry = jarFile.getJarEntry(entry.path)
@@ -204,6 +210,8 @@ class ProjectService(var config: JvmConfig, val javaHome : String) {
             else -> getContentFromSourceJar(srcFile, jmod, entry)
         }
         if (sourceEntry.text == null) sourceEntry.text = Json.encodePrettily(entry.classData)
+        else sourceEntry.parseData = parseService.parse(JavaParseRequest(file = entry.path, text = sourceEntry.text))
+        symbolRepo.saveJarEntry(sourceEntry)
         return sourceEntry
     }
 
@@ -223,7 +231,7 @@ class ProjectService(var config: JvmConfig, val javaHome : String) {
             val jarFile = JarFile(fileName)
             val prefix = if (jmod == null) "" else "${jmod}${File.separator}"
             val entryPath = "${prefix}${entry.pkg.replace(".", File.separator)}${File.separator}${entry.srcName()}"
-            logger.info("${entry.name} -> ${entryPath} in ${fileName}")
+            logger.debug("${entry.name} -> ${entryPath} in ${fileName}")
             var jarEntry : JarEntry? = jarFile.getJarEntry(entryPath)
             // Handles cases where srcName is null by trying various extensions -- a bit of a hack
             jarEntry = config.extensions.fold(jarEntry) { curEntry, ext ->

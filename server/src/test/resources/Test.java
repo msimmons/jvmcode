@@ -2878,6 +2878,11 @@ public final class String
         return ((st > 0) || (len < value.length)) ? substring(st, len) : this;
     }
 
+    public Stream<String> lines() {
+        return isLatin1() ? StringLatin1.lines(value)
+            : StringUTF16.lines(value);
+    }
+
     /**
      * This object (which is already a string!) is itself returned.
      *

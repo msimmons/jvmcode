@@ -7,4 +7,5 @@ interface ParseResult {
     val pkg: ParseSymbol
     val imports: Collection<ParseSymbol>
     val scopes: Collection<ParseScope>
+    val symbols: Collection<ParseSymbol>
 }

@@ -11,6 +11,7 @@ class JarEntryData(
 
     var text: String? = null
     var classData : ClassData? = null
+    var parseData : ParseResult? = null
 
     override fun compareTo(other: JarEntryData): Int {
         return fqcn().compareTo(other.fqcn())

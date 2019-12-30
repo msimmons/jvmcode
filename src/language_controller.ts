@@ -2,7 +2,7 @@
 
 import * as vscode from 'vscode'
 import { LanguageService } from './language_service'
-import { CompileRequest, CompileResult, LanguageRequest, ParseRequest } from 'server-models'
+import { CompileRequest, CompileResult, LanguageRequest, ParseRequest, ParseResult } from 'server-models'
 import { languageService } from './extension';
 import { ProjectController } from './project_controller';
 import * as provider from './language_providers'
@@ -16,6 +16,8 @@ export class LanguageController implements vscode.Disposable {
     private projectController: ProjectController
     private problemCollections = new Map<string, vscode.DiagnosticCollection>()
     private disposables : vscode.Disposable[] =  []
+    private parseResults = new Map<string, Promise<ParseResult>>()
+    private parseRequests = new Map<string, Promise<ParseResult>>()
 
     public constructor(languageService: LanguageService, projectController: ProjectController) {
         this.languageService = languageService
@@ -64,7 +66,7 @@ export class LanguageController implements vscode.Disposable {
 
     onDidOpen(request: LanguageRequest) {
         return async (doc: vscode.TextDocument) => {
-            this.requestParse(doc)
+            //if (doc.uri.scheme === 'file') this.requestParse(doc)
         }
     }
 
@@ -84,7 +86,7 @@ export class LanguageController implements vscode.Disposable {
         this.disposables.push(vscode.languages.registerRenameProvider(fileSelector, new provider.JvmRenameProvider()))
         this.disposables.push(vscode.languages.registerSignatureHelpProvider(fileSelector, new provider.JvmSignatureProvider())) // Meta for trigger chars
         let symbolProvider = new provider.JvmSymbolProvider()
-        this.disposables.push(vscode.languages.registerDocumentSymbolProvider(fileSelector, symbolProvider)) // metadata?
+        this.disposables.push(vscode.languages.registerDocumentSymbolProvider(allSelector, symbolProvider)) // metadata?
         this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(symbolProvider))
         this.disposables.push(vscode.languages.registerTypeDefinitionProvider(allSelector, new provider.JvmTypeDefinitionProvider()))
     }
@@ -114,8 +116,22 @@ export class LanguageController implements vscode.Disposable {
      * Request parse and deal with the results
      */
     async requestParse(doc: vscode.TextDocument) {
-        let request = {languageId: doc.languageId, file: doc.uri.path} as ParseRequest
-        let result = await this.languageService.requestParse(request)
+        let path = doc.uri.path
+        if (this.parseRequests.get(path)) return
+        let text = doc.uri.scheme === 'file' ? doc.getText() : ""
+        let request = {languageId: doc.languageId, file: path, text: text} as ParseRequest
+        let promise = this.languageService.requestParse(request)
+        promise.then(r => this.parseRequests.delete(path))
+        this.parseRequests.set(path, promise)
+        this.parseResults.set(path, promise)
+    }
+
+    /**
+     * Get ParseResult for the given doc
+     */
+    async getParseResult(doc: vscode.TextDocument) : Promise<ParseResult> {
+        this.requestParse(doc)
+        return this.parseResults.get(doc.uri.path)
     }
 
     dispose() {

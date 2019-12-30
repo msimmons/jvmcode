@@ -14,16 +14,19 @@ import io.vertx.ext.web.handler.sockjs.BridgeEvent
 import io.vertx.ext.web.handler.sockjs.BridgeOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import net.contrapt.jvmcode.handler.*
+import net.contrapt.jvmcode.language.ParseService
 import net.contrapt.jvmcode.model.JvmConfig
 import net.contrapt.jvmcode.service.ProjectService
+import net.contrapt.jvmcode.service.SymbolRepository
 import java.io.File
 
-class RouterVerticle(val startupToken: String, var config: JvmConfig) : AbstractVerticle() {
+class RouterVerticle(val startupToken: String, var config: JvmConfig, val symbolRepository: SymbolRepository) : AbstractVerticle() {
 
     private val logger = LoggerFactory.getLogger(javaClass)
     private val deployments = mutableMapOf<String, String>()
     private val javaHome = System.getProperty("java.home").replace("${File.separator}jre", "")
-    private val projectService = ProjectService(config, javaHome)
+    private val parseService = ParseService(symbolRepository)
+    private val projectService = ProjectService(config, javaHome, parseService, symbolRepository)
 
     var httpPort = 0
         private set
@@ -201,6 +204,11 @@ class RouterVerticle(val startupToken: String, var config: JvmConfig) : Abstract
          * Return the jar entries for the given dependency
          */
         vertx.eventBus().consumer<JsonObject>("jvmcode.jar-entries", JarEntries(vertx, projectService))
+
+        /**
+         * Return all the class data for this project
+         */
+        vertx.eventBus().consumer<JsonObject>("jvmcode.classdata", ClassDataHandler(vertx, projectService))
 
         /**
          * Return the contents of the given jar entry
