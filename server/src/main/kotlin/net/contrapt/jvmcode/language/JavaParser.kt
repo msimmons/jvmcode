@@ -32,7 +32,6 @@ class JavaParser : Grammar<Any>() {
 
     // Operators
     val ASSIGN by token("(>>>|<<|>>|\\|\\||-|\\+|\\*|/%|\\^|&)?=")
-    val OPERATOR by token("(==)|(!=)|(<=)|(>=)|[+-/&|^%<>!~?:]")
 
     // Keywords
     val PACKAGE by token("package\\b")
@@ -94,6 +93,7 @@ class JavaParser : Grammar<Any>() {
             IDENT, WILD_IDENT -> "n"
             CHAR_LITERAL, BIN_LITERAL, HEX_LITERAL, NUM_LITERAL, STRING_LITERAL, UNICODE_LITERAL, OCT_LITERAL, TRUE, FALSE, NULL -> "l"
             ASSIGN -> "="
+            //OPERATOR -> "o"
             else -> token.text
         }
     }
@@ -154,7 +154,7 @@ class JavaParser : Grammar<Any>() {
             val block = addSymbol(context, context.tokens.first(), ParseSymbolType.BLOCK).apply {
                 type = "<block>"
             }
-            context.scopes.push(block)
+            context.startScope(block)
         }
     }
 
@@ -162,12 +162,13 @@ class JavaParser : Grammar<Any>() {
         override val re = "@n(?:\\(.*\\))?"
         override val rule = re.toRegex()
         override fun createSymbols(context: ParseContext, group: MatchGroup?) {
-            if (group == null) return
-            group.range.forEach { i ->
+            group?.range?.forEachIndexed { i, j ->
                 val c = group.value[i]
-                val t = context.tokens[i]
+                val n = if (i+1 < group.value.length-1) group.value[i+1] else ' '
+                val t = context.tokens[j]
+                val symbolType = if (n == '=') ParseSymbolType.SYMREF else ParseSymbolType.TYPEREF
                 when (c) {
-                    'n' -> addSymbol(context, t, ParseSymbolType.TYPEREF)
+                    'n' -> addSymbol(context, t, symbolType)
                 }
             }
         }
@@ -177,10 +178,9 @@ class JavaParser : Grammar<Any>() {
         override val re = "<.*>"
         override val rule = re.toRegex()
         override fun createSymbols(context: ParseContext, group: MatchGroup?) {
-            if (group == null) return
-            group.range.forEach { i ->
-                val c = group.value[i-group.range.first]
-                val t = context.tokens[i]
+            group?.range?.forEachIndexed { i, j ->
+                val c = group.value[i]
+                val t = context.tokens[j]
                 when (c) {
                     'n' -> addSymbol(context, t, ParseSymbolType.TYPEREF)
                 }
@@ -197,10 +197,9 @@ class JavaParser : Grammar<Any>() {
         override val re = "[En<>,?]*"
         override val rule = re.toRegex()
         override fun createSymbols(context: ParseContext, group: MatchGroup?) {
-            if (group == null) return
-            group.range.forEach { i ->
-                val c = group.value[i-group.range.first]
-                val t = context.tokens[i]
+            group?.range?.forEachIndexed { i, j ->
+                val c = group.value[i]
+                val t = context.tokens[j]
                 when (c) {
                     'n' -> addSymbol(context, t, ParseSymbolType.TYPEREF)
                 }
@@ -209,16 +208,15 @@ class JavaParser : Grammar<Any>() {
     }
 
     val Params = object : ParseRule() {
-        override val re = "\\([@Tn()<E?>\\[\\],]*\\)"
+        override val re = "\\([@Tnl=()<E?>\\[\\],]*\\)"
         override val rule = re.toRegex()
         override fun createSymbols(context: ParseContext, group: MatchGroup?) {
-            if (group == null) return
             var parenCount = -1
             var annotationCount = 0
             var fieldType: JavaParseSymbol? = null
-            group.range.forEach { i ->
-                val c = group.value[i-group.range.first]
-                val t = context.tokens[i]
+            group?.range?.forEachIndexed { i, j ->
+                val c = group.value[i]
+                val t = context.tokens[j]
                 when (c) {
                     '(', '<' -> parenCount++
                     ')', '>' -> parenCount--
@@ -250,10 +248,9 @@ class JavaParser : Grammar<Any>() {
         override val re = "Wn(?:,n)*"
         override val rule = re.toRegex()
         override fun createSymbols(context: ParseContext, group: MatchGroup?) {
-            if (group == null) return
-            group.range.forEach { i ->
-                val c = group.value[i-group.range.first]
-                val t = context.tokens[i]
+            group?.range?.forEachIndexed { i, j ->
+                val c = group.value[i]
+                val t = context.tokens[j]
                 when (c) {
                     'n' -> addSymbol(context, t, ParseSymbolType.TYPEREF)
                 }
@@ -286,13 +283,13 @@ class JavaParser : Grammar<Any>() {
     }
 
     val TypeDef = object : ParseRule() {
-        override val re = "(${Annotation.re})*(M)*(D)(n)(${Generic.re})?(${Extends.re})[{]"
+        override val re = "(${Annotation.re})*(M*)(D)(n)(${Generic.re})?(${Extends.re})[{]"
         override val rule = re.toRegex()
         override fun createSymbols(context: ParseContext, match: MatchResult, terminating: TokenMatch?) {
             Annotation.createSymbols(context, match.groups[1])
             val typedef = addSymbol(context, match.groups[4]!!, ParseSymbolType.TYPEDEF)
             Generic.createSymbols(context, match.groups[5])
-            context.scopes.push(typedef)
+            context.startScope(typedef)
             Extends.createSymbols(context, match.groups[6])
         }
     }
@@ -304,7 +301,7 @@ class JavaParser : Grammar<Any>() {
             Annotation.createSymbols(context, match.groups[1])
             val ident = addSymbol(context, match.groups[3]!!, ParseSymbolType.CONSTRUCTOR)
             Throws.createSymbols(context, match.groups[3])
-            context.scopes.push(ident)
+            context.startScope(ident)
             Params.createSymbols(context, match.groups[4])
         }
     }
@@ -319,7 +316,7 @@ class JavaParser : Grammar<Any>() {
             Generic.createSymbols(context, match.groups[5])
             val ident = addSymbol(context, match.groups[7]!!, ParseSymbolType.METHOD, type.name)
             Throws.createSymbols(context, match.groups[9])
-            context.scopes.push(ident)
+            context.startScope(ident)
             Params.createSymbols(context, match.groups[8])
             // TODO dims
             if (terminating?.type == SEMI) context.endScope(terminating)
@@ -327,44 +324,56 @@ class JavaParser : Grammar<Any>() {
     }
 
     val FieldDef = object : ParseRule() {
-        override val re = "(${Annotation.re})*(M*)([VTn])(${Dimension.re})(n${Dimension.re})(,n${Dimension.re})*(=.*)?[;]?"
+        override val re = "(${Annotation.re})*(M*)([VTn])(${Generic.re})?(${Dimension.re})(n${Dimension.re})(,n${Dimension.re})*(=.*)?[{;]?"
         override val rule = re.toRegex()
         override fun createSymbols(context: ParseContext, match: MatchResult, terminating: TokenMatch?) {
             Annotation.createSymbols(context, match.groups[1])
             val type = if (match.groups[3]?.value == "V") null else addSymbol(context, match.groups[3]!!, ParseSymbolType.TYPEREF)
-            //val typeDim = Dimension.getDimension(context, match.groups[4])
-            addSymbol(context, match.groups[5]!!, ParseSymbolType.FIELD, type?.name)
-            val fieldList = match.groups[6]
-            if (fieldList != null) {
-                fieldList.range.forEach { i ->
-                    val c = fieldList.value[i-fieldList.range.first]
-                    val t = context.tokens[i]
-                    when (c) {
-                        'n' -> addSymbol(context, t, ParseSymbolType.FIELD, type?.name)
-                    }
+            Generic.createSymbols(context, match.groups[4])
+            //val typeDim = Dimension.getDimension(context, match.groups[5])
+            val symbolType = if (context.inType()) ParseSymbolType.FIELD else ParseSymbolType.VARIABLE
+            addSymbol(context, match.groups[6]!!, symbolType, type?.name)
+            val fieldList = match.groups[7]
+            fieldList?.range?.forEachIndexed { i, j ->
+                val c = fieldList.value[i]
+                val t = context.tokens[j]
+                when (c) {
+                    'n' -> addSymbol(context, t, symbolType, type?.name)
                 }
             }
-            // TODO assignment
+            val assignment = match.groups[7]
+            assignment?.range?.forEachIndexed { i, j ->
+                val c = assignment.value[i]
+                val t = context.tokens[j]
+                when (c) {
+                    'n' -> addSymbol(context, t, ParseSymbolType.SYMREF)
+                }
+            }
+            if (terminating?.type == O_BRACE) context.startScope(addSymbol(context, terminating, ParseSymbolType.BLOCK))
         }
     }
 
-    val MethodRef = object : ParseRule() {
-        override val re = "n($ARRAY_RE)*($ARGS_RE)[;]?"
+    val Statement = object : ParseRule() {
+        override val re = "([Tn(][^=]*)?(=)?([^=}].*)?[{;]?"
         override val rule = re.toRegex()
         override fun createSymbols(context: ParseContext, match: MatchResult, terminating: TokenMatch?) {
-            val ident = context.tokens.first()
-            addSymbol(context, ident, ParseSymbolType.SYMREF)
-            // TODO args
-        }
-    }
-
-    val Assignment = object : ParseRule() {
-        override val re = "n($ARRAY_RE)*=(.*)[;]"
-        override val rule = re.toRegex()
-        override fun createSymbols(context: ParseContext, match: MatchResult, terminating: TokenMatch?) {
-            val ident = context.tokens.first()
-            addSymbol(context, ident, ParseSymbolType.SYMREF)
-            // TODO RHS
+            val lhs = match.groups[1]
+            lhs?.range?.forEachIndexed { i, j ->
+                val c = lhs.value[i]
+                val t = context.tokens[j]
+                when (c) {
+                    'n' -> addSymbol(context, t, ParseSymbolType.SYMREF)
+                }
+            }
+            val rhs = match.groups[3]
+            rhs?.range?.forEachIndexed { i, j ->
+                val c = rhs.value[i]
+                val t = context.tokens[j]
+                when (c) {
+                    'n' -> addSymbol(context, t, ParseSymbolType.SYMREF)
+                }
+            }
+            if (terminating?.type == O_BRACE) context.startScope(addSymbol(context, terminating, ParseSymbolType.BLOCK))
         }
     }
 
@@ -372,7 +381,6 @@ class JavaParser : Grammar<Any>() {
         override val re = "R(.*)[;]"
         override val rule = re.toRegex()
         override fun createSymbols(context: ParseContext, match: MatchResult, terminating: TokenMatch?) {
-            //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
     }
 
@@ -383,7 +391,7 @@ class JavaParser : Grammar<Any>() {
             val symbol = addSymbol(context, context.tokens.first(), ParseSymbolType.CONTROL).apply {
                 type = "<control>"
             }
-            context.scopes.push(symbol)
+            context.startScope(symbol)
             // TODO Params
             if (terminating?.type == SEMI) context.endScope(terminating)
         }
@@ -413,10 +421,9 @@ class JavaParser : Grammar<Any>() {
         TypeDef,
         MethodDef,
         FieldDef,
-        MethodRef,
-        Assignment,
         FinalStatement,
-        ControlStatement
+        ControlStatement,
+        Statement
     )
 
     data class ParseContext(
@@ -429,14 +436,22 @@ class JavaParser : Grammar<Any>() {
     ) {
         fun nextId() = result.symbols.size
         fun scopeId() = if (scopes.empty()) -1 else scopes.peek().id
+        fun inType() = if (scopes.empty()) false else scopes.peek().symbolType == ParseSymbolType.TYPEDEF
         fun add(symbol: JavaParseSymbol) {
             result.symbols.add(symbol)
             if (!scopes.empty()) scopes.peek().children.add(symbol)
         }
+
+        fun startScope(symbol: JavaParseSymbol) {
+            println("Start Scope: ${symbol}")
+            scopes.push(symbol)
+        }
+
         fun endScope(token: TokenMatch) {
             if (!scopes.empty()) {
                 val scope = scopes.pop()
                 scope.scopeEnd = JavaParseLocation(token.position, token.position)
+                println("End Scope: ${scope}")
             }
         }
 
@@ -478,8 +493,6 @@ class JavaParser : Grammar<Any>() {
     private fun processTokens(context: ParseContext, terminating: TokenMatch? = null) {
         if (terminating != null) context.tokens.add(terminating)
         when (terminating?.type) {
-            O_BRACE -> if (context.inAssignment) return
-            C_BRACE -> if (context.inAssignment) return
             SEMI -> if (context.parenCount > 0) return
             COLON -> if (context.inAssignment || context.parenCount > 0) return
             ASSIGN -> {context.inAssignment = true && context.parenCount == 0; return}
@@ -499,8 +512,12 @@ class JavaParser : Grammar<Any>() {
                 println("[$row]: $pattern -> ${rule.javaClass.simpleName}")
                 rule.createSymbols(context, matchResult!!, terminating)
             }
+            else if (pattern != "}"){
+                println("=== UNMATCHED PATTERN: $pattern  ====")
+            }
         }
-        if (terminating?.type == C_BRACE && !context.inAssignment) context.endScope(terminating)
+        //if (terminating?.type == C_BRACE && !context.inAssignment) context.endScope(terminating)
+        if (terminating?.type == C_BRACE) context.endScope(terminating)
         context.clear()
     }
 
@@ -513,10 +530,10 @@ class JavaParser : Grammar<Any>() {
             val request = JavaParseRequest(file = path, text = text)
             //val result = parser.parse(request)
             val result = parser.parse(request)
-
+/*
             result.symbols.filter { !listOf(ParseSymbolType.TYPEREF, ParseSymbolType.CONTROL, ParseSymbolType.SYMREF).contains(it.symbolType) }
                 .forEach { println(it) }
-
+*/
 
         }
 
@@ -596,8 +613,27 @@ public class TryIt extends Object implements Serializable, Comparable {
     public abstract <T extends String<T>> int genericMethod(Class<T> clazz[]) throws IllegalStateException;
     
     static class AnInnerOne<T extends List<String>> {
-       public AnInnerOne(@JsonName("foo") int foo) {}
+       public AnInnerOne(@JsonName("foo") int foo) {
+       
+          i == 3;
+          ((String)i).hello(i,jk)[3] = 'c';
+          switch(3) {
+             case 8:
+                x = 8 +3; 
+                break;
+             case 7;
+             default:
+          }
+       }
     }
+    
+     private static final ThreadLocal<StringCoding.Result>
+            resultCached = new ThreadLocal<>() {
+                protected StringCoding.Result initialValue() {
+                    return new StringCoding.Result();
+                }};
+
+     ;
 
 }
         """.trimIndent()

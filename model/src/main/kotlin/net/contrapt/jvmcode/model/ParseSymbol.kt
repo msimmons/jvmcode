@@ -6,7 +6,7 @@ interface ParseSymbol {
     val symbolType: ParseSymbolType
     val location: ParseLocation
     val scopeEnd: ParseLocation
-    val type: String?
+    var type: String?
     val scope: Int
     val children: Collection<ParseSymbol>
 
