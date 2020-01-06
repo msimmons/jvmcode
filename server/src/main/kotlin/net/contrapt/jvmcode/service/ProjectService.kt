@@ -36,6 +36,9 @@ class ProjectService(
     // Map of entry FQCN to the dependency it belongs to
     private val dependencyMap = mutableMapOf<String, DependencyData>()
 
+    // Map of jarFile to [JarData]
+    private val jarDataMap = mutableMapOf<String, JarData>()
+
     // Map of path to class data for all project classes
     private val classMap = mutableMapOf<String, ClassData>()
 
@@ -44,6 +47,7 @@ class ProjectService(
     init {
         javaVersion = getVersion()
         jdkSource =  JDKDependencySource.create(config, javaHome, javaVersion)
+        jdkSource.dependencies.forEach { getJarData(it) }
         userSource = UserDependencySource()
     }
 
@@ -105,6 +109,7 @@ class ProjectService(
      */
     fun updateUserProject(request: ProjectUpdateRequest) {
         request.dependencySources.forEach {
+            userSource.dependencies.forEach { jarDataMap.remove(it.fileName) }
             userSource.dependencies.clear()
             userSource.dependencies.addAll(it.dependencies)
         }
@@ -114,16 +119,23 @@ class ProjectService(
             userPath.classDirs.addAll(it.classDirs)
             userPath.sourceDirs.addAll(it.sourceDirs)
         }
+        userSource.dependencies.forEach { getJarData(it) }
     }
 
     /**
      * Process update of project dependency information from an external source
      */
     fun updateProject(request: ProjectUpdateRequest) {
+        externalSource.filter { it.source == request.source }.forEach {
+            it.dependencies.forEach { jarDataMap.remove(it.fileName) }
+        }
         externalSource.removeIf { it.source == request.source }
         externalPaths.removeIf { it.source == request.source }
         externalSource.addAll(request.dependencySources)
         externalPaths.addAll(request.paths)
+        externalSource.filter { it.source == request.source }.forEach {
+            it.dependencies.forEach { getJarData(it) }
+        }
     }
 
     /**
@@ -131,6 +143,7 @@ class ProjectService(
      * in the resulting data structures [JarData] -> [JarPackageData]
      */
     fun getJarData(dependencyData: DependencyData) : JarData {
+        if (jarDataMap.containsKey(dependencyData.fileName)) return jarDataMap[dependencyData.fileName]!!
         val pkgMap = mutableMapOf<String, MutableSet<JarEntryData>>()
         val isJmod = dependencyData.fileName.endsWith(".jmod")
         try {
@@ -148,7 +161,7 @@ class ProjectService(
                 }
             }
             /** The [JarData] is a collection of [JarPackageData] for each non-empty package in the jar file */
-            return JarData(dependencyData.fileName,
+            val jarData = JarData(dependencyData.fileName,
                     pkgMap.asSequence()
                     .map {
                         entry -> JarPackageData(entry.key).apply { entries.addAll(entry.value) }
@@ -158,6 +171,8 @@ class ProjectService(
                     }
                     .toSortedSet()
             )
+            jarDataMap[dependencyData.fileName] = jarData
+            return jarData
         }
         catch (e: Exception) {
             throw RuntimeException("Unable to get jar entries for ${dependencyData.fileName}", e)

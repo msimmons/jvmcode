@@ -3,6 +3,7 @@ package net.contrapt.jvmcode.language
 import com.github.h0tk3y.betterParse.grammar.Grammar
 import com.github.h0tk3y.betterParse.lexer.TokenMatch
 import com.github.h0tk3y.betterParse.parser.Parser
+import io.vertx.core.logging.LoggerFactory
 import net.contrapt.jvmcode.model.ParseRequest
 import net.contrapt.jvmcode.model.ParseResult
 import net.contrapt.jvmcode.model.ParseSymbolType
@@ -125,7 +126,7 @@ class JavaParser : Grammar<Any>() {
             }
             context.add(symbol)
             val padding = "  ".repeat(context.scopes.size)
-            println("$padding$symbol")
+            //println("$padding$symbol")
             return symbol
         }
 
@@ -434,6 +435,7 @@ class JavaParser : Grammar<Any>() {
         val tokens: MutableList<TokenMatch> = mutableListOf(),
         val scopes: Stack<JavaParseSymbol> = Stack()
     ) {
+        private val logger = LoggerFactory.getLogger(javaClass)
         fun nextId() = result.symbols.size
         fun scopeId() = if (scopes.empty()) -1 else scopes.peek().id
         fun inType() = if (scopes.empty()) false else scopes.peek().symbolType == ParseSymbolType.TYPEDEF
@@ -443,7 +445,7 @@ class JavaParser : Grammar<Any>() {
         }
 
         fun startScope(symbol: JavaParseSymbol) {
-            println("Start Scope: ${symbol}")
+            //println("Start Scope: ${symbol}")
             scopes.push(symbol)
         }
 
@@ -451,7 +453,7 @@ class JavaParser : Grammar<Any>() {
             if (!scopes.empty()) {
                 val scope = scopes.pop()
                 scope.scopeEnd = JavaParseLocation(token.position, token.position)
-                println("End Scope: ${scope}")
+                //println("End Scope: ${scope}")
             }
         }
 
@@ -509,7 +511,7 @@ class JavaParser : Grammar<Any>() {
                 matchResult != null
             }
             if (rule != null && matchResult != null) {
-                println("[$row]: $pattern -> ${rule.javaClass.simpleName}")
+                //println("[$row]: $pattern -> ${rule.javaClass.simpleName}")
                 rule.createSymbols(context, matchResult!!, terminating)
             }
             else if (pattern != "}"){

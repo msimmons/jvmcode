@@ -20,7 +20,7 @@ import net.contrapt.jvmcode.service.ProjectService
 import net.contrapt.jvmcode.service.SymbolRepository
 import java.io.File
 
-class RouterVerticle(val startupToken: String, var config: JvmConfig, val symbolRepository: SymbolRepository) : AbstractVerticle() {
+class RouterVerticle(val startupToken: String, var config: JvmConfig, symbolRepository: SymbolRepository) : AbstractVerticle() {
 
     private val logger = LoggerFactory.getLogger(javaClass)
     private val deployments = mutableMapOf<String, String>()

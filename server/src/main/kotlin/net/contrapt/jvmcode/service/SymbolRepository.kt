@@ -18,6 +18,7 @@ class SymbolRepository {
     )
 
     private val jarEntryByFqcn = mutableMapOf<String, JarEntryData>()
+    private val jarEntriesByName = mutableMapOf<String, MutableList<JarEntryData>>()
     private val dataByFqcn = mutableMapOf<String, DataHolder>()
     private val jarEntryByPath = mutableMapOf<String, JarEntryData>()
     private val dataByPath = mutableMapOf<String, DataHolder>()
@@ -29,8 +30,14 @@ class SymbolRepository {
     }
 
     fun getJarEntryByFqn(fqn: String) : JarEntryData? {
-        logger.info("Getting jar entry for fqn $fqn")
+        logger.debug("Getting jar entry for fqn $fqn")
         return jarEntryByFqcn.getOrDefault(fqn, null)
+    }
+
+    fun getJarEntriesByName(name: String) : List<JarEntryData> {
+        val found = jarEntriesByName.get(name)?.toList() ?: listOf()
+        logger.debug("Found ${found} for $name")
+        return found
     }
 
     fun saveJarEntry(jarEntry: JarEntryData) {
@@ -38,6 +45,8 @@ class SymbolRepository {
         logger.debug("Storing jar entry for $fileKey (${jarEntry.fqcn()})")
         jarEntryByPath.put(fileKey, jarEntry)
         jarEntryByFqcn.put(jarEntry.fqcn(), jarEntry)
+        val entries = jarEntriesByName.getOrPut(jarEntry.name, {mutableListOf()})
+        entries.add(jarEntry)
     }
 
 }
