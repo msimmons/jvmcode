@@ -14,8 +14,9 @@ import io.vertx.ext.web.handler.sockjs.BridgeEvent
 import io.vertx.ext.web.handler.sockjs.BridgeOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import net.contrapt.jvmcode.handler.*
-import net.contrapt.jvmcode.language.ParseService
+import net.contrapt.jvmcode.service.ParseService
 import net.contrapt.jvmcode.model.JvmConfig
+import net.contrapt.jvmcode.service.CompileService
 import net.contrapt.jvmcode.service.ProjectService
 import net.contrapt.jvmcode.service.SymbolRepository
 import java.io.File
@@ -26,6 +27,7 @@ class RouterVerticle(val startupToken: String, var config: JvmConfig, symbolRepo
     private val deployments = mutableMapOf<String, String>()
     private val javaHome = System.getProperty("java.home").replace("${File.separator}jre", "")
     private val parseService = ParseService(symbolRepository)
+    private val compileService = CompileService(symbolRepository)
     private val projectService = ProjectService(config, javaHome, parseService, symbolRepository)
 
     var httpPort = 0
@@ -240,5 +242,15 @@ class RouterVerticle(val startupToken: String, var config: JvmConfig, symbolRepo
          */
         vertx.eventBus().consumer<JsonObject>("jvmcode.classpath", GetClasspath(vertx, projectService))
 
+        /**
+         * Request compilation for the given files
+         */
+        vertx.eventBus().consumer<JsonObject>("jvmcode.request-compile", RequestCompile(vertx, compileService))
+
+        /**
+         * Request parsing the given file
+         */
+        vertx.eventBus().consumer<JsonObject>("jvmcode.request-parse", RequestParse(vertx, parseService))
     }
+
 }

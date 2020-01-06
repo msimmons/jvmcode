@@ -8,7 +8,6 @@ import io.kotlintest.should
 import io.kotlintest.shouldBe
 import io.kotlintest.shouldNotBe
 import io.vertx.core.json.Json
-import net.contrapt.jvmcode.language.ParseService
 import net.contrapt.jvmcode.model.JarEntryType
 import net.contrapt.jvmcode.model.JvmConfig
 import net.contrapt.jvmcode.service.model.DependencySource

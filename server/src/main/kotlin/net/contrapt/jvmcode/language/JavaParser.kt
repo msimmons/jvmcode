@@ -4,13 +4,17 @@ import com.github.h0tk3y.betterParse.grammar.Grammar
 import com.github.h0tk3y.betterParse.lexer.TokenMatch
 import com.github.h0tk3y.betterParse.parser.Parser
 import io.vertx.core.logging.LoggerFactory
+import io.vertx.core.shareddata.Shareable
+import net.contrapt.jvmcode.model.LanguageParser
 import net.contrapt.jvmcode.model.ParseRequest
 import net.contrapt.jvmcode.model.ParseResult
 import net.contrapt.jvmcode.model.ParseSymbolType
 import java.io.File
 import java.util.*
 
-class JavaParser : Grammar<Any>() {
+class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     // Comments
     val BEGIN_COMMENT by token("/\\*")
@@ -440,6 +444,7 @@ class JavaParser : Grammar<Any>() {
         fun scopeId() = if (scopes.empty()) -1 else scopes.peek().id
         fun inType() = if (scopes.empty()) false else scopes.peek().symbolType == ParseSymbolType.TYPEDEF
         fun add(symbol: JavaParseSymbol) {
+            println(symbol)
             result.symbols.add(symbol)
             if (!scopes.empty()) scopes.peek().children.add(symbol)
         }
@@ -463,7 +468,7 @@ class JavaParser : Grammar<Any>() {
         }
     }
 
-    fun parse(request: ParseRequest) : ParseResult {
+    override fun parse(request: ParseRequest) : ParseResult {
         val context = ParseContext(request as JavaParseRequest)
         var tokens = this.tokenizer.tokenize(request.text ?: "")
         var inComment = false
@@ -528,8 +533,8 @@ class JavaParser : Grammar<Any>() {
         fun main(args: Array<String>) {
             val parser = JavaParser()
             val path = "/home/mark/work/jvmcode/server/src/test/resources/Test.java"
-            val text = File(path).readText()
-            val request = JavaParseRequest(file = path, text = text)
+            //val text = File(path).readText()
+            val request = JavaParseRequest(file = path, text = code)
             //val result = parser.parse(request)
             val result = parser.parse(request)
 /*
@@ -608,6 +613,7 @@ public class TryIt extends Object implements Serializable, Comparable {
                 return false;
             }
         }
+        return new String[] {"a", "b", variable, "d"};
         return true;
     }
     

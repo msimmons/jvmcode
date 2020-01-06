@@ -3,8 +3,6 @@ package net.contrapt.jvmcode.service
 import io.vertx.core.json.Json
 import io.vertx.core.logging.LoggerFactory
 import javassist.bytecode.ClassFile
-import net.contrapt.jvmcode.language.JavaParseRequest
-import net.contrapt.jvmcode.language.ParseService
 import net.contrapt.jvmcode.model.*
 import net.contrapt.jvmcode.service.model.*
 import java.io.DataInputStream
@@ -225,7 +223,6 @@ class ProjectService(
             else -> getContentFromSourceJar(srcFile, jmod, entry)
         }
         if (sourceEntry.text == null) sourceEntry.text = Json.encodePrettily(entry.classData)
-        else sourceEntry.parseData = parseService.parse(JavaParseRequest(file = entry.path, text = sourceEntry.text))
         symbolRepo.saveJarEntry(sourceEntry)
         return sourceEntry
     }

@@ -1,26 +1,26 @@
-package net.contrapt.jvmcode.language
+package net.contrapt.jvmcode.service
 
-import net.contrapt.jvmcode.model.ParseRequest
-import net.contrapt.jvmcode.model.ParseResult
-import net.contrapt.jvmcode.model.ParseSymbol
-import net.contrapt.jvmcode.model.ParseSymbolType
-import net.contrapt.jvmcode.service.SymbolRepository
+import net.contrapt.jvmcode.model.*
 import java.io.File
+import java.lang.IllegalStateException
 
 class ParseService(val symbolRepository: SymbolRepository) {
 
-    private val parser = JavaParser()
-
-    fun parse(request: ParseRequest) : ParseResult {
+    fun parse(request: ParseRequest, parser: LanguageParser?) : ParseResult {
         val cached = symbolRepository.getJarEntryByFile(request.file)
         val parseResult = cached?.parseData
         if (parseResult != null) return parseResult
-        if (request.text == null) {
-            request.text = File(request.file).readText()
+        if (request.text.isNullOrEmpty()) {
+            request.text = cached?.text ?: File(request.file).readText()
         }
-        val result = parser.parse(request)
-        resolveSymbols(result)
-        return result
+        if (parser != null) {
+            val result = parser.parse(request)
+            resolveSymbols(result)
+            return result
+        }
+        else {
+            throw IllegalStateException("No parser found for ${request.languageId}")
+        }
     }
 
     fun resolveSymbols(result: ParseResult) {

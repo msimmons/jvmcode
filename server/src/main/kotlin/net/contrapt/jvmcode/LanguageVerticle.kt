@@ -2,20 +2,14 @@ package net.contrapt.jvmcode
 
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.json.JsonObject
-import io.vertx.core.logging.LoggerFactory
-import net.contrapt.jvmcode.handler.RequestCompile
-import net.contrapt.jvmcode.handler.RequestParse
-import net.contrapt.jvmcode.language.CompileService
+import net.contrapt.jvmcode.language.JavaCompiler
 import net.contrapt.jvmcode.language.JavaLanguageRequest
-import net.contrapt.jvmcode.language.ParseService
+import net.contrapt.jvmcode.language.JavaParser
+import net.contrapt.jvmcode.model.LanguageCompiler
+import net.contrapt.jvmcode.model.LanguageParser
 import net.contrapt.jvmcode.service.SymbolRepository
 
 class LanguageVerticle(val symbolRepository: SymbolRepository) : AbstractVerticle() {
-
-    private val logger = LoggerFactory.getLogger(javaClass)
-
-    private val compileService = CompileService()
-    private val parseService = ParseService(symbolRepository)
 
     override fun start() {
         startLanguage()
@@ -25,18 +19,10 @@ class LanguageVerticle(val symbolRepository: SymbolRepository) : AbstractVerticl
 
         vertx.eventBus().consumer<JsonObject>("jvmcode.start-language") {
             val request = JavaLanguageRequest()
+            vertx.sharedData().getLocalMap<String, LanguageParser>(LanguageParser.MAP_NAME)[request.languageId] = JavaParser()
+            vertx.sharedData().getLocalMap<String, LanguageCompiler>(LanguageCompiler.MAP_NAME)[request.languageId] = JavaCompiler()
             vertx.eventBus().publish("jvmcode.language", JsonObject.mapFrom(request))
         }
 
-        /**
-         * Request compilation for the given files
-         */
-        vertx.eventBus().consumer<JsonObject>("jvmcode.request-compile", RequestCompile(vertx, compileService))
-
-        /**
-         * Request parsing the given files
-         */
-        vertx.eventBus().consumer<JsonObject>("jvmcode.request-parse", RequestParse(vertx, parseService))
     }
-
 }
