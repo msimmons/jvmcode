@@ -10,7 +10,7 @@
 - When jvm project starts (must have all dependencies and paths), scan all source files and class files, make sure things are up-to-date
 - Make sure things are compiled, watch .class files for changes?
 - Notifications from server -> vscode when server is doing something
-- More inteligent mapping of class names to file:locations when loading source (Javassist)
+- _More inteligent mapping of class names to file:locations when loading source (Javassist)_
 - Bytecode decompiler (Javassist as compromise maybe)
 - Debugger interface
 - _Allow filtering dependencies by package name_

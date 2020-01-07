@@ -444,7 +444,7 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
         fun scopeId() = if (scopes.empty()) -1 else scopes.peek().id
         fun inType() = if (scopes.empty()) false else scopes.peek().symbolType == ParseSymbolType.TYPEDEF
         fun add(symbol: JavaParseSymbol) {
-            println(symbol)
+            //println(symbol)
             result.symbols.add(symbol)
             if (!scopes.empty()) scopes.peek().children.add(symbol)
         }

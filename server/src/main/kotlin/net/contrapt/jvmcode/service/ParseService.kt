@@ -13,14 +13,10 @@ class ParseService(val symbolRepository: SymbolRepository) {
         if (request.text.isNullOrEmpty()) {
             request.text = cached?.text ?: File(request.file).readText()
         }
-        if (parser != null) {
-            val result = parser.parse(request)
-            resolveSymbols(result)
-            return result
-        }
-        else {
-            throw IllegalStateException("No parser found for ${request.languageId}")
-        }
+        if ( parser == null ) throw IllegalStateException("No parser found for ${request.languageId}")
+        val result = parser.parse(request)
+        resolveSymbols(result)
+        return result
     }
 
     fun resolveSymbols(result: ParseResult) {

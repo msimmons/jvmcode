@@ -60,6 +60,7 @@ export class LanguageController implements vscode.Disposable {
 
     onDidDelete(request: LanguageRequest) {
         return async (uri: vscode.Uri) => {
+            // TODO remove problems for this URI
             this.requestCompile(request.languageId, uri)
         }
     }
@@ -121,7 +122,10 @@ export class LanguageController implements vscode.Disposable {
         let text = doc.uri.scheme === 'file' ? doc.getText() : ""
         let request = {languageId: doc.languageId, file: path, text: text} as ParseRequest
         let promise = this.languageService.requestParse(request)
-        promise.then(r => this.parseRequests.delete(path))
+        promise.then(r => this.parseRequests.delete(path)).catch(reason => {
+            this.parseRequests.delete(path)
+            this.parseResults.delete(path)
+        })
         this.parseRequests.set(path, promise)
         this.parseResults.set(path, promise)
     }
