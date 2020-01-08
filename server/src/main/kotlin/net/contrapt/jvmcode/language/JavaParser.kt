@@ -130,20 +130,12 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
             }
             context.add(symbol)
             val padding = "  ".repeat(context.scopes.size)
-            //println("$padding$symbol")
+            //println("$padding:$token:$symbol")
             return symbol
         }
 
         fun getDimension(context: ParseContext, group: MatchGroup?) : Int {
             return if (group == null) 0 else group.value.count { it == '[' }
-        }
-
-        fun countNames(match: String?) : Int {
-            return when(match) {
-                null -> 0
-                else -> match.count { it == 'n' }
-            }
-
         }
 
         abstract val re: String
@@ -545,13 +537,13 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
         }
 
         val code = """
-/** hello
+/** 
+ * hello
  a multiline comment here
  and more
  and more
  *
  */
-
 package net.contrapt.jvmcode.language;
 
 import java.math.BigDecimal;
@@ -644,6 +636,38 @@ public class TryIt extends Object implements Serializable, Comparable {
      ;
 
 }
+
+package org.slf4j.event;
+
+import org.slf4j.Marker;
+
+/**
+ * 
+ * @author ceki
+ * @since 1.7.15
+ */
+public interface LoggingEvent {
+
+    Level getLevel();
+
+    Marker getMarker();
+
+    String getLoggerName();
+
+    String getMessage();
+
+    String getThreadName();
+
+    Object[] getArgumentArray();
+
+    long getTimeStamp();
+
+    Throwable getThrowable();
+
+}
+/*
+null
+*/
         """.trimIndent()
     }
 

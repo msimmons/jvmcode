@@ -120,7 +120,8 @@ export class LanguageController implements vscode.Disposable {
         let path = doc.uri.path
         if (this.parseRequests.get(path)) return
         let text = doc.uri.scheme === 'file' ? doc.getText() : ""
-        let request = {languageId: doc.languageId, file: path, text: text} as ParseRequest
+        //let text = doc.getText()
+        let request = {languageId: doc.languageId, file: path, text: text, stripCR: (doc.eol === vscode.EndOfLine.LF)} as ParseRequest
         let promise = this.languageService.requestParse(request)
         promise.then(r => this.parseRequests.delete(path)).catch(reason => {
             this.parseRequests.delete(path)

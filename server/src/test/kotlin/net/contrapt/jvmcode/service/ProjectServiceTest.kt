@@ -27,7 +27,7 @@ class ProjectServiceTest {
     fun systemJdkTest() {
         assumeTrue(File(javaHomeSys).exists())
         val config = JvmConfig(setOf(), setOf("java"), setOf(), setOf("java.base", "java.sql"))
-        val service = ProjectService(config, javaHomeSys, parseService, symbolRepository)
+        val service = ProjectService(config, javaHomeSys, symbolRepository)
         val project = service.getJvmProject()
         project.dependencySources.size shouldBe 2 // System and User
         val depSource = project.dependencySources.first()
@@ -50,7 +50,7 @@ class ProjectServiceTest {
     fun systemJdkTest11() {
         assumeTrue(File(javaHome11).exists())
         val config = JvmConfig(setOf(), setOf("java"), setOf(), setOf("java.base", "java.sql"))
-        val service = ProjectService(config, javaHome11, parseService, symbolRepository)
+        val service = ProjectService(config, javaHome11, symbolRepository)
         val project = service.getJvmProject()
         project.dependencySources.size shouldBe 2 // System and User
         val depSource = project.dependencySources.first()
@@ -73,7 +73,7 @@ class ProjectServiceTest {
     fun systemJdkWithExcludesTest() {
         assumeTrue(File(javaHomeSys).exists())
         val config = JvmConfig(setOf("com.sun"), setOf("java"), setOf(), setOf("java.base", "java.sql"))
-        val service = ProjectService(config, javaHomeSys, parseService, symbolRepository)
+        val service = ProjectService(config, javaHomeSys, symbolRepository)
         val deps = service.getJvmProject().dependencySources
         deps.size shouldBe 2
         val depSource = deps.first()
@@ -87,7 +87,7 @@ class ProjectServiceTest {
     fun addDependencyTest() {
         assumeTrue(File(javaHomeSys).exists())
         val config = JvmConfig(setOf("com.sun"), setOf("java"), setOf(), setOf("java.base", "java.sql"))
-        val service = ProjectService(config, javaHomeSys, parseService, symbolRepository)
+        val service = ProjectService(config, javaHomeSys, symbolRepository)
         val path = javaClass.classLoader?.getResource("postgresql-42.1.4.jar")?.path ?: ""
         service.addUserDependency(path, null)
         val deps = service.getJvmProject().dependencySources
@@ -105,7 +105,7 @@ class ProjectServiceTest {
     @Test
     fun getClasspathTest() {
         assumeTrue(File(javaHomeSys).exists())
-        val service = ProjectService(JvmConfig(setOf(), setOf(), setOf()), javaHomeSys, parseService, symbolRepository)
+        val service = ProjectService(JvmConfig(setOf(), setOf(), setOf()), javaHomeSys, symbolRepository)
         val path1 = javaClass.classLoader?.getResource("postgresql-42.1.4.jar")?.path ?: ""
         service.addUserDependency(path1, null)
         var classpath = service.getClasspath()
@@ -128,7 +128,7 @@ class ProjectServiceTest {
     @Test
     fun getClassDataTest() {
         assumeTrue(File(javaHome11).exists())
-        val service = ProjectService(JvmConfig(setOf(), setOf(), setOf()), javaHome11, parseService, symbolRepository)
+        val service = ProjectService(JvmConfig(setOf(), setOf(), setOf()), javaHome11, symbolRepository)
         val path = UserPath()
         path.classDirs.add("/home/mark/work/jvmcode/server/build/classes/kotlin/main")
         service.addUserPath(path)

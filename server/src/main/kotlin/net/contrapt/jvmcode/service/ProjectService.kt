@@ -13,7 +13,6 @@ import java.util.jar.JarFile
 
 class ProjectService(
     var config: JvmConfig, val javaHome : String,
-    val parseService: ParseService,
     val symbolRepo: SymbolRepository
 ) {
 
@@ -258,7 +257,7 @@ class ProjectService(
             } else {
                 val sourceEntry = pathToJarEntry(entry.pkg, jarEntry.name)
                 sourceEntry.text = jarFile.getInputStream(jarEntry).bufferedReader().use {
-                    it.readText() + "/*\n${entry.text}\n*/"
+                    it.readText().replace("\r", "")
                 }
                 return sourceEntry
             }

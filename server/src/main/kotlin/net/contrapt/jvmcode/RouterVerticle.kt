@@ -28,7 +28,7 @@ class RouterVerticle(val startupToken: String, var config: JvmConfig, symbolRepo
     private val javaHome = System.getProperty("java.home").replace("${File.separator}jre", "")
     private val parseService = ParseService(symbolRepository)
     private val compileService = CompileService(symbolRepository)
-    private val projectService = ProjectService(config, javaHome, parseService, symbolRepository)
+    private val projectService = ProjectService(config, javaHome, symbolRepository)
 
     var httpPort = 0
         private set

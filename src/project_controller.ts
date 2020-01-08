@@ -164,6 +164,9 @@ export class ProjectController {
                 let end = doc.positionAt(symbol.location.end)
                 options.selection = new vscode.Range(start, end)
             }
+            else {
+                options.selection = new vscode.Range(doc.positionAt(0), doc.positionAt(0))
+            }
             this.contentProvider.update(uri, entryNode.content)
             vscode.window.showTextDocument(doc, options).then((te) => {
             })
