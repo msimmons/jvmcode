@@ -244,14 +244,18 @@ export class ProjectController {
                             let detail = dependencyLabel(r.dependency)
                             return { label: r.name, description: r.package.name , detail: detail, entry: r } as vscode.QuickPickItem
                         })
+                        quickPick.items = quickPick.items.concat(jarItems.filter((ji) => {
+                            return ji.label.toLowerCase().includes(event.toLowerCase() || ji.description.toLowerCase().includes(event.toLocaleLowerCase()))
+                        }))
+                        quickPick.busy = false
                     }).catch((reason) => {
                         console.error(reason)
                         jarItems = []
+                        quickPick.busy = false
                     })
-                    quickPick.busy = false
                 }
                 quickPick.items = quickPick.items.concat(jarItems.filter((ji) => {
-                    return ji.label.toLowerCase().includes(event.toLowerCase())
+                    return ji.label.toLowerCase().includes(event.toLowerCase() || ji.description.toLowerCase().includes(event.toLocaleLowerCase()))
                 }))
             }
             else if (event.length === 0) {
