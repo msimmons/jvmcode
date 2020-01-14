@@ -5,6 +5,6 @@ interface ParseResult {
     val name: String
     val file: String
     val pkg: ParseSymbol?
-    val imports: List<ParseSymbol>
-    val symbols: List<ParseSymbol>
+    val imports: MutableList<ParseSymbol>
+    val symbols: MutableList<ParseSymbol>
 }

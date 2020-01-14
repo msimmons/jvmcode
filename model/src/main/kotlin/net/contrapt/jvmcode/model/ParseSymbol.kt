@@ -3,13 +3,17 @@ package net.contrapt.jvmcode.model
 interface ParseSymbol {
     val id: Int
     val name: String
+    val classifier: String
     val symbolType: ParseSymbolType
-    val location: ParseLocation
+    var location: ParseLocation
     val scopeEnd: ParseLocation
     var type: String?
-    val scope: Int
-    val children: Collection<ParseSymbol>
+    val parent: Int
+    val children: MutableList<Int>
 
     var isWild: Boolean
     var isStatic: Boolean
+    var arrayDim: String
+    var symbolDef: Int?
+    var caller: Int?
 }

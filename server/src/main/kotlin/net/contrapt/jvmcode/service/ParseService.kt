@@ -3,7 +3,6 @@ package net.contrapt.jvmcode.service
 import io.vertx.core.logging.LoggerFactory
 import net.contrapt.jvmcode.model.*
 import java.io.File
-import java.lang.IllegalStateException
 
 class ParseService(val symbolRepository: SymbolRepository) {
 
@@ -26,14 +25,15 @@ class ParseService(val symbolRepository: SymbolRepository) {
     fun resolveSymbols(result: ParseResult) {
         val pkgName = result.pkg?.name ?: ""
         val importMap = result.imports.associate { it.name.substringAfterLast(".") to it.name }
-        result.symbols.forEach {
+        result.symbols.toList().forEach {
             when (it.symbolType) {
                 ParseSymbolType.TYPEREF -> it.type = typeRefName(it, importMap, pkgName)
                 ParseSymbolType.FIELD -> it.type = typeRefName(it,importMap, pkgName)
                 ParseSymbolType.VARIABLE ->  it.type = typeRefName(it, importMap, pkgName)
                 ParseSymbolType.METHOD -> it.type = typeRefName(it, importMap, pkgName)
-                ParseSymbolType.TYPEDEF -> it.type = "$pkgName.${typeDefName(it, result.symbols)}"
+                ParseSymbolType.CLASS, ParseSymbolType.INTERFACE, ParseSymbolType.ENUM, ParseSymbolType.OBJECT-> it.type = "$pkgName.${typeDefName(it, result.symbols)}"
                 ParseSymbolType.CONSTRUCTOR -> it.type = "$pkgName.${constructorType(it, result.symbols)}"
+                ParseSymbolType.SYMREF -> resolveSymbolRef(it, result.symbols)
                 else -> {}
             }
         }
@@ -57,13 +57,37 @@ class ParseService(val symbolRepository: SymbolRepository) {
     }
 
     private fun constructorType(symbol: ParseSymbol, symbols: List<ParseSymbol>) : String {
-        val type = symbols[symbol.scope]
+        val type = symbols[symbol.parent]
         return typeDefName(type, symbols)
     }
 
     private fun typeDefName(symbol: ParseSymbol, symbols: List<ParseSymbol>) : String {
-        if (symbol.scope == -1) return symbol.name
-        else return "${typeDefName(symbols[symbol.scope], symbols)}.${symbol.name}"
+        if (symbol.parent == -1) return symbol.name
+        else return "${typeDefName(symbols[symbol.parent], symbols)}.${symbol.name}"
+    }
+
+    private fun resolveSymbolRef(symbol: ParseSymbol, symbols: MutableList<ParseSymbol>) {
+        val caller = when (val c = symbol.caller) {
+            null -> null
+            else -> symbols[c]
+        }
+        when (caller?.name) {
+            null -> symbol.symbolDef = findSymbolDef(symbol, symbol.parent, symbols)
+            "this" -> symbol.symbolDef = findSymbolDef(symbol, symbol.parent, symbols, true)
+            // TODO super
+        }
+    }
+
+    private fun findSymbolDef(symbol: ParseSymbol, parent: Int, symbols: List<ParseSymbol>, isThis: Boolean = false) : Int? {
+        if (parent == -1) return null
+        if (parent == symbol.id) return null
+        val def = symbols[parent].children.reversed().firstOrNull { id ->
+            val child = symbols[id]
+            child.name == symbol.name &&
+                ((isThis && symbol.symbolType.isMember) || (!isThis && child.symbolType.isDef))
+        }
+        if (def == null) return findSymbolDef(symbol, symbols[parent].parent, symbols)
+        else return def
     }
 
 }
