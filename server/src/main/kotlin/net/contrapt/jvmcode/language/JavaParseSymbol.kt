@@ -17,7 +17,7 @@ data class JavaParseSymbol(
     override var scopeEnd: ParseLocation = location
     override var isWild = false
     override var isStatic = false
-    override var arrayDim = ""
+    override var arrayDim = 0
     override var symbolDef: Int? = null
     override var caller: Int? = null
 

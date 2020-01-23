@@ -1,32 +1,34 @@
 package net.contrapt.jvmcode.language
 
+import com.github.h0tk3y.betterParse.combinators.*
 import com.github.h0tk3y.betterParse.grammar.Grammar
+import com.github.h0tk3y.betterParse.grammar.parser
 import com.github.h0tk3y.betterParse.lexer.TokenMatch
+import com.github.h0tk3y.betterParse.parser.Parsed
 import com.github.h0tk3y.betterParse.parser.Parser
-import io.vertx.core.logging.LoggerFactory
 import io.vertx.core.shareddata.Shareable
 import net.contrapt.jvmcode.model.LanguageParser
 import net.contrapt.jvmcode.model.ParseRequest
 import net.contrapt.jvmcode.model.ParseResult
 import net.contrapt.jvmcode.model.ParseSymbolType
 import java.io.File
-import java.util.*
 
 class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
 
-    private val logger = LoggerFactory.getLogger(javaClass)
+    class MatchProcessor(val block: (ParseContext) -> Unit)
 
     // Comments
     val BEGIN_COMMENT by token("/\\*")
     val END_COMMENT by token("\\*/")
-    val LINE_COMMENT by token("//.*")
+    val LINE_COMMENT by token("//.*", ignore = true)
 
     // Puncuation
-    val NL by token("[\r\n]+")
-    val WS by token("\\s+")
+    val NL by token("[\r\n]+", ignore = true)
+    val WS by token("\\s+", ignore = true)
     val SEMI by token(";")
     val COLON by token(":")
     val COMMA by token(",")
+    val QUESTION by token("\\?")
     val AT by token("@")
     val O_BRACE by token("\\{")
     val C_BRACE by token("}")
@@ -36,24 +38,24 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
     val C_BRACKET by token("]")
 
     // Operators
-    val OPERATOR by token("(==|!=|<=|>=|&&|\\|\\|)")
+    val INFIX_OPERATOR by token("(==|!=|<=|>=|&&|\\|\\||instanceof\\b)")
     val ASSIGN by token("(>>>|<<|>>|\\|\\||-|\\+|\\*|/|%|\\^|&)?=")
 
     val GT by token(">")
     val LT by token("<")
+    val AMPERSAND by token("&")
 
     // Keywords
     val PACKAGE by token("package\\b")
     val IMPORT by token("import\\b")
 
     val MODIFIER by token("(public|private|protected|final|transient|threadsafe|volatile|abstract|native|strictfp|inner|static)\\b")
-    val DECLARE by token("(class|interface|enum)\\b")
+    val DECLARE by token("(class|interface|enum|@interface)\\b")
     val VAR by token("var\\b")
     val EXTENDS by token("extends\\b")
     val IMPLEMENTS by token("implements\\b")
 
     val NEW by token("new\\b")
-    val INSTANCEOF by token("instanceof\\b")
 
     val THROWS by token("throws\\b")
 
@@ -78,563 +80,356 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
     val WILD_IDENT by  token("[a-zA-Z_\$][.\\w]*[\\w](\\.\\*)")
     val IDENT by token("[a-zA-Z_\$][.\\w]*")
     val DOT by token("\\.")
-
     val OTHER by token(".")
 
-    private fun charForToken(token: TokenMatch?) : String {
-        return when (token?.type) {
-            null -> ""
-            MODIFIER -> "M"
-            PACKAGE -> "P"
-            IMPORT -> "I"
-            DECLARE -> "D"
-            TYPE -> "T"
-            VAR -> "V"
-            EXTENDS, IMPLEMENTS -> "E"
-            CONTROL -> "C"
-            GOTO -> "G"
-            LABEL -> "L"
-            NEW -> "N"
-            RETURN, THROW -> "R"
-            INSTANCEOF -> "o"
-            THROWS -> "W"
-            IDENT, WILD_IDENT -> "n"
-            CHAR_LITERAL, BIN_LITERAL, HEX_LITERAL, NUM_LITERAL, STRING_LITERAL, UNICODE_LITERAL, OCT_LITERAL, TRUE, FALSE, NULL -> "l"
-            ASSIGN -> "="
-            OTHER, OPERATOR -> "o"
-            else -> token.text
+    val OPERATOR by INFIX_OPERATOR or QUESTION or GT or LT or COLON or AMPERSAND
+    val LITERAL by STRING_LITERAL or BIN_LITERAL or CHAR_LITERAL or HEX_LITERAL or NUM_LITERAL or OCT_LITERAL or UNICODE_LITERAL or FALSE or TRUE or NULL
+    val MODIFIERS by zeroOrMore(MODIFIER)
+
+    // Rules
+    val literal by LITERAL
+    val typeRef by TYPE or IDENT
+    val symRef by IDENT
+    val typeName by IDENT
+    val varName by IDENT * zeroOrMore(O_BRACKET * C_BRACKET) map { it.t1 to it.t2.size }
+    val fieldName by IDENT * zeroOrMore(O_BRACKET * C_BRACKET) map { it.t1 to it.t2.size }
+    val methodName by IDENT
+    val constructorName by IDENT
+
+    val varNames by separated(varName, COMMA) map {
+        it.terms
+    }
+    val typeSpec by typeRef * optional(parser(::typeArgs)) * zeroOrMore(O_BRACKET * C_BRACKET) map {
+        Triple(it.t1, it.t3.size, it.t2)
+    }
+    fun addTypeSpec(ctx: ParseContext, typeSpec: Triple<TokenMatch, Int, MatchProcessor?>) : JavaParseSymbol {
+        typeSpec.third?.block?.invoke(ctx)
+        return ctx.addSymbol(typeSpec.first, ParseSymbolType.TYPEREF).apply { arrayDim = typeSpec.second }
+    }
+
+    val typeArg by typeSpec or (-QUESTION * -EXTENDS * typeSpec) map {
+        MatchProcessor { ctx ->
+            addTypeSpec(ctx, it)
+        }
+    }
+    val typeArgs : Parser<MatchProcessor> by LT * separated(typeArg, COMMA, true) * GT map {
+        MatchProcessor { ctx ->
+            it.t2.terms.forEach { it.block(ctx) }
         }
     }
 
-    abstract class ParseRule {
-
-        val PARAMS_RE = "\\(.*\\)"
-
-        fun matches(pattern: String): MatchResult? {
-            return rule.matchEntire(pattern)
+    val typeParam by typeRef * optional(-EXTENDS * separated(typeSpec, AMPERSAND)) map {
+        (typeRef, typeSpecs) ->
+        MatchProcessor { ctx ->
+            ctx.addSymbol(typeRef, ParseSymbolType.SYMREF)
+            typeSpecs?.terms?.forEach { addTypeSpec(ctx, it) }
         }
-
-        fun addThis(context: ParseContext, group: MatchGroup, symbolType: ParseSymbolType) {
-            val token = context.tokens[group.range.first]
-            val name = "this"
-            val start = token.position
-            val end = token.position
-            val id = context.nextId()
-            val symbol = JavaParseSymbol(id, name, "", JavaParseLocation(start, end)).apply {
-                this.type = token.text
-                this.symbolType = symbolType
-                parent = context.scopeId()
-            }
-            context.add(symbol)
-        }
-
-        fun addSymbol(context: ParseContext, group: MatchGroup, symbolType: ParseSymbolType, classifier: String = "", type: String? = null) : JavaParseSymbol {
-            val token = context.tokens[group.range.first]
-            return addSymbol(context, token, symbolType, classifier, type)
-        }
-
-        fun addSymbol(context: ParseContext, token: TokenMatch, symbolType: ParseSymbolType, classifier: String = "", type: String? = null): JavaParseSymbol {
-            val name = token.text
-            val start = token.position
-            val end = start + name.length - 1
-            val id = context.nextId()
-            val symbol = JavaParseSymbol(id, name, classifier, JavaParseLocation(start, end)).apply {
-                this.type = type ?: name
-                this.symbolType = symbolType
-                parent = context.scopeId()
-            }
-            context.add(symbol)
-            val padding = "  ".repeat(context.scopes.size)
-            //println("$padding:$token:$symbol")
-            return symbol
-        }
-
-        fun addSymbolRef(context: ParseContext, token: TokenMatch) {
-            val names = token.text
-            var offset = 0
-            names.split(".").forEachIndexed { i, n ->
-                val start = token.position + offset
-                val end = start + n.length - 1
-                offset = offset + n.length + 1
-                val id = context.nextId()
-                val symbol = JavaParseSymbol(id, n, "", JavaParseLocation(start, end)).apply {
-                    this.type = type ?: name
-                    this.symbolType = ParseSymbolType.SYMREF
-                    parent = context.scopeId()
-                    caller = if (i == 0) null else id - 1
-                }
-                //println("   ${token.text} $offset $symbol")
-                context.add(symbol)
-            }
-        }
-
-        abstract val re: String
-        abstract val rule: Regex
-        open fun createSymbols(context: ParseContext, match: MatchResult, terminating: TokenMatch?) {}
-        open fun createSymbols(context: ParseContext, group: MatchGroup?) : List<JavaParseSymbol> { return listOf() }
     }
+    val typeParams by LT * separated(typeParam, COMMA, true) * GT map {
+        MatchProcessor { ctx ->
 
-    val Block = object : ParseRule() {
-        override val re = "(M)?[{]"
-        override val rule = re.toRegex()
-        override fun createSymbols(context: ParseContext, match: MatchResult, terminating: TokenMatch?) {
-            val block = addSymbol(context, context.tokens.first(), ParseSymbolType.BLOCK).apply {
-                type = "<block>"
-            }
-            context.startScope(block)
         }
     }
 
-    val Annotation = object : ParseRule() {
-        override val re = "@n(?:\\(.*\\))?"
-        override val rule = re.toRegex()
-        override fun createSymbols(context: ParseContext, group: MatchGroup?) : List<JavaParseSymbol> {
-            group?.range?.forEachIndexed { i, j ->
-                val c = group.value[i]
-                val n = if (i+1 < group.value.length-1) group.value[i+1] else ' '
-                val t = context.tokens[j]
-                val symbolType = if (n == '=') ParseSymbolType.SYMREF else ParseSymbolType.TYPEREF
-                when (c) {
-                    'n' -> addSymbol(context, t, symbolType)
-                }
+    val annotationScalar by literal or symRef or parser(::annotationRef) map {
+        MatchProcessor { ctx ->
+            when(it) {
+                is TokenMatch -> { if (it.type == IDENT) ctx.addSymbol(it, ParseSymbolType.SYMREF)}
+                is MatchProcessor -> it.block(ctx)
+                else -> {}
             }
-            return listOf()
+        }
+    }
+    val annotationArray by -O_BRACE * separated(annotationScalar, COMMA, true) * -C_BRACE map {
+        MatchProcessor { ctx ->
+            it.terms.forEach { it.block(ctx) }
+        }
+    }
+    val annotationParam by (annotationScalar or annotationArray) * optional(-ASSIGN * (annotationScalar or annotationArray)) map {
+        MatchProcessor { ctx ->
+            it.t1.block(ctx)
+            it.t2?.block?.invoke(ctx)
+        }
+    }
+    val annotationRef: Parser<MatchProcessor> by -AT * (typeRef) * optional(-O_PAREN * separated(annotationParam, COMMA, true) * -C_PAREN) map {
+        MatchProcessor { ctx ->
+            it.t2?.terms?.forEach { param ->
+                param.block(ctx)
+            }
+            ctx.addSymbol(it.t1, ParseSymbolType.TYPEREF)
+        }
+    }
+    val extendsClause by optional(-EXTENDS * typeRef) * optional(-IMPLEMENTS * separated(typeSpec, COMMA)) map {
+        (extends, implements) ->
+        MatchProcessor { ctx ->
+            if (extends != null) {
+                ctx.addSymbol(extends, ParseSymbolType.TYPEREF)
+                ctx.addSuper(extends, ParseSymbolType.TYPEREF)
+            }
+            implements?.terms?.forEach { addTypeSpec(ctx, it) }
+        }
+    }
+    val throwsClause by optional(-THROWS * separated(typeRef, COMMA)) map {
+        MatchProcessor { ctx ->
+            it?.terms?.forEach { ctx.addSymbol(it, ParseSymbolType.TYPEREF) }
         }
     }
 
-    val Generic = object : ParseRule() {
-        override val re = "<.*>"
-        override val rule = re.toRegex()
-        override fun createSymbols(context: ParseContext, group: MatchGroup?) : List<JavaParseSymbol> {
-            group?.range?.forEachIndexed { i, j ->
-                val c = group.value[i]
-                val t = context.tokens[j]
-                when (c) {
-                    'n' -> addSymbol(context, t, ParseSymbolType.TYPEREF)
-                }
+    val paramDef by zeroOrMore(annotationRef) * -optional(MODIFIER) * typeSpec * varName map { (annotations, typeSpec, varName) ->
+        MatchProcessor { ctx ->
+            annotations.forEach { it.block(ctx) }
+            val type = ctx.addSymbol(typeSpec.first, ParseSymbolType.TYPEREF).apply { arrayDim = typeSpec.second }
+            ctx.addSymbol(varName.first, ParseSymbolType.VARIABLE, "", type.name).apply {
+                arrayDim = varName.second + type.arrayDim
             }
-            return listOf()
+            typeSpec.third?.block?.invoke(ctx)
+        }
+    }
+    val paramDefs by -O_PAREN * separated(paramDef, COMMA, true) * -C_PAREN map {
+        MatchProcessor { ctx ->
+            it.terms.forEach { it.block(ctx) }
         }
     }
 
-    val Dimension = object : ParseRule() {
-        override val re = "(?:\\[])*"
-        override val rule = re.toRegex()
+    val literalExp by LITERAL map {MatchProcessor{}}
+    val varExp by (IDENT or TYPE) * zeroOrMore(-O_BRACKET * parser(::expression) * -C_BRACKET) map {
+        MatchProcessor { ctx ->
+            ctx.addSymbolRef(it.t1)
+            it.t2.forEach { it.block(ctx) }
+        }
     }
-
-    val Extends = object : ParseRule() {
-        override val re = "[En<>,?]*"
-        override val rule = re.toRegex()
-        override fun createSymbols(context: ParseContext, group: MatchGroup?) : List<JavaParseSymbol> {
-            group?.range?.forEachIndexed { i, j ->
-                val c = group.value[i]
-                val t = context.tokens[j]
-                when (c) {
-                    'n' -> addSymbol(context, t, ParseSymbolType.TYPEREF)
-                }
+    val castExp by -O_PAREN * typeSpec * -C_PAREN * parser(::expression) map {
+        MatchProcessor {ctx->
+            addTypeSpec(ctx, it.t1)
+            it.t2.block(ctx)
+        }
+    }
+    val methodExp by IDENT * optional(typeArgs) * -O_PAREN * separated(parser(::expression), COMMA, true) * -C_PAREN map {
+        MatchProcessor{ctx->
+            ctx.addSymbolRef(it.t1)
+            it.t2?.block?.invoke(ctx)
+            it.t3.terms.forEach { it.block(ctx) }
+        }
+    }
+    val newArrayExp by -NEW * varExp * optional(typeArgs) * zeroOrMore(O_BRACKET * C_BRACKET) map {
+        MatchProcessor { ctx ->
+            it.t1.block(ctx)
+        }
+    }
+    val newExp by -NEW * varExp * optional(typeArgs) * -O_PAREN * separated(parser(::expression), COMMA, true) * -C_PAREN map {
+        MatchProcessor{ ctx ->
+            it.t1.block(ctx)
+            it.t2?.block?.invoke(ctx)
+            it.t3.terms.forEach { it.block(ctx) }
+        }
+    }
+    val loopExp by typeSpec * varName * -COLON * parser(::expression) map {
+        MatchProcessor { ctx ->
+            val type = addTypeSpec(ctx, it.t1)
+            ctx.addSymbol(it.t2.first, ParseSymbolType.VARIABLE, "", type.name).apply { arrayDim = it.t2.second }
+            it.t3.block(ctx)
+        }
+    }
+    val initExp by typeSpec * varNames * -ASSIGN * parser(::expression) map {
+        MatchProcessor { ctx ->
+            val type = addTypeSpec(ctx, it.t1)
+            it.t2.forEach {
+                ctx.addSymbol(it.first, ParseSymbolType.VARIABLE, "", type.name).apply { arrayDim = it.second }
             }
-            return listOf()
+            it.t3.block(ctx)
+        }
+    }
+    val arrayExp by oneOrMore(-O_BRACKET * optional(parser(::expression)) * -C_BRACKET) map {
+        MatchProcessor { ctx ->
+            it.forEach { it?.block?.invoke(ctx) }
+        }
+    }
+    val compoundExp by -O_PAREN * parser(::expression) * -C_PAREN map {
+        MatchProcessor { ctx ->
+            it.block(ctx)
         }
     }
 
-    /** The left hand side of an assignment */
-    val Lhs = object : ParseRule() {
-        override val re = "[NTn(o][Tnlo:.,()<>\\[\\]]*="
-        override val rule = re.toRegex()
-        override fun createSymbols(context: ParseContext, group: MatchGroup?): List<JavaParseSymbol> {
-            group?.range?.forEachIndexed { i, j ->
-                val c = group.value[i]
-                val t = context.tokens[j]
-                when (c) {
-                    'n' -> addSymbolRef(context, t)
-                }
-            }
-            return listOf()
-        }
-    }
-
-    /** The right hand side of an assignment or a standalone expression */
-    val Rhs = object : ParseRule() {
-        override val re = "[Nnl(o{][NTnl.,()o:<>=\\[\\]]*"
-        override val rule = re.toRegex()
-        override fun createSymbols(context: ParseContext, group: MatchGroup?): List<JavaParseSymbol> {
-            group?.range?.forEachIndexed { i, j ->
-                val c = group.value[i]
-                val t = context.tokens[j]
-                when (c) {
-                    'n' -> addSymbolRef(context, t)
+    val expression : Parser<MatchProcessor> by oneOrMore(
+        initExp or loopExp or methodExp or arrayExp or castExp or varExp or literalExp or compoundExp or
+            OPERATOR or OTHER or DOT or ASSIGN or LABEL or RETURN or THROW or GOTO or NEW or COMMA
+    ) map {
+        MatchProcessor{ ctx ->
+            it.forEach {m ->
+                when (m) {
+                    is MatchProcessor -> m.block(ctx)
                 }
             }
-            return listOf()
         }
     }
 
-    val ValueList = object : ParseRule() {
-        override val re = "${Rhs.re}[}]?"
-        override val rule = re.toRegex()
-        override fun createSymbols(context: ParseContext, group: MatchGroup?): List<JavaParseSymbol> {
-            return Rhs.createSymbols(context, group)
+    val Block : Parser<MatchProcessor> by optional(MODIFIER) * O_BRACE map {
+        MatchProcessor { ctx ->
+            ctx.addSymbol(it.t2, ParseSymbolType.BLOCK, it.t1?.text ?: "", createScope = true)
         }
     }
 
-    val Params = object : ParseRule() {
-        override val re = "\\([@Tnl=()<E?o>,.\\[\\]]*\\)"
-        override val rule = re.toRegex()
-        override fun createSymbols(context: ParseContext, group: MatchGroup?) : List<JavaParseSymbol> {
-            val symbols = mutableListOf<JavaParseSymbol>()
-            var parenCount = -1
-            var annotationCount = 0
-            var fieldType: JavaParseSymbol? = null
-            group?.range?.forEachIndexed { i, j ->
-                val c = group.value[i]
-                val t = context.tokens[j]
-                when (c) {
-                    '(', '<' -> parenCount++
-                    ')', '>' -> parenCount--
-                    '@' -> annotationCount++
-                    'T', 'n' -> {
-                        if (annotationCount > 0) {
-                            symbols.add(addSymbol(context, t, ParseSymbolType.TYPEREF))
-                            annotationCount--
-                        }
-                        else if (parenCount > 0) symbols.add(addSymbol(context, t, ParseSymbolType.TYPEREF))
-                        else if (fieldType == null) {
-                            fieldType = addSymbol(context, t, ParseSymbolType.TYPEREF)
-                            symbols.add(fieldType as JavaParseSymbol)
-                        }
-                        else {
-                            symbols.add(addSymbol(context, t, ParseSymbolType.VARIABLE, "", fieldType?.name))
-                        }
-                    }
-                    ',' -> {
-                        parenCount = 0
-                        annotationCount = 0
-                        fieldType = null
-                    }
-                }
+    val PackageDecl by -PACKAGE * IDENT * -SEMI map {
+        MatchProcessor { ctx ->
+            ctx.result.pkg = ctx.addSymbol(it, ParseSymbolType.PACKAGE)
+        }
+    }
+
+    val ImportDecl by -IMPORT * optional(MODIFIER) * (IDENT or WILD_IDENT) map {
+        MatchProcessor { ctx ->
+            val imp = ctx.addSymbol(it.t2, ParseSymbolType.IMPORT).apply {
+                isWild = it.t2.type == WILD_IDENT
+                isStatic = it.t1 != null
             }
-            return symbols.toList()
+            ctx.result.imports.add(imp)
         }
     }
 
-    val Throws = object : ParseRule() {
-        override val re = "Wn(?:,n)*"
-        override val rule = re.toRegex()
-        override fun createSymbols(context: ParseContext, group: MatchGroup?) : List<JavaParseSymbol> {
-            group?.range?.forEachIndexed { i, j ->
-                val c = group.value[i]
-                val t = context.tokens[j]
-                when (c) {
-                    'n' -> addSymbol(context, t, ParseSymbolType.TYPEREF)
-                }
+    val TypeDef by zeroOrMore(annotationRef) * MODIFIERS * DECLARE * typeName * optional(typeArgs) * extendsClause * -O_BRACE map {
+        (annotations, mods, declare, name, generics, extends) ->
+        MatchProcessor { ctx ->
+            annotations.forEach { ann -> ann.block(ctx) }
+            val symType = when(declare.text) {
+                "class" -> ParseSymbolType.CLASS
+                "interface" -> ParseSymbolType.INTERFACE
+                "enum" -> ParseSymbolType.ENUM
+                "@interface" -> ParseSymbolType.INTERFACE
+                else -> ParseSymbolType.OBJECT
             }
-            return listOf()
+            generics?.block?.invoke(ctx)
+            ctx.addSymbol(name, symType, createScope = true)
+            extends.block(ctx)
+            ctx.addThis(name, symType)
         }
     }
 
-    val PackageDecl = object : ParseRule() {
-        override val re = "Pn;"
-        override val rule = re.toRegex()
-        override fun createSymbols(context: ParseContext, match: MatchResult, terminating: TokenMatch?) {
-            val token = context.tokens.first { it.type == IDENT }
-            context.result.pkg = addSymbol(context, token, ParseSymbolType.PACKAGE).apply {
-                type = "<package>"
-            }
+    val ConstructorDef by zeroOrMore(annotationRef) * MODIFIERS * constructorName * paramDefs * throwsClause * O_BRACE map { (annotations, mods, name, params, throws) ->
+        MatchProcessor { ctx ->
+            annotations.forEach { it.block(ctx) }
+            ctx.addSymbol(name, ParseSymbolType.CONSTRUCTOR, createScope = true)
+            params.block(ctx)
+            throws.block(ctx)
         }
     }
 
-    val ImportDecl = object : ParseRule() {
-        override val re = "I(M)?n;"
-        override val rule = re.toRegex()
-        override fun createSymbols(context: ParseContext, match: MatchResult, terminating: TokenMatch?) {
-            val token = context.tokens.first { it.type == IDENT || it.type == WILD_IDENT }
-            context.result.imports.add(addSymbol(context, token, ParseSymbolType.IMPORT).apply {
-                isWild = token.text.endsWith("*")
-                isStatic = !match.groupValues[1].isEmpty()
-                type = "<import>"
-            })
+    val MethodDef by zeroOrMore(annotationRef) * MODIFIERS * optional(typeParams) * typeSpec * methodName * paramDefs * throwsClause * (O_BRACE or SEMI) map {
+        (annotations, _, typeParams, typespec, name, params, throws, term) ->
+        MatchProcessor { ctx ->
+            annotations.forEach { it.block(ctx) }
+            typeParams?.block?.invoke(ctx)
+            throws.block(ctx)
+            val type = addTypeSpec(ctx, typespec)
+            ctx.addSymbol(name, ParseSymbolType.METHOD, "", type.name, createScope = true)
+            params.block(ctx)
+            if (term.type == SEMI) ctx.endScope(term)
         }
     }
 
-    val TypeDef = object : ParseRule() {
-        override val re = "(${Annotation.re})*(M*)(D)(n)(${Generic.re})?(${Extends.re})[{]"
-        override val rule = re.toRegex()
-        override fun createSymbols(context: ParseContext, match: MatchResult, terminating: TokenMatch?) {
-            Annotation.createSymbols(context, match.groups[1])
-            val typeGroup = match.groups[3]
-            val symbolType = if (typeGroup != null) {
-                when(context.tokens[typeGroup.range.first].text) {
-                    "class" -> ParseSymbolType.CLASS
-                    "interface" -> ParseSymbolType.INTERFACE
-                    "enum" -> ParseSymbolType.ENUM
-                    else -> ParseSymbolType.OBJECT
-                }
-            }
-            else {
-                ParseSymbolType.OBJECT
-            }
-            val typedef = addSymbol(context, match.groups[4]!!, symbolType, match.groupValues[5])
-            Generic.createSymbols(context, match.groups[5])
-            context.startScope(typedef)
-            addThis(context, match.groups[4]!!, symbolType)
-            Extends.createSymbols(context, match.groups[6])
+    val VarDef by zeroOrMore(annotationRef) * MODIFIERS * -VAR * varNames * optional(-ASSIGN * expression ) * -SEMI map {
+        (annotations, _, names, expression) ->
+        MatchProcessor { ctx->
+            annotations.forEach { it.block(ctx) }
+            names.forEach { ctx.addSymbol(it.first, ParseSymbolType.VARIABLE).apply { arrayDim = it.second } }
+            expression?.block?.invoke(ctx)
         }
     }
 
-    val ConstructorDef = object : ParseRule() {
-        override val re = "(${Annotation.re})*(M*)(n)(${Params.re})(${Throws.re})?[{]"
-        override val rule = re.toRegex()
-        override fun createSymbols(context: ParseContext, match: MatchResult, terminating: TokenMatch?) {
-            Annotation.createSymbols(context, match.groups[1])
-            val ident = addSymbol(context, match.groups[3]!!, ParseSymbolType.CONSTRUCTOR)
-            Throws.createSymbols(context, match.groups[3])
-            context.startScope(ident)
-            val params = Params.createSymbols(context, match.groups[4])
-            ident.classifier = "(" + params.filter { it.symbolType == ParseSymbolType.TYPEREF }.joinToString { it.name } + ")"
+    val FieldDef by zeroOrMore(annotationRef) * MODIFIERS * typeSpec * separated(fieldName, COMMA) * optional(-ASSIGN * expression ) * (SEMI or O_BRACE) map {
+        (annotations, _, typespec, names, expression, term) ->
+        MatchProcessor { ctx ->
+            annotations.forEach { it.block(ctx) }
+            typespec.third?.block?.invoke(ctx)
+            val type = ctx.addSymbol(typespec.first, ParseSymbolType.TYPEREF).apply { arrayDim = typespec.second }
+            val symbolType = if (ctx.inType()) ParseSymbolType.FIELD else ParseSymbolType.VARIABLE
+            names.terms.forEach { ctx.addSymbol(it.first, symbolType, "", type.name).apply { arrayDim = it.second } }
+            expression?.block?.invoke(ctx)
+            if (term.type == O_BRACE) ctx.addSymbol(term, ParseSymbolType.BLOCK, createScope = true)
         }
     }
 
-    val MethodDef = object : ParseRule() {
-        override val re = "(${Annotation.re})*(M*)(${Generic.re})?([Tn])(${Generic.re})?(${Dimension.re})(n)(${Params.re})(${Throws.re})?[{;]"
-        override val rule = re.toRegex()
-        override fun createSymbols(context: ParseContext, match: MatchResult, terminating: TokenMatch?) {
-            Annotation.createSymbols(context, match.groups[1])
-            Generic.createSymbols(context, match.groups[3])
-            val type = addSymbol(context, match.groups[4]!!, ParseSymbolType.TYPEREF)
-            Generic.createSymbols(context, match.groups[5])
-            val ident = addSymbol(context, match.groups[7]!!, ParseSymbolType.METHOD, type.name)
-            Throws.createSymbols(context, match.groups[9])
-            context.startScope(ident)
-            val params = Params.createSymbols(context, match.groups[8])
-            ident.classifier = "(" + params.filter { it.symbolType == ParseSymbolType.TYPEREF }.joinToString { it.name } + ")"
-            ident.arrayDim = match.groupValues[6]
-            if (terminating?.type == SEMI) context.endScope(terminating)
+    val simpleControl by oneOrMore(CONTROL) * O_BRACE map {
+        MatchProcessor { ctx ->
+            ctx.addSymbol(it.t1.last(), ParseSymbolType.CONTROL, it.t1.last().text, it.t1.last().text, createScope = true)
+        }
+    }
+    val statementControl by oneOrMore(CONTROL) * expression * SEMI map {
+        MatchProcessor { ctx ->
+            it.t2.block(ctx)
+        }
+    }
+    val complexControl by oneOrMore(CONTROL) * -O_PAREN * separated(optional(expression), SEMI) * -C_PAREN * optional(expression) * (O_BRACE or SEMI) map {
+        (controls, params, expression, term) ->
+        MatchProcessor { ctx ->
+            ctx.addSymbol(controls.last(), ParseSymbolType.CONTROL, controls.last().text, controls.last().text, createScope = true)
+            params.terms.forEach { it?.block?.invoke(ctx) }
+            expression?.block?.invoke(ctx)
+            if (term.type == SEMI) ctx.endScope(term)
+        }
+    }
+    val ControlStatement by optional(IDENT * COLON) * (simpleControl or statementControl or complexControl) map {
+        MatchProcessor { ctx ->
+            it.t2.block(ctx)
         }
     }
 
-    val FieldDef = object : ParseRule() {
-        override val re = "(${Annotation.re})*(M*)([VTn])(${Generic.re})?(${Dimension.re})(n${Dimension.re})(,n${Dimension.re})*(=${Rhs.re})?[{;]?"
-        override val rule = re.toRegex()
-        override fun createSymbols(context: ParseContext, match: MatchResult, terminating: TokenMatch?) {
-            Annotation.createSymbols(context, match.groups[1])
-            val type = if (match.groups[3]?.value == "V") null else addSymbol(context, match.groups[3]!!, ParseSymbolType.TYPEREF)
-            Generic.createSymbols(context, match.groups[4])
-            val symbolType = if (context.inType()) ParseSymbolType.FIELD else ParseSymbolType.VARIABLE
-            addSymbol(context, match.groups[6]!!, symbolType, "", type?.name).apply {
-                arrayDim = match.groupValues[5]
-            }
-            val fieldList = match.groups[7]
-            fieldList?.range?.forEachIndexed { i, j ->
-                val c = fieldList.value[i]
-                val t = context.tokens[j]
-                when (c) {
-                    'n' -> addSymbol(context, t, symbolType, "", type?.name).apply { arrayDim = match.groupValues[5] }
-                }
-            }
-            Rhs.createSymbols(context, match.groups[8])
-            if (terminating?.type == O_BRACE) context.startScope(addSymbol(context, terminating, ParseSymbolType.BLOCK))
+    val Statement by optional(expression) * (SEMI or O_BRACE or C_BRACE) map { (expr, term) ->
+        MatchProcessor { ctx ->
+            expr?.block?.invoke(ctx)
+            if (term.type == O_BRACE) ctx.addSymbol(term, ParseSymbolType.BLOCK, createScope = true)
+            if (term.type == C_BRACE) ctx.endScope(term)
         }
     }
 
-    val Statement = object : ParseRule() {
-        override val re = "(${Lhs.re})?(${Rhs.re})?[{;]?"
-        override val rule = re.toRegex()
-        override fun createSymbols(context: ParseContext, match: MatchResult, terminating: TokenMatch?) {
-            Lhs.createSymbols(context, match.groups[1])
-            Rhs.createSymbols(context, match.groups[2])
-            if (terminating?.type == O_BRACE) context.startScope(addSymbol(context, terminating, ParseSymbolType.BLOCK))
+    val CloseBlock : Parser<MatchProcessor> by C_BRACE map {
+        MatchProcessor { ctx ->
+            ctx.endScope(it)
         }
     }
 
-    val FinalStatement = object : ParseRule() {
-        override val re = "R(${Rhs.re})?[;{]?"
-        override val rule = re.toRegex()
-        override fun createSymbols(context: ParseContext, match: MatchResult, terminating: TokenMatch?) {
-            Rhs.createSymbols(context, match.groups[1])
+    val Rules : Parser<MatchProcessor> = Block or PackageDecl or ImportDecl or TypeDef or ConstructorDef or MethodDef or VarDef or FieldDef or
+        ControlStatement or CloseBlock or Statement
+
+    private fun processToken(context: ParseContext, token: TokenMatch, inComment: Boolean) {
+        if (inComment) return
+        when (token.type) {
+            O_PAREN -> context.parenCount++
+            C_PAREN -> context.parenCount--
+        }
+        when (token.type) {
+            WS, NL, LINE_COMMENT -> {}
+            else -> context.tokens.add(token)
         }
     }
 
-    val ControlParams = object : ParseRule() {
-        override val re = "\\(.*\\)"
-        //override val re = "\\([NTnl=;:,.<>o()\\[\\]]*\\)"
-        override val rule = re.toRegex()
-        override fun createSymbols(context: ParseContext, group: MatchGroup?): List<JavaParseSymbol> {
-            val stripped = group?.value?.replaceFirst("(", "")?.trimEnd(')')
-            val patterns = stripped?.split(";")
-            patterns?.forEach {
-                val match = findMatch(it)
-                println("    $it ${match?.first} ${match?.second}")
-            }
-            group?.range?.forEachIndexed { i, j ->
-                val c = group.value[i]
-                val t = context.tokens[j]
-                //println("    $c $t")
-            }
-            return listOf()
+    private fun processTokens(context: ParseContext, token: TokenMatch) {
+        if (context.tokens.size == 0) return
+        if (context.parenCount > 0) return
+        //println("Trying ${context.tokens.first()} -> ${context.tokens.last()}")
+        val parsed = Rules.tryParse(context.tokens.asSequence())
+        when (parsed) {
+            is Parsed -> parsed.value.block(context)
+            else -> println("NO MATCH: (${token.row}) ${context.tokens}")
         }
-    }
-
-    val ControlStatement = object : ParseRule() {
-        override val re = "C+(${ControlParams.re})?[RG]?(${Lhs.re})?(${Rhs.re})?[{;]"
-        override val rule = re.toRegex()
-        override fun createSymbols(context: ParseContext, match: MatchResult, terminating: TokenMatch?) {
-            val symbol = addSymbol(context, context.tokens.first(), ParseSymbolType.CONTROL).apply {
-                type = "<control>"
-            }
-            context.startScope(symbol)
-            ControlParams.createSymbols(context, match.groups[1])
-            Lhs.createSymbols(context, match.groups[2])
-            Rhs.createSymbols(context, match.groups[3])
-            if (terminating?.type == SEMI) context.endScope(terminating)
-        }
-    }
-
-    val Label = object : ParseRule() {
-        override val re = "([Ln][ln]?):"
-        override val rule = re.toRegex()
-        override fun createSymbols(context: ParseContext, match: MatchResult, terminating: TokenMatch?) {
-            if (match.groups[1]?.value == "n") {
-                addSymbol(context, match.groups[1]!!, ParseSymbolType.VARIABLE)
-            }
-        }
-    }
-
-    val Goto  = object : ParseRule() {
-        override val re = "G(n)?[;]"
-        override val rule = re.toRegex()
-        override fun createSymbols(context: ParseContext, match: MatchResult, terminating: TokenMatch?) {
-            if (match.groups[1]?.value == "n") {
-                addSymbol(context, match.groups[1]!!, ParseSymbolType.SYMREF)
-            }
-        }
-    }
-
-    val rules = listOf(
-        Block,
-        Label,
-        Goto,
-        PackageDecl,
-        ImportDecl,
-        ConstructorDef,
-        TypeDef,
-        MethodDef,
-        FieldDef,
-        FinalStatement,
-        ControlStatement,
-        Statement,
-        ValueList
-    )
-
-    data class ParseContext(
-        val request: JavaParseRequest,
-        val result: JavaParseResult = JavaParseResult(file = request.file),
-        var parenCount: Int = 0,
-        var inAssignment: Boolean = false,
-        val tokens: MutableList<TokenMatch> = mutableListOf(),
-        val scopes: Stack<JavaParseSymbol> = Stack()
-    ) {
-        private val logger = LoggerFactory.getLogger(javaClass)
-        fun nextId() = result.symbols.size
-        fun scopeId() = if (scopes.empty()) -1 else scopes.peek().id
-        fun inType() : Boolean {
-            return if (scopes.empty()) false
-            else when(scopes.peek().symbolType) {
-                ParseSymbolType.OBJECT, ParseSymbolType.ENUM, ParseSymbolType.INTERFACE, ParseSymbolType.CLASS -> true
-                else -> false
-            }
-        }
-        fun add(symbol: JavaParseSymbol) {
-            //println(symbol)
-            result.symbols.add(symbol)
-            if (!scopes.empty()) scopes.peek().children.add(symbol.id)
-        }
-
-        fun startScope(symbol: JavaParseSymbol) {
-            //println("Start Scope: ${symbol}")
-            scopes.push(symbol)
-        }
-
-        fun endScope(token: TokenMatch) {
-            if (!scopes.empty()) {
-                val scope = scopes.pop()
-                scope.scopeEnd = JavaParseLocation(token.position, token.position)
-                //println("End Scope: ${scope}")
-            }
-        }
-
-        fun clear() {
-            inAssignment = false
-            tokens.clear()
-        }
+        context.clear()
     }
 
     override fun parse(request: ParseRequest) : ParseResult {
         val context = ParseContext(request as JavaParseRequest)
         var tokens = this.tokenizer.tokenize(request.text ?: "")
         var inComment = false
+        val start = System.currentTimeMillis()
         tokens.forEach {
             when (it.type) {
                 BEGIN_COMMENT -> inComment = true
                 END_COMMENT -> inComment = false
-                else -> if (!inComment) processToken(context, it)
+                else -> processToken(context, it, inComment)
+            }
+            when (it.type) {
+                O_BRACE, SEMI, C_BRACE -> processTokens(context, it)
             }
         }
+        println("Parse Time: ${System.currentTimeMillis()-start}")
         return context.result
-    }
-
-    private fun processToken(context: ParseContext, token: TokenMatch) {
-        when (token.type) {
-            O_BRACE -> processTokens(context, token)
-            C_BRACE -> processTokens(context, token)
-            O_PAREN -> {context.parenCount++; context.tokens.add(token)}
-            C_PAREN -> {context.parenCount--; context.tokens.add(token)}
-            SEMI -> processTokens(context, token)
-            COLON -> processTokens(context, token)
-            ASSIGN, RETURN, THROW -> processTokens(context, token)
-            LINE_COMMENT -> {}
-            NL -> {}
-            WS -> {}
-            else -> context.tokens.add(token)
-        }
-    }
-
-    private fun findMatch(pattern: String) : Pair<ParseRule, MatchResult>? {
-        var matchResult: MatchResult? = null
-        val rule = rules.firstOrNull {
-            matchResult = it.matches(pattern)
-            matchResult != null
-        }
-        if (rule != null && matchResult != null) return  rule to matchResult!!
-        else return null
-    }
-
-    private fun processTokens(context: ParseContext, terminating: TokenMatch? = null) {
-        if (terminating != null) context.tokens.add(terminating)
-        when (terminating?.type) {
-            SEMI -> if (context.parenCount > 0) return
-            COLON -> if (context.inAssignment || context.parenCount > 0) return
-            ASSIGN -> {context.inAssignment = true && context.parenCount == 0; return}
-            RETURN, THROW -> {context.inAssignment = true; return}
-            O_PAREN -> {context.parenCount++; return}
-            C_PAREN -> {context.parenCount--; return}
-        }
-        if (!context.tokens.isEmpty()) {
-            val pattern = context.tokens.joinToString("") { charForToken(it) }
-            val row = context.tokens.first().row
-            val match = findMatch(pattern)
-            if (match != null) {
-                //println("[$row]: $pattern -> ${rule.javaClass.simpleName}")
-                match.first.createSymbols(context, match.second, terminating)
-            }
-            else if (terminating == null) {
-                return
-            }
-            else if (pattern != "}"){
-                println("=== UNMATCHED PATTERN: [$row]: $pattern  ====")
-            }
-        }
-        if (terminating?.type == C_BRACE) context.endScope(terminating)
-        context.clear()
     }
 
     companion object {
@@ -646,6 +441,7 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
             val request = JavaParseRequest(file = path, text = text)
             //val result = parser.parse(request)
             val result = parser.parse(request)
+            result.symbols.forEach { println(it) }
 /*
             result.symbols.filter { !listOf(ParseSymbolType.TYPEREF, ParseSymbolType.CONTROL, ParseSymbolType.SYMREF).contains(it.symbolType) }
                 .forEach { println(it) }
@@ -667,7 +463,8 @@ import java.math.BigDecimal;
 import java.math.*;
 import static net.contrapt.FOO;
 
-@ClassAnnotation(value="foo")
+//@ClassAnnotation(value="foo", anno=@Nested("bar"))
+@ClassAnnotation(value=@Nested("foo"), value2=bar)
 public class TryIt extends Object implements Serializable, Comparable {
 
     static {
@@ -722,6 +519,7 @@ public class TryIt extends Object implements Serializable, Comparable {
        x = new Foo();
        x.doSomething(x, y, foo());
        y = x.aField;
+       do {}
        try {
            while (x == y) {
               doSomething();
@@ -751,7 +549,7 @@ public class TryIt extends Object implements Serializable, Comparable {
     @MethodAnnotation
     public abstract <T extends String<T>> int genericMethod(Class<T> clazz[]) throws IllegalStateException;
     
-    static class AnInnerOne<T extends List<String>> {
+    static inner class AnInnerOne<List<String>> {
        public AnInnerOne(@JsonName("foo") int foo) {
        
           i == 3;
@@ -761,7 +559,9 @@ public class TryIt extends Object implements Serializable, Comparable {
                 x = 8 +3; 
                 break;
              case 7:
+             break;
              default:
+             break;
           }
        }
     }

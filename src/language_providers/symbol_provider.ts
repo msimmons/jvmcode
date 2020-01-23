@@ -48,7 +48,8 @@ export class JvmSymbolProvider implements vscode.DocumentSymbolProvider, vscode.
         let scopeEnd = document.positionAt(symbol.scopeEnd.end)
         let fullRange = new vscode.Range(start, scopeEnd)
         let selectionRange = new vscode.Range(start, end)
-        return new vscode.DocumentSymbol(`${symbol.name}${symbol.classifier}`, `${symbol.type}${symbol.arrayDim}`, kind, fullRange, selectionRange)
+        let arrayDim = "[]".repeat(symbol.arrayDim)
+        return new vscode.DocumentSymbol(`${symbol.name}${symbol.classifier}`, `${symbol.type}${arrayDim}`, kind, fullRange, selectionRange)
     }
 
     private getSymbolKind(symbol: ParseSymbol) : vscode.SymbolKind {

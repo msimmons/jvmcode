@@ -25,7 +25,7 @@ class ParseService(val symbolRepository: SymbolRepository) {
     fun resolveSymbols(result: ParseResult) {
         val pkgName = result.pkg?.name ?: ""
         val importMap = result.imports.associate { it.name.substringAfterLast(".") to it.name }
-        result.symbols.toList().forEach {
+        result.symbols.forEach {
             when (it.symbolType) {
                 ParseSymbolType.TYPEREF -> it.type = typeRefName(it, importMap, pkgName)
                 ParseSymbolType.FIELD -> it.type = typeRefName(it,importMap, pkgName)
@@ -33,9 +33,15 @@ class ParseService(val symbolRepository: SymbolRepository) {
                 ParseSymbolType.METHOD -> it.type = typeRefName(it, importMap, pkgName)
                 ParseSymbolType.CLASS, ParseSymbolType.INTERFACE, ParseSymbolType.ENUM, ParseSymbolType.OBJECT-> it.type = "$pkgName.${typeDefName(it, result.symbols)}"
                 ParseSymbolType.CONSTRUCTOR -> it.type = "$pkgName.${constructorType(it, result.symbols)}"
+                else -> {}
+            }
+        }
+        result.symbols.forEach {
+            when (it.symbolType) {
                 ParseSymbolType.SYMREF -> resolveSymbolRef(it, result.symbols)
                 else -> {}
             }
+            if (it.symbolDef == null) it.type = typeRefName(it, importMap, pkgName)
         }
     }
 
@@ -51,8 +57,8 @@ class ParseService(val symbolRepository: SymbolRepository) {
         return when {
             autoType != null -> autoType.fqcn()
             wildTypes.isNotEmpty() -> wildTypes.first().fqcn()
-            packageType != null -> packageType.fqcn()
-            else -> symbol.type
+            packageType != null -> packageType.fqcn() //Not until we are loading the local classes
+            else -> symbol.type // could default to same package here also
         }
     }
 
@@ -75,6 +81,10 @@ class ParseService(val symbolRepository: SymbolRepository) {
             null -> symbol.symbolDef = findSymbolDef(symbol, symbol.parent, symbols)
             "this" -> symbol.symbolDef = findSymbolDef(symbol, symbol.parent, symbols, true)
             // TODO super
+        }
+        when (val sd = symbol.symbolDef) {
+            null -> {}
+            else -> symbol.type = symbols[sd].type
         }
     }
 

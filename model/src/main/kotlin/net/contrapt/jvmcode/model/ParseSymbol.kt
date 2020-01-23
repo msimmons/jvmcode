@@ -13,7 +13,7 @@ interface ParseSymbol {
 
     var isWild: Boolean
     var isStatic: Boolean
-    var arrayDim: String
+    var arrayDim: Int
     var symbolDef: Int?
     var caller: Int?
 }
