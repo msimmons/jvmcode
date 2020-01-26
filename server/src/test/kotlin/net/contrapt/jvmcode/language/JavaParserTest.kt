@@ -50,7 +50,7 @@ class JavaParserTest {
 
     @Test
     fun testJava1() {
-        val path = javaClass.classLoader?.getResource("Test1.java")?.path ?: ""
+        val path = javaClass.classLoader?.getResource("Test1.javasource")?.path ?: ""
         val text = File(path).readText()
         val request = JavaParseRequest(file = path, text = text)
         val parser = JavaParser()
@@ -60,7 +60,7 @@ class JavaParserTest {
 
     @Test
     fun testJava2() {
-        val path = javaClass.classLoader?.getResource("Test2.java")?.path ?: ""
+        val path = javaClass.classLoader?.getResource("Test2.javasource")?.path ?: ""
         val text = File(path).readText()
         val request = JavaParseRequest(file = path, text = text)
         val parser = JavaParser()
@@ -70,7 +70,7 @@ class JavaParserTest {
 
     @Test
     fun testJava3() {
-        val path = javaClass.classLoader?.getResource("Test3.java")?.path ?: ""
+        val path = javaClass.classLoader?.getResource("Test3.javasource")?.path ?: ""
         val text = File(path).readText()
         val request = JavaParseRequest(file = path, text = text)
         val parser = JavaParser()
