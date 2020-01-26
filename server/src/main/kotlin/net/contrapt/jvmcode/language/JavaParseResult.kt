@@ -11,4 +11,5 @@ data class JavaParseResult(
     override var  pkg: ParseSymbol? = null
     override val imports: MutableList<ParseSymbol> = mutableListOf()
     override val symbols: MutableList<ParseSymbol> = mutableListOf()
+    var parseTime = 0L
 }

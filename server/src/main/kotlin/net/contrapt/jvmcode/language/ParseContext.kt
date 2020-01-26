@@ -35,9 +35,9 @@ data class ParseContext(
         }
         add(symbol)
         val padding = "  ".repeat(scopes.size)
-        println("$padding:$token:$symbol")
+        //println("$padding:$token:$symbol")
         if (createScope) {
-            println("Start Scope: ${symbol}")
+            //println("Start Scope: ${symbol}")
             scopes.push(symbol)
         }
         return symbol
@@ -98,7 +98,7 @@ data class ParseContext(
         if (!scopes.empty()) {
             val scope = scopes.pop()
             scope.scopeEnd = JavaParseLocation(token.position, token.position)
-            println("End Scope: ${scope}")
+            //println("End Scope: ${scope}")
         }
     }
 

@@ -1,0 +1,162 @@
+/**
+ * hello
+ a multiline comment here
+ and more
+ and more
+ *
+ */
+package net.contrapt.jvmcode.language;
+
+import java.math.BigDecimal;
+import java.math.*;
+import static net.contrapt.FOO;
+
+//@ClassAnnotation(value="foo", anno=@Nested("bar"))
+@ClassAnnotation(value=@Nested("foo"), value2=bar)
+public class TryIt extends Object implements Serializable, Comparable {
+
+    static {
+        System.properties.set("name", "value");
+    }
+
+    public TryIt(int a, java.lang.String b[]) {}
+
+    String[][] foo, bar[][];
+
+    private abstract Integer abstractMethod(int p1, String[] p2);
+
+    private void aMethod(int a, String b, @ann("bar") Long c) {
+        tl.set(new SoftReference<>(ob));
+        v = 3;
+        v += 3;
+        v -= 3;
+        v >>>=3;
+        v *= 3;
+        v /= 3;
+        v %=3;
+        v <<=3;
+        v >>=3;
+        v &= 3;
+        v ^= 3;
+        // Operator
+        v && 3;
+        v || 3;
+        v > 3;
+        v < 3;
+        v <= 3;
+        v != 3;
+        v >= 3;
+        v == 3;
+        b.length().trim().subtring(1, 4);
+        @JsonProperty("foo") int a;
+        int b = 0b10_1010100;
+        int c, d = '\n';
+        char u >>>= '\uaf30';
+        int foo = 2 + 3++ - 8 + bar && foo/bar | biz;
+        byte[] bb = x > 2 ? false : 8 +2;
+        f = g[0][1];
+        f[0] = 3;
+        if (8 == 3) {
+            g = 1 +3;
+            g = this.aMethod();
+        }
+        for (int i=0; i<1; i++) x = (3+2)*y;
+        for ( String s : strings) {
+            doSomething(s);
+        }
+        x = new Foo();
+        x.doSomething(x, y, foo());
+        y = x.aField;
+        do {}
+        try {
+            while (x == y) {
+                doSomething();
+            }
+        }
+        catch (Exception e) {
+            System.println("hello");
+        }
+        finally {
+            somethingElse();
+        }
+        if (isLatin1()) {
+            for (int i = 0; i < n; i++) {
+                if ((val[i] & 0xff) != cs.charAt(i)) {
+                    return false;
+                }
+            }
+        } else {
+            if (!StringUTF16.contentEquals(val, cs, n)) {
+                return false;
+            }
+        }
+        return new String[] {"a", "b", variable, "d"};
+        return true;
+    }
+
+    @MethodAnnotation
+    public abstract <T extends String<T>> int genericMethod(Class<T> clazz[]) throws IllegalStateException;
+
+    static inner class AnInnerOne<List<String>> {
+       public AnInnerOne(@JsonName("foo") int foo) {
+
+            i == 3;
+            ((String)i).hello(i,jk)[3] = 'c';
+            switch(3) {
+                case 8:
+                    x = 8 +3;
+                    break;
+                case 7:
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    private static final ThreadLocal<StringCoding.Result>
+        resultCached = new ThreadLocal<>() {
+        protected StringCoding.Result initialValue() {
+            return new StringCoding.Result();
+        }};
+
+    ;
+
+}
+
+package org.slf4j.event;
+
+    import org.slf4j.Marker;
+
+/**
+ *
+ * @author ceki
+ * @since 1.7.15
+ */
+public interface LoggingEvent {
+
+    Level getLevel();
+
+    Marker getMarker();
+
+    String getLoggerName();
+
+    String getMessage();
+
+    String getThreadName();
+
+    Object[] getArgumentArray();
+
+    long getTimeStamp();
+
+    Throwable getThrowable();
+
+}
+enum MyEnum {
+    ONE,
+    TWO,
+    TRHEE
+}
+/*
+null
+*/

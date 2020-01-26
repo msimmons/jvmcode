@@ -2,12 +2,16 @@ package net.contrapt.jvmcode.language
 
 import com.github.h0tk3y.betterParse.parser.Parsed
 import com.github.h0tk3y.betterParse.parser.tryParseToEnd
+import io.kotlintest.matchers.numerics.shouldBeLessThanOrEqual
+import io.kotlintest.shouldBe
+import io.vertx.core.json.Json
 import org.junit.jupiter.api.Test
+import java.io.File
 
 class JavaParserTest {
 
     @Test
-    fun testExpression() {
+    fun testExpressions() {
         val expressions = listOf(
             "new String(\"string\")",
             "x = foo.something() ? 8 + 3 : 15",
@@ -37,10 +41,41 @@ class JavaParserTest {
             when (result) {
                 is Parsed -> result.value.block(ParseContext(request))
                 else -> {
-                    println(it)
-                    println("  NO MATCH: ${tokens.joinToString { it.toString() }} for $it")
+                    val t = tokens.joinToString { it.toString() }
+                    result shouldBe "$it -> \n   $t"
                 }
             }
         }
+    }
+
+    @Test
+    fun testJava1() {
+        val path = javaClass.classLoader?.getResource("Test1.java")?.path ?: ""
+        val text = File(path).readText()
+        val request = JavaParseRequest(file = path, text = text)
+        val parser = JavaParser()
+        val result = parser.parse(request)
+        result.parseTime shouldBeLessThanOrEqual 1000
+    }
+
+    @Test
+    fun testJava2() {
+        val path = javaClass.classLoader?.getResource("Test2.java")?.path ?: ""
+        val text = File(path).readText()
+        val request = JavaParseRequest(file = path, text = text)
+        val parser = JavaParser()
+        val result = parser.parse(request)
+        result.parseTime shouldBeLessThanOrEqual 1000
+    }
+
+    @Test
+    fun testJava3() {
+        val path = javaClass.classLoader?.getResource("Test3.java")?.path ?: ""
+        val text = File(path).readText()
+        val request = JavaParseRequest(file = path, text = text)
+        val parser = JavaParser()
+        val result = parser.parse(request)
+        println(Json.encodePrettily(result.symbols))
+        result.parseTime shouldBeLessThanOrEqual 1000
     }
 }
