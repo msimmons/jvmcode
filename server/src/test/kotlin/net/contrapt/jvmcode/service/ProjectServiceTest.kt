@@ -4,12 +4,15 @@ import io.kotlintest.matchers.beGreaterThan
 import io.kotlintest.matchers.endWith
 import io.kotlintest.matchers.haveSubstring
 import io.kotlintest.matchers.numerics.shouldBeGreaterThan
+import io.kotlintest.matchers.startWith
 import io.kotlintest.should
 import io.kotlintest.shouldBe
 import io.kotlintest.shouldNotBe
 import io.vertx.core.json.Json
+import net.contrapt.jvmcode.model.ClassEntryData
 import net.contrapt.jvmcode.model.JarEntryType
 import net.contrapt.jvmcode.model.JvmConfig
+import net.contrapt.jvmcode.model.PathData
 import net.contrapt.jvmcode.service.model.DependencySource
 import net.contrapt.jvmcode.service.model.UserPath
 import org.junit.jupiter.api.Assumptions.assumeTrue
@@ -37,12 +40,12 @@ class ProjectServiceTest {
         val jarEntries = service.getJarData(depData)
         jarEntries.packages.size shouldBe beGreaterThan(0)
         val resourceEntry = jarEntries.packages.first().entries.first()
-        service.getJarEntryContents(resourceEntry)
-        resourceEntry.text shouldNotBe null
+        service.getJarEntryContents(resourceEntry.fqcn)
+        resourceEntry.content shouldNotBe null
         val classEntry = jarEntries.packages.first { it.name == "java.lang" }.entries.first { it.type == JarEntryType.CLASS }
-        val javaEntry = service.getJarEntryContents(classEntry)
+        val javaEntry = service.getJarEntryContents(classEntry.fqcn)
         if (File(depData.sourceFileName ?: "").exists()) {
-            javaEntry.text shouldNotBe null
+            (javaEntry as ClassEntryData).srcEntry shouldNotBe null
         }
     }
 
@@ -60,12 +63,12 @@ class ProjectServiceTest {
         val jarEntries = service.getJarData(depData)
         jarEntries.packages.size shouldBe beGreaterThan(0)
         val resourceEntry = jarEntries.packages.first().entries.first()
-        service.getJarEntryContents(resourceEntry)
-        resourceEntry.text shouldNotBe null
+        service.getJarEntryContents(resourceEntry.fqcn)
+        resourceEntry.content shouldNotBe null
         val classEntry = jarEntries.packages.first { it.name == "java.lang" }.entries.first { it.type == JarEntryType.CLASS }
-        val javaEntry = service.getJarEntryContents(classEntry)
+        val javaEntry = service.getJarEntryContents(classEntry.fqcn)
         if (File(depData.sourceFileName ?: "").exists()) {
-            javaEntry.text shouldNotBe null
+            (javaEntry as ClassEntryData).srcEntry shouldNotBe null
         }
     }
 
@@ -117,12 +120,10 @@ class ProjectServiceTest {
         classpath should haveSubstring("postgresql-42.1.4.jar:")
         classpath should endWith("jd-gui-1.4.0.jar")
         // Add a class directory
-/*
         service.addUserPath(UserPath().apply { classDirs.add("/home/mark/classes") })
         classpath = service.getClasspath()
         classpath should startWith("/home/mark/classes:")
         classpath should endWith("jd-gui-1.4.0.jar")
-*/
     }
 
     @Test

@@ -1,7 +1,7 @@
 'use strict';
 
 import * as vscode from 'vscode'
-import { JarEntryData, JvmProject, ClassData } from "server-models"
+import { JarEntryData, JvmProject, ClassData, ClassEntryData } from "server-models"
 import { ProjectTreeProvider } from './project_tree_provider';
 import { JarContentProvider } from './jar_content_provider';
 import { ProjectService } from './project_service';
@@ -10,6 +10,9 @@ import { projectService, projectController } from './extension';
 import { existsSync, readdirSync, statSync } from 'fs';
 import * as PathHelper from 'path'
 import { ConfigService } from './config_service';
+import { url } from 'inspector';
+import { URL } from 'url';
+import { encode } from 'punycode';
 
 /**
  * Responsible for managing various views related to a project
@@ -144,7 +147,7 @@ export class ProjectController {
      * @param entryNode 
      */
     private async getJarEntryContent(entryNode: JarEntryNode) : Promise<JarEntryData> {
-        if (!entryNode.data.text) return await this.service.getJarEntryContent(entryNode)
+        if (!entryNode.data.content) return await this.service.getJarEntryContent(entryNode)
         else return entryNode.data
     }
 
@@ -154,20 +157,36 @@ export class ProjectController {
      * @param entryNode 
      */
     private openJarEntryContent(entryNode: JarEntryNode) {
-        if (!entryNode.content) return
-        let uri = vscode.Uri.parse(`${this.contentProvider.scheme}:///${entryNode.contentName}`)
+        //let uri = vscode.Uri.parse(`${this.contentProvider.scheme}:///${entryNode.contentName}`)
+        let jarFile = undefined
+        let path = undefined
+        let content = undefined
+        if (entryNode.data.type === 'CLASS') {
+            let d = entryNode.data as ClassEntryData
+            if (d.srcEntry) {
+                jarFile = d.srcEntry.jarFile
+                content = d.srcEntry.content
+                path = d.srcEntry.path
+            }
+        }
+        if (!jarFile) jarFile = entryNode.dependency.fileName
+        if (!content) content = entryNode.data.content
+        if (!path) path = entryNode.data.path
+        let authority = encodeURIComponent(jarFile)
+        let uri = vscode.Uri.parse(`${this.contentProvider.scheme}://${authority}/${path}`)
         vscode.workspace.openTextDocument(uri).then((doc) => {
-            let options : vscode.TextDocumentShowOptions =  {preview: true}
+            let options : vscode.TextDocumentShowOptions = {preview: true}
+            /*
             if (entryNode.data.parseData) {
                 let symbol = entryNode.data.parseData.symbols.find(s => s.name === entryNode.name)
                 let start = doc.positionAt(symbol.location.start)
                 let end = doc.positionAt(symbol.location.end)
                 options.selection = new vscode.Range(start, end)
             }
-            else {
+            else {*/
                 options.selection = new vscode.Range(doc.positionAt(0), doc.positionAt(0))
-            }
-            this.contentProvider.update(uri, entryNode.content)
+            //}
+            this.contentProvider.update(uri, content)
             vscode.window.showTextDocument(doc, options).then((te) => {
             })
         })
@@ -207,10 +226,7 @@ export class ProjectController {
         }
         vscode.window.withProgress({ location: vscode.ProgressLocation.Window, title: entryNode.name}, (progess) => {
             return this.getJarEntryContent(entryNode).then((reply) => {
-                entryNode.content = reply.text
-                entryNode.contentName = reply.path
-                entryNode.data.classData = reply.classData
-                entryNode.data.parseData = reply.parseData
+                entryNode.data = reply
                 this.openJarEntryContent(entryNode)
             }).catch(error => {
                 vscode.window.showErrorMessage(error)

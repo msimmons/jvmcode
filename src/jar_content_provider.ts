@@ -10,6 +10,7 @@ export class JarContentProvider implements vscode.TextDocumentContentProvider {
 
     /**
      * Uri is of the form jvmcode-jar://groupId.artifactId.version/package/name
+     * how about: jvmcode-jar://{jarFilePath}?{entryPath}
      */
 	public scheme = 'jvmcode-jar';
 
@@ -54,7 +55,7 @@ export class JarContentProvider implements vscode.TextDocumentContentProvider {
 	}
 
     /**
-     * Provide the html content for the given uri (queryId)
+     * Provide the content for the given uri
      * @param uri The uri to provider for
      */
 	provideTextDocumentContent(uri: vscode.Uri): string | Thenable<string> {

@@ -3,23 +3,29 @@ package net.contrapt.jvmcode.service
 import io.vertx.core.logging.LoggerFactory
 import net.contrapt.jvmcode.model.*
 import java.io.File
+import java.lang.IllegalArgumentException
 
 class ParseService(val symbolRepository: SymbolRepository) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     fun parse(request: ParseRequest, parser: LanguageParser?) : ParseResult {
-         val cached = symbolRepository.getJarEntryByFile(request.file)
-        val parseResult = cached?.parseData
-        if (parseResult != null) return parseResult
-        if ( parser == null ) throw IllegalStateException("No parser found for ${request.languageId}")
-        if (request.text.isNullOrEmpty()) {
-            request.text = cached?.text ?: File(request.file).readText()
+        val cached = symbolRepository.getJarEntryByFile(request.file)
+        when (cached) {
+            is SourceEntryData -> {
+                val parseResult = cached.parseData
+                if (parseResult != null) return parseResult
+                if ( parser == null ) throw IllegalStateException("No parser found for ${request.languageId}")
+                if (request.text.isNullOrEmpty()) {
+                    request.text = cached.content
+                }
+                if (request.stripCR) request.text = request.text?.replace("\r", "")
+                val result = parser.parse(request)
+                resolveSymbols(result)
+                return result
+            }
+            else -> throw IllegalArgumentException("Cannot parse a $cached")
         }
-        if (request.stripCR) request.text = request.text?.replace("\r", "")
-        val result = parser.parse(request)
-        resolveSymbols(result)
-        return result
     }
 
     fun resolveSymbols(result: ParseResult) {
@@ -55,9 +61,9 @@ class ParseService(val symbolRepository: SymbolRepository) {
         val wildTypes = names.filter { importMap.values.contains("${it.pkg}.*") }
         val packageType = names.firstOrNull { it.pkg == pkg } // Is it in the same package?
         return when {
-            autoType != null -> autoType.fqcn()
-            wildTypes.isNotEmpty() -> wildTypes.first().fqcn()
-            packageType != null -> packageType.fqcn() //Not until we are loading the local classes
+            autoType != null -> autoType.fqcn
+            wildTypes.isNotEmpty() -> wildTypes.first().fqcn
+            packageType != null -> packageType.fqcn //Not until we are loading the local classes
             else -> symbol.type // could default to same package here also
         }
     }

@@ -42,9 +42,9 @@ class SymbolRepository {
 
     fun saveJarEntry(jarEntry: JarEntryData) {
         val fileKey = if (!jarEntry.path.startsWith("/")) "/${jarEntry.path}" else jarEntry.path
-        logger.debug("Storing jar entry for $fileKey (${jarEntry.fqcn()})")
+        logger.debug("Storing jar entry for $fileKey (${jarEntry.fqcn})")
         jarEntryByPath.put(fileKey, jarEntry)
-        jarEntryByFqcn.put(jarEntry.fqcn(), jarEntry)
+        jarEntryByFqcn.put(jarEntry.fqcn, jarEntry)
         val entries = jarEntriesByName.getOrPut(jarEntry.name, {mutableListOf()})
         entries.add(jarEntry)
     }

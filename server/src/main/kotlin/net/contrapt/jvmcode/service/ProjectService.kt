@@ -1,13 +1,13 @@
 package net.contrapt.jvmcode.service
 
-import io.vertx.core.json.Json
 import io.vertx.core.logging.LoggerFactory
 import javassist.bytecode.ClassFile
 import net.contrapt.jvmcode.model.*
 import net.contrapt.jvmcode.service.model.*
 import java.io.DataInputStream
 import java.io.File
-import java.io.InputStream
+import java.lang.IllegalArgumentException
+import java.lang.IllegalStateException
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
 
@@ -31,7 +31,7 @@ class ProjectService(
     private val externalPaths = mutableSetOf<PathData>()
 
     // Map of entry FQCN to the dependency it belongs to
-    private val dependencyMap = mutableMapOf<String, DependencyData>()
+    private val dependencyMap = mutableMapOf<String, Pair<JarEntryData,DependencyData>>()
 
     // Map of jarFile to [JarData]
     private val jarDataMap = mutableMapOf<String, JarData>()
@@ -135,44 +135,41 @@ class ProjectService(
         }
     }
 
-    /**
-     * For the given dependency, find all the entries contained in the jar file and organize them by package
-     * in the resulting data structures [JarData] -> [JarPackageData]
-     */
     fun getJarData(dependencyData: DependencyData) : JarData {
         if (jarDataMap.containsKey(dependencyData.fileName)) return jarDataMap[dependencyData.fileName]!!
         val pkgMap = mutableMapOf<String, MutableSet<JarEntryData>>()
         val isJmod = dependencyData.fileName.endsWith(".jmod")
-        try {
-            val jarFile = JarFile(dependencyData.fileName)
-            jarFile.entries().toList().forEach { entry ->
-                val jed = JarEntryData.create(entry.name, isJmod)
-                when (jed.type) {
-                    JarEntryType.PACKAGE -> pkgMap.putIfAbsent(jed.pkg, sortedSetOf())
-                    else -> {
-                        pkgMap.getOrPut(jed.pkg, { sortedSetOf()}).add(jed)
-                        /** The [dependencyMap] records this entry by FQCN */
-                        symbolRepo.saveJarEntry(jed)
-                        dependencyMap.put(jed.fqcn(), dependencyData)
-                    }
+        val jarFile = runCatching { JarFile(dependencyData.fileName) }
+        jarFile.getOrElse { e -> throw RuntimeException("Unable to get jar entries for ${dependencyData.fileName}", e) }
+            .entries().toList().forEach { entry ->
+            val ed = createEntryData(entry, isJmod)
+            when (ed) {
+                is PackageEntryData -> pkgMap.putIfAbsent(ed.pkg, sortedSetOf())
+                else -> {
+                    pkgMap.getOrPut(ed.pkg, { sortedSetOf() }).add(ed)
+                    //symbolRepo.saveJarEntry(ed)
+                    dependencyMap.put(ed.fqcn, ed to dependencyData)
                 }
             }
-            /** The [JarData] is a collection of [JarPackageData] for each non-empty package in the jar file */
-            val jarData = JarData(dependencyData.fileName,
-                    pkgMap.asSequence()
-                    .map {
-                        entry -> JarPackageData(entry.key).apply { entries.addAll(entry.value) }
-                    }
-                    .filter { pkg ->
-                        pkg.entries.size > 0 && !config.excludes.any { exclude -> pkg.name.startsWith(exclude) }
-                    }
-                    .toSortedSet()
-            )
-            jarDataMap[dependencyData.fileName] = jarData
-            return jarData
         }
-        catch (e: Exception) {
-            throw RuntimeException("Unable to get jar entries for ${dependencyData.fileName}", e)
+        val packages = pkgMap.asSequence()
+            .map { entry -> JarPackageData(entry.key).apply { entries.addAll(entry.value) } }
+            .filter { pkg -> pkg.entries.size > 0 && !config.excludes.any { exclude -> pkg.name.startsWith(exclude)} }
+            .toSortedSet()
+        val jarData = JarData(dependencyData.fileName, packages)
+        jarDataMap[dependencyData.fileName] = jarData
+        return jarData
+    }
+
+    private fun createEntryData(entry: JarEntry, isJmod: Boolean) : JarEntryData {
+        if (entry.isDirectory) {
+            return PackageEntryData.create(entry.name, isJmod)
+        }
+        else if (entry.name.endsWith(".class")) {
+            return ClassEntryData.create(entry.name, isJmod)
+        }
+        else {
+            return ResourceEntryData.create(entry.name, isJmod)
         }
     }
 
@@ -198,32 +195,39 @@ class ProjectService(
      * TODO decompile a class
      * If resource, return the contents as is
      */
-    fun getJarEntryContents(entry: JarEntryData) : JarEntryData {
-        val dependency = dependencyMap[entry.fqcn()]
-        if ( dependency == null ) return entry
-        if ( entry.type == JarEntryType.CLASS && !entry.isResolved()) {
-            val jarFile = JarFile(dependency.fileName)
-            val jarEntry = jarFile.getJarEntry(entry.path)
-            val cf = ClassFile(DataInputStream(jarFile.getInputStream(jarEntry)))
-            entry.resolve(cf)
+    fun getJarEntryContents(fqcn: String) : JarEntryData {
+        val entryPair = dependencyMap[fqcn]
+        if ( entryPair == null ) throw IllegalArgumentException("No such entry $fqcn")
+        val entry = entryPair.first
+        val dependencyData = entryPair.second
+        return when (entry) {
+            is ClassEntryData -> {
+                ensureResolved(dependencyData.fileName, entry)
+                getSourceContent(dependencyData.sourceFileName, dependencyData.jmod, entry)
+            }
+            is ResourceEntryData -> getContentFromJar(dependencyData.fileName, entry)
+            else -> throw IllegalStateException("Unhandled type for ${entry}")
         }
-        return when (entry.type) {
-            JarEntryType.CLASS -> getSourceContent(dependency.sourceFileName, dependency.jmod, entry)
-            else -> getContentFromJar(dependency.fileName, entry)
-        }
+    }
+
+    private fun ensureResolved(file: String, entry: ClassEntryData) {
+        if (entry.isResolved()) return
+        val jarFile = JarFile(file)
+        val jarEntry = jarFile.getJarEntry(entry.path)
+        val cf = ClassFile(DataInputStream(jarFile.getInputStream(jarEntry)))
+        entry.resolve(ClassData.create(cf))
     }
 
     /**
      * Return the source code content for a class if available or fill in content from [ClassData]
      */
-    private fun getSourceContent(srcFile: String?, jmod: String?, entry: JarEntryData) : JarEntryData {
-        val sourceEntry = when (srcFile) {
-            null -> entry
+    private fun getSourceContent(srcFile: String?, jmod: String?, entry: ClassEntryData) : ClassEntryData {
+        when (srcFile) {
+            null -> {}
             else -> getContentFromSourceJar(srcFile, jmod, entry)
         }
-        if (sourceEntry.text == null) sourceEntry.text = Json.encodePrettily(entry.classData)
-        symbolRepo.saveJarEntry(sourceEntry)
-        return sourceEntry
+        //symbolRepo.saveJarEntry(sourceEntry)
+        return entry
     }
 
     /**
@@ -237,7 +241,7 @@ class ProjectService(
         return components.joinToString(File.pathSeparator) { it }
     }
 
-    private fun getContentFromSourceJar(fileName: String, jmod: String?, entry: JarEntryData) : JarEntryData {
+    private fun getContentFromSourceJar(fileName: String, jmod: String?, entry: ClassEntryData) : ClassEntryData {
         try {
             val jarFile = JarFile(fileName)
             val prefix = if (jmod == null) "" else "${jmod}${File.separator}"
@@ -252,15 +256,14 @@ class ProjectService(
             if ( jarEntry == null ) {
                 jarEntry = jarFile.entries().asSequence().find { it.name.endsWith(entry.srcName()) }
             }
-            if (jarEntry == null) {
-                return entry // TODO could use getContentFromJar if we had a decompiler
-            } else {
-                val sourceEntry = pathToJarEntry(entry.pkg, jarEntry.name)
-                sourceEntry.text = jarFile.getInputStream(jarEntry).bufferedReader().use {
+            if (jarEntry != null) {
+                val content = jarFile.getInputStream(jarEntry).bufferedReader().use {
                     it.readText().replace("\r", "")
                 }
-                return sourceEntry
+                val sourceEntry = SourceEntryData.create(jarEntry.name, entry.pkg, fileName, content)
+                entry.srcEntry = sourceEntry
             }
+            return entry
         }
         catch (e: Exception) {
             logger.warn("Unable to read content for ${entry.name} from ${fileName}", e)
@@ -268,15 +271,13 @@ class ProjectService(
         }
     }
 
-    private fun getContentFromJar(fileName: String, entry: JarEntryData) : JarEntryData {
+    private fun getContentFromJar(fileName: String, entry: ResourceEntryData) : ResourceEntryData {
         try {
             val jarFile = JarFile(fileName)
             val jarEntry = jarFile.getJarEntry(entry.path)
             jarFile.getInputStream(jarEntry).use {
-                entry.text = when (entry.type) {
-                    JarEntryType.RESOURCE -> getResourceFromJar(it)
-                    JarEntryType.CLASS -> getClassFromJar(it)
-                    JarEntryType.PACKAGE -> throw IllegalStateException()
+                entry.content = it.bufferedReader().use {
+                    it.readText()
                 }
             }
             return entry
@@ -285,34 +286,5 @@ class ProjectService(
             throw RuntimeException("Unable to read content for ${entry.name}")
         }
     }
-
-    private fun getResourceFromJar(stream: InputStream) : String {
-        return stream.bufferedReader().use {
-            it.readText()
-        }
-    }
-
-    private fun getClassFromJar(stream: InputStream) : String {
-        stream.use {  it.readBytes() } // TODO Decompile the byte code some day
-        return "No Source Found"
-    }
-
-    /**
-     * Turn a jar path into a JarEntryData
-     */
-    private fun pathToJarEntry(packageName: String, path: String) : JarEntryData {
-        val parts = path.split("/")
-        val fileName = parts[parts.size-1]
-        val type = when (fileName.endsWith(".class")) {
-            true -> JarEntryType.CLASS
-            else -> JarEntryType.RESOURCE
-        }
-        val name = when (type) {
-            JarEntryType.CLASS -> fileName.replace(".class", "")
-            else -> fileName
-        }
-        return JarEntryData(name, type, packageName, path)
-    }
-
 
 }

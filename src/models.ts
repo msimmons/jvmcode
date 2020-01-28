@@ -1,5 +1,5 @@
-import { DependencySourceData, DependencyData, JarPackageData, JarEntryData, PathData} from "server-models"
-import { workspace } from "vscode"
+import { DependencySourceData, DependencyData, JarPackageData, JarEntryData, PathData, ClassEntryData, ResourceEntryData} from "server-models"
+import { workspace, Uri } from "vscode"
 
 export enum NodeType {
     PATH_ROOT,
