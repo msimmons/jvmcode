@@ -30,11 +30,14 @@ class ProjectService(
     // Classpath data added by other extensions
     private val externalPaths = mutableSetOf<PathData>()
 
-    // Map of entry FQCN to the dependency it belongs to
-    private val dependencyMap = mutableMapOf<String, Pair<JarEntryData,DependencyData>>()
+    // Map of entry FQCN to the dependency it belongs to -- allow for multiple with same FQCN
+    private val dependencyMap = mutableMapOf<String, MutableSet<Pair<JarEntryData,DependencyData>>>()
 
     // Map of jarFile to [JarData]
     private val jarDataMap = mutableMapOf<String, JarData>()
+
+    // Map of source file name to source entry -- allow for multiple with same path
+    private val sourceMap = mutableMapOf<String, MutableSet<Pair<SourceEntryData, DependencyData>>>()
 
     // Map of path to class data for all project classes
     private val classMap = mutableMapOf<String, ClassData>()
@@ -44,7 +47,10 @@ class ProjectService(
     init {
         javaVersion = getVersion()
         jdkSource =  JDKDependencySource.create(config, javaHome, javaVersion)
-        jdkSource.dependencies.forEach { getJarData(it) }
+        jdkSource.dependencies.forEach {
+            indexJarData(it)
+            indexSourceJarData(it)
+        }
         userSource = UserDependencySource()
     }
 
@@ -116,7 +122,10 @@ class ProjectService(
             userPath.classDirs.addAll(it.classDirs)
             userPath.sourceDirs.addAll(it.sourceDirs)
         }
-        userSource.dependencies.forEach { getJarData(it) }
+        userSource.dependencies.forEach {
+            indexJarData(it)
+            indexSourceJarData(it)
+        }
     }
 
     /**
@@ -131,27 +140,38 @@ class ProjectService(
         externalSource.addAll(request.dependencySources)
         externalPaths.addAll(request.paths)
         externalSource.filter { it.source == request.source }.forEach {
-            it.dependencies.forEach { getJarData(it) }
+            it.dependencies.forEach {
+                indexJarData(it)
+                indexSourceJarData(it)
+            }
         }
     }
 
-    fun getJarData(dependencyData: DependencyData) : JarData {
+    private fun addDependencyMap(entry: JarEntryData, dependencyData: DependencyData) {
+        dependencyMap.getOrPut(entry.fqcn, { mutableSetOf() }).add(entry to dependencyData)
+    }
+
+    fun indexJarData(dependencyData: DependencyData) : JarData {
         if (jarDataMap.containsKey(dependencyData.fileName)) return jarDataMap[dependencyData.fileName]!!
         val pkgMap = mutableMapOf<String, MutableSet<JarEntryData>>()
         val isJmod = dependencyData.fileName.endsWith(".jmod")
         val jarFile = runCatching { JarFile(dependencyData.fileName) }
         jarFile.getOrElse { e -> throw RuntimeException("Unable to get jar entries for ${dependencyData.fileName}", e) }
             .entries().toList().forEach { entry ->
-            val ed = createEntryData(entry, isJmod)
-            when (ed) {
-                is PackageEntryData -> pkgMap.putIfAbsent(ed.pkg, sortedSetOf())
-                else -> {
-                    pkgMap.getOrPut(ed.pkg, { sortedSetOf() }).add(ed)
-                    symbolRepo.saveJarEntry(ed)
-                    dependencyMap.put(ed.fqcn, ed to dependencyData)
+                when (val ed = createEntryData(entry, isJmod)) {
+                    is PackageEntryData -> pkgMap.putIfAbsent(ed.pkg, sortedSetOf())
+                    is ClassEntryData -> {
+                        pkgMap.getOrPut(ed.pkg, { sortedSetOf() }).add(ed)
+                        symbolRepo.saveJarEntry(ed)
+                        addDependencyMap(ed, dependencyData)
+                    }
+                    is ResourceEntryData -> {
+                        pkgMap.getOrPut(ed.pkg, { sortedSetOf() }).add(ed)
+                        addDependencyMap(ed, dependencyData)
+                    }
+                    else -> logger.warn("Unhandled when for $ed")
                 }
             }
-        }
         val packages = pkgMap.asSequence()
             .map { entry -> JarPackageData(entry.key).apply { entries.addAll(entry.value) } }
             .filter { pkg -> pkg.entries.size > 0 && !config.excludes.any { exclude -> pkg.name.startsWith(exclude)} }
@@ -159,6 +179,18 @@ class ProjectService(
         val jarData = JarData(dependencyData.fileName, packages)
         jarDataMap[dependencyData.fileName] = jarData
         return jarData
+    }
+
+    fun indexSourceJarData(dependencyData: DependencyData) {
+        val jarFileName = dependencyData.sourceFileName
+        if (jarFileName.isNullOrEmpty()) return
+        val jarFile = runCatching { JarFile(jarFileName) }
+        jarFile.getOrElse { e -> throw java.lang.RuntimeException("Unable to get source entries for ${dependencyData.sourceFileName}", e) }
+            .entries().asSequence().forEach { entry ->
+                val ed = SourceEntryData.create(entry.name, jarFileName)
+                sourceMap.getOrPut(ed.name, { mutableSetOf() })
+                    .add(ed to dependencyData)
+            }
     }
 
     private fun createEntryData(entry: JarEntry, isJmod: Boolean) : JarEntryData {
@@ -195,17 +227,19 @@ class ProjectService(
      * TODO decompile a class
      * If resource, return the contents as is
      */
-    fun getJarEntryContents(fqcn: String) : JarEntryData {
-        val entryPair = dependencyMap[fqcn]
-        if ( entryPair == null ) throw IllegalArgumentException("No such entry $fqcn")
+    fun getJarEntryContents(jarFile: String, fqcn: String) : JarEntryData {
+        val entryPair = dependencyMap[fqcn]?.firstOrNull { it.second.fileName == jarFile }
+        if ( entryPair == null ) throw IllegalArgumentException("No such entry $fqcn in $jarFile")
         val entry = entryPair.first
         val dependencyData = entryPair.second
         return when (entry) {
             is ClassEntryData -> {
                 ensureResolved(dependencyData.fileName, entry)
-                getSourceContent(dependencyData.sourceFileName, dependencyData.jmod, entry)
+                entry.srcEntry = getSourceEntryData(entry, dependencyData)
+                //getSourceContent(dependencyData.sourceFileName, dependencyData.jmod, entry)
+                entry
             }
-            is ResourceEntryData -> getContentFromJar(dependencyData.fileName, entry)
+            is ResourceEntryData -> entry //getContentFromJar(dependencyData.fileName, entry)
             else -> throw IllegalStateException("Unhandled type for ${entry}")
         }
     }
@@ -240,6 +274,18 @@ class ProjectService(
         return components.joinToString(File.pathSeparator) { it }
     }
 
+    private fun getSourceEntryData(entry: ClassEntryData, dependencyData: DependencyData) : SourceEntryData? {
+        val srcName = entry.srcName()
+        val entries = sourceMap.getOrElse(srcName) {
+            val srcEntry : Set<Pair<SourceEntryData, DependencyData>>? = null
+            config.extensions.fold(srcEntry) { curEntry, ext ->
+                if (curEntry == null) sourceMap.get("$srcName.$ext") else curEntry
+            }
+        }
+        val found = entries?.firstOrNull { it.second.fileName == dependencyData.fileName }
+        return if (found != null) found.first else entries?.firstOrNull()?.first
+    }
+
     private fun getContentFromSourceJar(fileName: String, jmod: String?, entry: ClassEntryData) : ClassEntryData {
         try {
             val jarFile = JarFile(fileName)
@@ -261,9 +307,9 @@ class ProjectService(
                     it.readText().replace("\r", "")
                 }
                  */
-                val sourceEntry = SourceEntryData.create(jarEntry.name, entry.pkg, fileName, "")
+                val sourceEntry = SourceEntryData.create(jarEntry.name, fileName)
                 entry.srcEntry = sourceEntry
-                symbolRepo.saveJarEntry(sourceEntry)
+                //symbolRepo.saveJarEntry(sourceEntry)
             }
             return entry
         }
@@ -277,11 +323,13 @@ class ProjectService(
         try {
             val jarFile = JarFile(fileName)
             val jarEntry = jarFile.getJarEntry(entry.path)
+/*
             jarFile.getInputStream(jarEntry).use {
                 entry.content = it.bufferedReader().use {
                     it.readText()
                 }
             }
+*/
             return entry
         }
         catch (e: Exception) {

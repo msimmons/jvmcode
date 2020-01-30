@@ -1,13 +1,12 @@
 package net.contrapt.jvmcode.model
 
 class ResourceEntryData(
-    pkg: String,
+    val pkg: String,
     name: String,
     path: String
-) : JarEntryData(pkg, name, path) {
+) : JarEntryData(name, path) {
 
     override val type : JarEntryType = JarEntryType.RESOURCE
-    override var content : String = ""
 
     companion object {
 

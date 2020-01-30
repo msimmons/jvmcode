@@ -10,13 +10,6 @@ class ParseService(val symbolRepository: SymbolRepository) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     fun parse(request: ParseRequest, parser: LanguageParser?) : ParseResult {
-        val cached = symbolRepository.getJarEntryByFile(request.file)
-        when (cached) {
-            is SourceEntryData -> {
-                val parseResult = cached.parseData
-                if (parseResult != null) return parseResult
-            }
-        }
         if ( parser == null ) throw IllegalStateException("No parser found for ${request.languageId}")
         val result = parser.parse(request)
         resolveSymbols(result)

@@ -119,7 +119,7 @@ export class ProjectService {
      * @param jarEntry 
      */
     public async getJarEntryContent(jarEntry: JarEntryNode) : Promise<JarEntryData> {
-        let reply = await this.server.send('jvmcode.jar-entry', {jarEntry: jarEntry.data})
+        let reply = await this.server.send('jvmcode.jar-entry', {jarEntry: jarEntry.data, jarFile: jarEntry.dependency.fileName})
         return reply.body
     }
 

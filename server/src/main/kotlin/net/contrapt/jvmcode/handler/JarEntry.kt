@@ -10,7 +10,8 @@ class JarEntry(vertx: Vertx, val projectService: ProjectService) : AbstractHandl
 
     override fun processMessage(message: Message<JsonObject>): JsonObject {
         val jarEntryData = message.body().getJsonObject("jarEntry").mapTo(JarEntryData::class.java)
-        val resolved = projectService.getJarEntryContents(jarEntryData.fqcn)
+        val jarFile = message.body().getString("jarFile")
+        val resolved = projectService.getJarEntryContents(jarFile, jarEntryData.fqcn)
         return JsonObject.mapFrom(resolved)
     }
 

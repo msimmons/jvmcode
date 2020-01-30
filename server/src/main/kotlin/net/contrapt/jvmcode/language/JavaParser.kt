@@ -271,7 +271,7 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
 
     val Block : Parser<MatchProcessor> by optional(MODIFIER) * O_BRACE map {
         MatchProcessor { ctx ->
-            ctx.addSymbol(it.t2, ParseSymbolType.BLOCK, it.t1?.text ?: "", createScope = true)
+            ctx.addSymbol(it.t2, ParseSymbolType.BLOCK, it.t1?.text ?: "", type = "", createScope = true)
         }
     }
 
@@ -355,7 +355,7 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
 
     val simpleControl by oneOrMore(CONTROL) * O_BRACE map {
         MatchProcessor { ctx ->
-            ctx.addSymbol(it.t1.last(), ParseSymbolType.CONTROL, it.t1.last().text, it.t1.last().text, createScope = true)
+            ctx.addSymbol(it.t1.last(), ParseSymbolType.CONTROL, classifier = "{}", type="", createScope = true)
         }
     }
     val statementControl by oneOrMore(CONTROL) * expression * SEMI map {
@@ -366,7 +366,7 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
     val complexControl by oneOrMore(CONTROL or SYNCRONIZED) * -O_PAREN * separated(optional(expression), SEMI) * -C_PAREN * optional(expression) * (O_BRACE or SEMI) map {
         (controls, params, expression, term) ->
         MatchProcessor { ctx ->
-            ctx.addSymbol(controls.last(), ParseSymbolType.CONTROL, controls.last().text, controls.last().text, createScope = true)
+            ctx.addSymbol(controls.last(), ParseSymbolType.CONTROL, classifier = "()", type = "", createScope = true)
             params.terms.forEach { it?.block?.invoke(ctx) }
             expression?.block?.invoke(ctx)
             if (term.type == SEMI) ctx.endScope(term)

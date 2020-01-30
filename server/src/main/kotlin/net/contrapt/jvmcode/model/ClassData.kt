@@ -10,7 +10,7 @@ class ClassData(
         val name: String,
         val srcFile: String?,
         val implements: Collection<String>,
-        val extends: String,
+        val extends: String?,
         val references: Collection<String>,
         val annotations: Collection<String>,
         val fields: Collection<FieldData>,

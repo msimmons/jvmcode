@@ -12,7 +12,6 @@ import io.vertx.core.json.Json
 import net.contrapt.jvmcode.model.ClassEntryData
 import net.contrapt.jvmcode.model.JarEntryType
 import net.contrapt.jvmcode.model.JvmConfig
-import net.contrapt.jvmcode.model.PathData
 import net.contrapt.jvmcode.service.model.DependencySource
 import net.contrapt.jvmcode.service.model.UserPath
 import org.junit.jupiter.api.Assumptions.assumeTrue
@@ -37,13 +36,12 @@ class ProjectServiceTest {
         depSource.source shouldBe DependencySource.SYSTEM
         depSource.dependencies.size shouldBeGreaterThan  0
         val depData = depSource.dependencies.first()
-        val jarEntries = service.getJarData(depData)
+        val jarEntries = service.indexJarData(depData)
         jarEntries.packages.size shouldBe beGreaterThan(0)
         val resourceEntry = jarEntries.packages.first().entries.first()
-        service.getJarEntryContents(resourceEntry.fqcn)
-        resourceEntry.content shouldNotBe null
+        service.getJarEntryContents(depData.fileName, resourceEntry.fqcn) shouldBe resourceEntry
         val classEntry = jarEntries.packages.first { it.name == "java.lang" }.entries.first { it.type == JarEntryType.CLASS }
-        val javaEntry = service.getJarEntryContents(classEntry.fqcn)
+        val javaEntry = service.getJarEntryContents(depData.fileName, classEntry.fqcn)
         if (File(depData.sourceFileName ?: "").exists()) {
             (javaEntry as ClassEntryData).srcEntry shouldNotBe null
         }
@@ -60,13 +58,13 @@ class ProjectServiceTest {
         depSource.source shouldBe DependencySource.SYSTEM
         depSource.dependencies.size shouldBe 2
         val depData = depSource.dependencies.first()
-        val jarEntries = service.getJarData(depData)
+        val jarEntries = service.indexJarData(depData)
         jarEntries.packages.size shouldBe beGreaterThan(0)
         val resourceEntry = jarEntries.packages.first().entries.first()
-        service.getJarEntryContents(resourceEntry.fqcn)
-        resourceEntry.content shouldNotBe null
+        val contents = service.getJarEntryContents(depData.fileName, resourceEntry.fqcn)
+        //contents shouldBe resourceEntry
         val classEntry = jarEntries.packages.first { it.name == "java.lang" }.entries.first { it.type == JarEntryType.CLASS }
-        val javaEntry = service.getJarEntryContents(classEntry.fqcn)
+        val javaEntry = service.getJarEntryContents(depData.fileName, classEntry.fqcn)
         if (File(depData.sourceFileName ?: "").exists()) {
             (javaEntry as ClassEntryData).srcEntry shouldNotBe null
         }
@@ -81,7 +79,7 @@ class ProjectServiceTest {
         deps.size shouldBe 2
         val depSource = deps.first()
         val depData = depSource.dependencies.first()
-        val jarEntries = service.getJarData(depData)
+        val jarEntries = service.indexJarData(depData)
         jarEntries.packages.size shouldBe beGreaterThan(0)
         jarEntries.packages.any { pkg -> pkg.name.startsWith("com.sun") } shouldBe false
     }
@@ -96,7 +94,7 @@ class ProjectServiceTest {
         val deps = service.getJvmProject().dependencySources
         deps.size shouldBe 2
         val depSource = deps.last()
-        val jarData = service.getJarData(depSource.dependencies.last())
+        val jarData = service.indexJarData(depSource.dependencies.last())
         val pkg = jarData.packages.find { it.name == "META-INF.maven.org.postgresql.postgresql" } // META-INF/maven/org.postgresql/postgresql
         val je = pkg?.entries?.first()
         when (je) {
