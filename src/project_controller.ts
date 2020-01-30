@@ -157,25 +157,21 @@ export class ProjectController {
      * @param entryNode 
      */
     private openJarEntryContent(entryNode: JarEntryNode) {
-        //let uri = vscode.Uri.parse(`${this.contentProvider.scheme}:///${entryNode.contentName}`)
         let jarFile = undefined
         let path = undefined
-        let content = undefined
         if (entryNode.data.type === 'CLASS') {
             let d = entryNode.data as ClassEntryData
             if (d.srcEntry) {
                 jarFile = d.srcEntry.jarFile
-                content = d.srcEntry.content
                 path = d.srcEntry.path
             }
         }
         if (!jarFile) jarFile = entryNode.dependency.fileName
-        if (!content) content = entryNode.data.content
         if (!path) path = entryNode.data.path
-        let authority = encodeURIComponent(jarFile)
-        let uri = vscode.Uri.parse(`${this.contentProvider.scheme}://${authority}/${path}`)
+        let authority = dependencyLabel(entryNode.dependency)
+        let uri = vscode.Uri.file(path).with({scheme: this.contentProvider.scheme, authority: authority, fragment: jarFile})
         vscode.workspace.openTextDocument(uri).then((doc) => {
-            let options : vscode.TextDocumentShowOptions = {preview: true}
+            let options : vscode.TextDocumentShowOptions = {preview: false}
             /*
             if (entryNode.data.parseData) {
                 let symbol = entryNode.data.parseData.symbols.find(s => s.name === entryNode.name)
@@ -186,7 +182,6 @@ export class ProjectController {
             else {*/
                 options.selection = new vscode.Range(doc.positionAt(0), doc.positionAt(0))
             //}
-            this.contentProvider.update(uri, content)
             vscode.window.showTextDocument(doc, options).then((te) => {
             })
         })

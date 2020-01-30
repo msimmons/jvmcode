@@ -14,6 +14,10 @@ import net.contrapt.jvmcode.model.ParseResult
 import net.contrapt.jvmcode.model.ParseSymbolType
 import java.io.File
 
+/**
+ * array init
+ * annotation param defs
+ */
 class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
 
     val logger = LoggerFactory.getLogger(javaClass)
@@ -32,7 +36,6 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
     val COLON by token(":")
     val COMMA by token(",")
     val QUESTION by token("\\?")
-    val AT by token("@")
     val O_BRACE by token("\\{")
     val C_BRACE by token("}")
     val O_PAREN by token("\\(")
@@ -52,8 +55,11 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
     val PACKAGE by token("package\\b")
     val IMPORT by token("import\\b")
 
+    val SYNCRONIZED by token("synchronized\\b")
     val MODIFIER by token("(public|private|protected|final|transient|threadsafe|volatile|abstract|native|strictfp|inner|static)\\b")
     val DECLARE by token("(class|interface|enum|@interface)\\b")
+    val AT by token("@")
+
     val VAR by token("var\\b")
     val EXTENDS by token("extends\\b")
     val IMPLEMENTS by token("implements\\b")
@@ -67,7 +73,7 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
 
     val GOTO by token("(break|continue)\\b")
     val LABEL by token("(case|default)\\b")
-    val CONTROL by token("(if|else|switch|for|while|do|try|catch|finally|synchronized)\\b")
+    val CONTROL by token("(if|else|switch|for|while|do|try|catch|finally|default)\\b")
     val TYPE by token("(void|boolean|byte|char|short|int|long|double|float)\\b")
 
     val FALSE by token("false\\b")
@@ -87,7 +93,7 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
 
     val OPERATOR by INFIX_OPERATOR or QUESTION or GT or LT or COLON or AMPERSAND
     val LITERAL by STRING_LITERAL or BIN_LITERAL or CHAR_LITERAL or HEX_LITERAL or NUM_LITERAL or OCT_LITERAL or UNICODE_LITERAL or FALSE or TRUE or NULL
-    val MODIFIERS by zeroOrMore(MODIFIER)
+    val MODIFIERS by zeroOrMore(MODIFIER or SYNCRONIZED)
 
     // Rules
     val literal by LITERAL
@@ -162,13 +168,10 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
             ctx.addSymbol(it.t1, ParseSymbolType.TYPEREF)
         }
     }
-    val extendsClause by optional(-EXTENDS * typeRef) * optional(-IMPLEMENTS * separated(typeSpec, COMMA)) map {
+    val extendsClause by optional(-EXTENDS * separated(typeSpec, COMMA)) * optional(-IMPLEMENTS * separated(typeSpec, COMMA)) map {
         (extends, implements) ->
         MatchProcessor { ctx ->
-            if (extends != null) {
-                ctx.addSymbol(extends, ParseSymbolType.TYPEREF)
-                ctx.addSuper(extends, ParseSymbolType.TYPEREF)
-            }
+            extends?.terms?.forEach { addTypeSpec(ctx, it) }
             implements?.terms?.forEach { addTypeSpec(ctx, it) }
         }
     }
@@ -360,7 +363,7 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
             it.t2.block(ctx)
         }
     }
-    val complexControl by oneOrMore(CONTROL) * -O_PAREN * separated(optional(expression), SEMI) * -C_PAREN * optional(expression) * (O_BRACE or SEMI) map {
+    val complexControl by oneOrMore(CONTROL or SYNCRONIZED) * -O_PAREN * separated(optional(expression), SEMI) * -C_PAREN * optional(expression) * (O_BRACE or SEMI) map {
         (controls, params, expression, term) ->
         MatchProcessor { ctx ->
             ctx.addSymbol(controls.last(), ParseSymbolType.CONTROL, controls.last().text, controls.last().text, createScope = true)

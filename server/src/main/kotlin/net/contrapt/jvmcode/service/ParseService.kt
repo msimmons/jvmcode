@@ -15,17 +15,12 @@ class ParseService(val symbolRepository: SymbolRepository) {
             is SourceEntryData -> {
                 val parseResult = cached.parseData
                 if (parseResult != null) return parseResult
-                if ( parser == null ) throw IllegalStateException("No parser found for ${request.languageId}")
-                if (request.text.isNullOrEmpty()) {
-                    request.text = cached.content
-                }
-                if (request.stripCR) request.text = request.text?.replace("\r", "")
-                val result = parser.parse(request)
-                resolveSymbols(result)
-                return result
             }
-            else -> throw IllegalArgumentException("Cannot parse a $cached")
         }
+        if ( parser == null ) throw IllegalStateException("No parser found for ${request.languageId}")
+        val result = parser.parse(request)
+        resolveSymbols(result)
+        return result
     }
 
     fun resolveSymbols(result: ParseResult) {

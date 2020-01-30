@@ -1,7 +1,7 @@
 'use strict';
 
 import * as vscode from 'vscode'
-import {JvmConfig} from "server-models"
+import {JvmConfig} from 'server-models'
 
 /**
  * Service to return configuration to send to server when necessary

@@ -78,4 +78,15 @@ class JavaParserTest {
         println(Json.encodePrettily(result.symbols))
         result.parseTime shouldBeLessThanOrEqual 1000
     }
+
+    @Test
+    fun testJava4() {
+        val path = javaClass.classLoader?.getResource("Test4.javasource")?.path ?: ""
+        val text = File(path).readText()
+        val request = JavaParseRequest(file = path, text = text)
+        val parser = JavaParser()
+        val result = parser.parse(request)
+        println(Json.encodePrettily(result.symbols))
+        result.parseTime shouldBeLessThanOrEqual 1000
+    }
 }

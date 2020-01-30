@@ -4,6 +4,7 @@ import io.vertx.core.AbstractVerticle
 import io.vertx.core.DeploymentOptions
 import io.vertx.core.Handler
 import io.vertx.core.http.HttpServer
+import io.vertx.core.http.HttpServerOptions
 import io.vertx.core.json.JsonObject
 import io.vertx.core.logging.LoggerFactory
 import io.vertx.ext.bridge.BridgeEventType
@@ -13,6 +14,7 @@ import io.vertx.ext.web.handler.StaticHandler
 import io.vertx.ext.web.handler.sockjs.BridgeEvent
 import io.vertx.ext.web.handler.sockjs.BridgeOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
+import io.vertx.ext.web.handler.sockjs.SockJSHandlerOptions
 import net.contrapt.jvmcode.handler.*
 import net.contrapt.jvmcode.service.ParseService
 import net.contrapt.jvmcode.model.JvmConfig
@@ -41,7 +43,10 @@ class RouterVerticle(val startupToken: String, var config: JvmConfig, symbolRepo
     }
 
     fun startRouter() {
-        httpServer = vertx.createHttpServer()
+        val httpServerOptions = HttpServerOptions().apply {
+            maxWebsocketFrameSize = 1024 * 1024
+        }
+        httpServer = vertx.createHttpServer(httpServerOptions)
         router = Router.router(vertx)
 
         val bridgeOptions = BridgeOptions().apply {
@@ -49,7 +54,6 @@ class RouterVerticle(val startupToken: String, var config: JvmConfig, symbolRepo
             addOutboundPermitted(PermittedOptions().apply { addressRegex = ".*" })
             setReplyTimeout(5 * 60 * 1000)
         }
-
         val sockJs = SockJSHandler.create(vertx)
         sockJs.bridge(bridgeOptions, bridgeEventHandler())
 

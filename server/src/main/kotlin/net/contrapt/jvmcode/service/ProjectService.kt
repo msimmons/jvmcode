@@ -147,7 +147,7 @@ class ProjectService(
                 is PackageEntryData -> pkgMap.putIfAbsent(ed.pkg, sortedSetOf())
                 else -> {
                     pkgMap.getOrPut(ed.pkg, { sortedSetOf() }).add(ed)
-                    //symbolRepo.saveJarEntry(ed)
+                    symbolRepo.saveJarEntry(ed)
                     dependencyMap.put(ed.fqcn, ed to dependencyData)
                 }
             }
@@ -226,7 +226,6 @@ class ProjectService(
             null -> {}
             else -> getContentFromSourceJar(srcFile, jmod, entry)
         }
-        //symbolRepo.saveJarEntry(sourceEntry)
         return entry
     }
 
@@ -257,11 +256,14 @@ class ProjectService(
                 jarEntry = jarFile.entries().asSequence().find { it.name.endsWith(entry.srcName()) }
             }
             if (jarEntry != null) {
+                /*
                 val content = jarFile.getInputStream(jarEntry).bufferedReader().use {
                     it.readText().replace("\r", "")
                 }
-                val sourceEntry = SourceEntryData.create(jarEntry.name, entry.pkg, fileName, content)
+                 */
+                val sourceEntry = SourceEntryData.create(jarEntry.name, entry.pkg, fileName, "")
                 entry.srcEntry = sourceEntry
+                symbolRepo.saveJarEntry(sourceEntry)
             }
             return entry
         }

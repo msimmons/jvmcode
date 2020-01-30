@@ -35,7 +35,7 @@ data class ParseContext(
         }
         add(symbol)
         val padding = "  ".repeat(scopes.size)
-        //println("$padding:$token:$symbol")
+        println("$padding:$token:$symbol")
         if (createScope) {
             //println("Start Scope: ${symbol}")
             scopes.push(symbol)
