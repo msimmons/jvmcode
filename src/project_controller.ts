@@ -143,12 +143,17 @@ export class ProjectController {
     }
     
     /**
-    * Get the jar entry's content from the service
+    * Resolve the jar entry's associated source if necessary; also read [ClassData]
+    * for class resources
     * @param entryNode 
     */
-    private async getJarEntryContent(entryNode: JarEntryNode) : Promise<JarEntryData> {
-        if (!entryNode.data.content) return await this.service.getJarEntryContent(entryNode)
-        else return entryNode.data
+    private async resolveJarEntryData(entryNode: JarEntryNode) : Promise<JarEntryData> {
+        switch (entryNode.data.type) {
+            case 'CLASS':
+                if (!(entryNode.data as ClassEntryData).srcEntry) return this.service.getJarEntryContent(entryNode)
+            default:
+                return entryNode.data
+        }
     }
     
     /**
@@ -217,12 +222,8 @@ export class ProjectController {
     * Open the contents of a jar entry in a text editor
     */
     public openJarEntry(entryNode: JarEntryNode) {
-        if (entryNode.content) {
-            this.openJarEntryContent(entryNode)
-            return
-        }
         vscode.window.withProgress({ location: vscode.ProgressLocation.Window, title: entryNode.name}, (progess) => {
-            return this.getJarEntryContent(entryNode).then((reply) => {
+            return this.resolveJarEntryData(entryNode).then((reply) => {
                 entryNode.data = reply
                 this.openJarEntryContent(entryNode)
             }).catch(error => {

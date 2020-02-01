@@ -202,8 +202,6 @@ export class JarEntryNode implements TreeNode {
     dependency: DependencyData
     name: string
     type: NodeType
-    content: string
-    contentName: string
     isTerminal = true
     isOpenable = true
     constructor(pkgNode: JarPackageNode, data: JarEntryData) { 
