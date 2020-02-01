@@ -156,8 +156,8 @@ class ProjectService(
         val pkgMap = mutableMapOf<String, MutableSet<JarEntryData>>()
         val isJmod = dependencyData.fileName.endsWith(".jmod")
         val jarFile = runCatching { JarFile(dependencyData.fileName) }
-        jarFile.getOrElse { e -> throw RuntimeException("Unable to get jar entries for ${dependencyData.fileName}", e) }
-            .entries().toList().forEach { entry ->
+        jarFile.getOrElse { e -> throw RuntimeException("Unable to get jar entries for ${dependencyData.fileName}", e) }.use {
+            it.entries().toList().forEach { entry ->
                 when (val ed = createEntryData(entry, isJmod)) {
                     is PackageEntryData -> pkgMap.putIfAbsent(ed.pkg, sortedSetOf())
                     is ClassEntryData -> {
@@ -172,6 +172,7 @@ class ProjectService(
                     else -> logger.warn("Unhandled when for $ed")
                 }
             }
+        }
         val packages = pkgMap.asSequence()
             .map { entry -> JarPackageData(entry.key).apply { entries.addAll(entry.value) } }
             .filter { pkg -> pkg.entries.size > 0 && !config.excludes.any { exclude -> pkg.name.startsWith(exclude)} }
@@ -185,12 +186,14 @@ class ProjectService(
         val jarFileName = dependencyData.sourceFileName
         if (jarFileName.isNullOrEmpty()) return
         val jarFile = runCatching { JarFile(jarFileName) }
-        jarFile.getOrElse { e -> throw java.lang.RuntimeException("Unable to get source entries for ${dependencyData.sourceFileName}", e) }
-            .entries().asSequence().forEach { entry ->
+        if (jarFile.isFailure) return
+        jarFile.getOrThrow().use {
+            it.entries().asSequence().forEach { entry ->
                 val ed = SourceEntryData.create(entry.name, jarFileName)
                 sourceMap.getOrPut(ed.name, { mutableSetOf() })
                     .add(ed to dependencyData)
             }
+        }
     }
 
     private fun createEntryData(entry: JarEntry, isJmod: Boolean) : JarEntryData {
