@@ -2,8 +2,8 @@
 
 import * as vscode from 'vscode'
 import { LanguageService } from './language_service'
-import { CompileRequest, CompileResult, LanguageRequest, ParseRequest, ParseResult } from 'server-models'
-import { languageService } from './extension';
+import { CompileRequest, ClassEntryData, LanguageRequest, ParseRequest, ParseResult } from 'server-models'
+import { languageService, languageController, projectService } from './extension';
 import { ProjectController } from './project_controller';
 import * as provider from './language_providers'
 
@@ -131,6 +131,16 @@ export class LanguageController implements vscode.Disposable {
      */
     async getParseResult(doc: vscode.TextDocument) : Promise<ParseResult> {
         return this.requestParse(doc)
+    }
+
+    /**
+     * Get the [Location] of the given FQCN type reference
+     */
+    async getRefLocation(fqcn: string) : Promise<vscode.Location> {
+        let uri = await this.projectController.getFqcnUri(fqcn)
+        // TODO parse text to find position
+        new vscode.Location(uri, new vscode.Position(0,0))
+        return uri ? new vscode.Location(uri, new vscode.Position(0,0)) : undefined
     }
 
     dispose() {

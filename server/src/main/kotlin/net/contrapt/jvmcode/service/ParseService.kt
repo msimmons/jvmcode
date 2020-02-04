@@ -25,7 +25,11 @@ class ParseService(val symbolRepository: SymbolRepository) {
                 ParseSymbolType.FIELD -> it.type = typeRefName(it,importMap, pkgName)
                 ParseSymbolType.VARIABLE ->  it.type = typeRefName(it, importMap, pkgName)
                 ParseSymbolType.METHOD -> it.type = typeRefName(it, importMap, pkgName)
-                ParseSymbolType.CLASS, ParseSymbolType.INTERFACE, ParseSymbolType.ENUM, ParseSymbolType.OBJECT-> it.type = "$pkgName.${typeDefName(it, result.symbols)}"
+                ParseSymbolType.CLASS,
+                ParseSymbolType.INTERFACE,
+                ParseSymbolType.ENUM,
+                ParseSymbolType.THIS,
+                ParseSymbolType.OBJECT-> it.type = "$pkgName.${typeDefName(it, result.symbols)}"
                 ParseSymbolType.CONSTRUCTOR -> it.type = "$pkgName.${constructorType(it, result.symbols)}"
                 else -> {}
             }
@@ -57,7 +61,7 @@ class ParseService(val symbolRepository: SymbolRepository) {
     }
 
     private fun constructorType(symbol: ParseSymbol, symbols: List<ParseSymbol>) : String {
-        val type = symbols[symbol.parent]
+        val type = if (symbol.parent > -1) symbols[symbol.parent] else symbol
         return typeDefName(type, symbols)
     }
 

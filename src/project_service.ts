@@ -115,11 +115,12 @@ export class ProjectService {
     }
 
     /**
-     * Returns JarEntryData with text content if available, otherwise content set to empty
-     * @param jarEntry 
+     * Returns the jar entry data given the fqcn and (optional) dependency jar
+     * @param fqcn 
+     * @param jarFile 
      */
-    public async getJarEntryContent(jarEntry: JarEntryNode) : Promise<JarEntryData> {
-        let reply = await this.server.send('jvmcode.jar-entry', {jarEntry: jarEntry.data, jarFile: jarEntry.dependency.fileName})
+    public async resolveJarEntryData(fqcn : string, jarFile : string) : Promise<JarEntryData> {
+        let reply = await this.server.send('jvmcode.jar-entry', {fqcn: fqcn, jarFile: jarFile})
         return reply.body
     }
 

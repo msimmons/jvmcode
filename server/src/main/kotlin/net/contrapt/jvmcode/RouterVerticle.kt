@@ -45,6 +45,7 @@ class RouterVerticle(val startupToken: String, var config: JvmConfig, symbolRepo
     fun startRouter() {
         val httpServerOptions = HttpServerOptions().apply {
             maxWebsocketFrameSize = 1024 * 1024
+            maxWebsocketMessageSize = 1024 * 1024
         }
         httpServer = vertx.createHttpServer(httpServerOptions)
         router = Router.router(vertx)

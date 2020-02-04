@@ -23,6 +23,7 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
     val logger = LoggerFactory.getLogger(javaClass)
 
     class MatchProcessor(val block: (ParseContext) -> Unit)
+    class MatchProducer(val block: (ParseContext) -> JavaParseSymbol)
 
     // Comments
     val BEGIN_COMMENT by token("/\\*")
@@ -50,6 +51,7 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
     val GT by token(">")
     val LT by token("<")
     val AMPERSAND by token("&")
+    val SUPER by token("super\\b")
 
     // Keywords
     val PACKAGE by token("package\\b")
@@ -97,8 +99,8 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
 
     // Rules
     val literal by LITERAL
-    val typeRef by TYPE or IDENT
-    val symRef by IDENT
+    val typeRef by TYPE or IDENT or SUPER
+    val symRef by IDENT or SUPER
     val typeName by IDENT
     val varName by IDENT * zeroOrMore(O_BRACKET * C_BRACKET) map { it.t1 to it.t2.size }
     val fieldName by IDENT * zeroOrMore(O_BRACKET * C_BRACKET) map { it.t1 to it.t2.size }
@@ -108,17 +110,22 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
     val varNames by separated(varName, COMMA) map {
         it.terms
     }
-    val typeSpec by typeRef * optional(parser(::typeArgs)) * zeroOrMore(O_BRACKET * C_BRACKET) map {
-        Triple(it.t1, it.t3.size, it.t2)
+    val typeSpec by (typeRef or QUESTION) * optional(parser(::typeArgs)) * zeroOrMore(O_BRACKET * C_BRACKET) map {
+        MatchProducer { ctx ->
+            it.t2?.block?.invoke(ctx)
+            ctx.addSymbol(it.t1, ParseSymbolType.TYPEREF).apply { arrayDim = it.t3.size }
+        }
+        //Triple(it.t1, it.t3.size, it.t2)
     }
     fun addTypeSpec(ctx: ParseContext, typeSpec: Triple<TokenMatch, Int, MatchProcessor?>) : JavaParseSymbol {
         typeSpec.third?.block?.invoke(ctx)
         return ctx.addSymbol(typeSpec.first, ParseSymbolType.TYPEREF).apply { arrayDim = typeSpec.second }
     }
 
-    val typeArg by typeSpec or (-QUESTION * -EXTENDS * typeSpec) map {
+    val typeArg by typeSpec * optional(-(EXTENDS or SUPER) * typeSpec) map {
         MatchProcessor { ctx ->
-            addTypeSpec(ctx, it)
+            it.t1.block(ctx)
+            //addTypeSpec(ctx, it.t1)
         }
     }
     val typeArgs : Parser<MatchProcessor> by LT * separated(typeArg, COMMA, true) * GT map {
@@ -127,16 +134,21 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
         }
     }
 
-    val typeParam by typeRef * optional(-EXTENDS * separated(typeSpec, AMPERSAND)) map {
+    // Generic parameter definition
+    val typeParam by (typeRef or QUESTION) * optional(-(EXTENDS or SUPER) * separated(typeSpec, AMPERSAND)) map {
         (typeRef, typeSpecs) ->
         MatchProcessor { ctx ->
-            ctx.addSymbol(typeRef, ParseSymbolType.SYMREF)
-            typeSpecs?.terms?.forEach { addTypeSpec(ctx, it) }
+            val types = typeSpecs?.terms?.map { it.block(ctx) }
+            val type = types?.firstOrNull()?.type
+            //val type = typeSpecs?.terms?.firstOrNull()?.first?.text
+            if (typeRef.type != QUESTION)
+                ctx.addSymbol(typeRef, ParseSymbolType.TYPEPARAM, type = type)
+            //typeSpecs?.terms?.forEach { addTypeSpec(ctx, it) }
         }
     }
-    val typeParams by LT * separated(typeParam, COMMA, true) * GT map {
+    val typeParams by -LT * separated(typeParam, COMMA, true) * -GT map {
         MatchProcessor { ctx ->
-
+            it.terms.forEach { it.block(ctx) }
         }
     }
 
@@ -171,8 +183,8 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
     val extendsClause by optional(-EXTENDS * separated(typeSpec, COMMA)) * optional(-IMPLEMENTS * separated(typeSpec, COMMA)) map {
         (extends, implements) ->
         MatchProcessor { ctx ->
-            extends?.terms?.forEach { addTypeSpec(ctx, it) }
-            implements?.terms?.forEach { addTypeSpec(ctx, it) }
+            extends?.terms?.forEach { it.block(ctx) } //addTypeSpec(ctx, it) }
+            implements?.terms?.forEach { it.block(ctx) } //addTypeSpec(ctx, it) }
         }
     }
     val throwsClause by optional(-THROWS * separated(typeRef, COMMA)) map {
@@ -184,11 +196,12 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
     val paramDef by zeroOrMore(annotationRef) * -optional(MODIFIER) * typeSpec * varName map { (annotations, typeSpec, varName) ->
         MatchProcessor { ctx ->
             annotations.forEach { it.block(ctx) }
-            val type = ctx.addSymbol(typeSpec.first, ParseSymbolType.TYPEREF).apply { arrayDim = typeSpec.second }
+            //val type = ctx.addSymbol(typeSpec.first, ParseSymbolType.TYPEREF).apply { arrayDim = typeSpec.second }
+            val type = typeSpec.block(ctx)
             ctx.addSymbol(varName.first, ParseSymbolType.VARIABLE, "", type.name).apply {
                 arrayDim = varName.second + type.arrayDim
             }
-            typeSpec.third?.block?.invoke(ctx)
+            //typeSpec.third?.block?.invoke(ctx)
         }
     }
     val paramDefs by -O_PAREN * separated(paramDef, COMMA, true) * -C_PAREN map {
@@ -206,7 +219,8 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
     }
     val castExp by -O_PAREN * typeSpec * -C_PAREN * parser(::expression) map {
         MatchProcessor {ctx->
-            addTypeSpec(ctx, it.t1)
+            //addTypeSpec(ctx, it.t1)
+            it.t1.block(ctx)
             it.t2.block(ctx)
         }
     }
@@ -231,14 +245,16 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
     }
     val loopExp by typeSpec * varName * -COLON * parser(::expression) map {
         MatchProcessor { ctx ->
-            val type = addTypeSpec(ctx, it.t1)
+            //val type = addTypeSpec(ctx, it.t1)
+            val type = it.t1.block(ctx)
             ctx.addSymbol(it.t2.first, ParseSymbolType.VARIABLE, "", type.name).apply { arrayDim = it.t2.second }
             it.t3.block(ctx)
         }
     }
     val initExp by typeSpec * varNames * -ASSIGN * parser(::expression) map {
         MatchProcessor { ctx ->
-            val type = addTypeSpec(ctx, it.t1)
+            //val type = addTypeSpec(ctx, it.t1)
+            val type = it.t1.block(ctx)
             it.t2.forEach {
                 ctx.addSymbol(it.first, ParseSymbolType.VARIABLE, "", type.name).apply { arrayDim = it.second }
             }
@@ -291,25 +307,25 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
         }
     }
 
-    val TypeDef by zeroOrMore(annotationRef) * MODIFIERS * DECLARE * typeName * optional(typeArgs) * extendsClause * -O_BRACE map {
-        (annotations, mods, declare, name, generics, extends) ->
+    val TypeDef by zeroOrMore(annotationRef) * MODIFIERS * DECLARE * typeName * optional(typeParams) * extendsClause * -O_BRACE map {
+        (annotations, _, declare, name, generics, extends) ->
         MatchProcessor { ctx ->
             annotations.forEach { ann -> ann.block(ctx) }
             val symType = when(declare.text) {
                 "class" -> ParseSymbolType.CLASS
                 "interface" -> ParseSymbolType.INTERFACE
                 "enum" -> ParseSymbolType.ENUM
-                "@interface" -> ParseSymbolType.INTERFACE
+                "@interface" -> ParseSymbolType.ANNOTATION
                 else -> ParseSymbolType.OBJECT
             }
-            generics?.block?.invoke(ctx)
             ctx.addSymbol(name, symType, createScope = true)
+            generics?.block?.invoke(ctx)
             extends.block(ctx)
-            ctx.addThis(name, symType)
+            ctx.addThis(name)
         }
     }
 
-    val ConstructorDef by zeroOrMore(annotationRef) * MODIFIERS * constructorName * paramDefs * throwsClause * O_BRACE map { (annotations, mods, name, params, throws) ->
+    val ConstructorDef by zeroOrMore(annotationRef) * MODIFIERS * constructorName * paramDefs * throwsClause * O_BRACE map { (annotations, _, name, params, throws) ->
         MatchProcessor { ctx ->
             annotations.forEach { it.block(ctx) }
             ctx.addSymbol(name, ParseSymbolType.CONSTRUCTOR, createScope = true)
@@ -322,10 +338,11 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
         (annotations, _, typeParams, typespec, name, params, throws, term) ->
         MatchProcessor { ctx ->
             annotations.forEach { it.block(ctx) }
-            typeParams?.block?.invoke(ctx)
             throws.block(ctx)
-            val type = addTypeSpec(ctx, typespec)
+            //val type = addTypeSpec(ctx, typespec)
+            val type = typespec.block(ctx)
             ctx.addSymbol(name, ParseSymbolType.METHOD, "", type.name, createScope = true)
+            typeParams?.block?.invoke(ctx)
             params.block(ctx)
             if (term.type == SEMI) ctx.endScope(term)
         }
@@ -344,8 +361,9 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
         (annotations, _, typespec, names, expression, term) ->
         MatchProcessor { ctx ->
             annotations.forEach { it.block(ctx) }
-            typespec.third?.block?.invoke(ctx)
-            val type = ctx.addSymbol(typespec.first, ParseSymbolType.TYPEREF).apply { arrayDim = typespec.second }
+            //typespec.third?.block?.invoke(ctx)
+            //val type = ctx.addSymbol(typespec.first, ParseSymbolType.TYPEREF).apply { arrayDim = typespec.second }
+            val type = typespec.block(ctx)
             val symbolType = if (ctx.inType()) ParseSymbolType.FIELD else ParseSymbolType.VARIABLE
             names.terms.forEach { ctx.addSymbol(it.first, symbolType, "", type.name).apply { arrayDim = it.second } }
             expression?.block?.invoke(ctx)

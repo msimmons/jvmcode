@@ -10,7 +10,7 @@ import net.contrapt.jvmcode.model.LanguageCompiler
 import net.contrapt.jvmcode.service.CompileService
 import java.lang.IllegalStateException
 
-class RequestCompile(vertx: Vertx, val compileService: CompileService) : AbstractHandler(vertx) {
+class RequestCompile(vertx: Vertx, val compileService: CompileService) : AbstractHandler(vertx, true) {
 
     val logger = LoggerFactory.getLogger(javaClass)
 

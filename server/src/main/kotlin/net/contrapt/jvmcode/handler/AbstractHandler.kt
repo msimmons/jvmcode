@@ -29,7 +29,7 @@ abstract class AbstractHandler(val vertx: Vertx, val blocking: Boolean = false) 
     private fun handleBlocking(message: Message<JsonObject>) {
         vertx.executeBlocking(handler(message), false, Handler { ar ->
             if (ar.failed()) {
-                logger.error(ar.cause())
+                logger.error("handleBlocking", ar.cause())
                 message.fail(500, ar.cause().message)
             } else {
                 message.reply(ar.result())
@@ -45,7 +45,7 @@ abstract class AbstractHandler(val vertx: Vertx, val blocking: Boolean = false) 
             val result = processMessage(message)
             message.reply(result)
         } catch (e: Exception) {
-            logger.error(e)
+            logger.error("handleNonBlocking", e)
             message.fail(500, e.message)
         }
     }

@@ -49,6 +49,33 @@ class JavaParserTest {
     }
 
     @Test
+    fun testGeneric() {
+        val generics = listOf(
+            "T",
+            "?",
+            "? extends String",
+            "T extends String",
+            "? super Integer & Number",
+            "T super Integer & Number",
+            "? extends List<String>",
+            "T extends Comparable<? super T>"
+        )
+        val request = JavaParseRequest(file = "", text = "")
+        val parser = JavaParser()
+        generics.forEach {
+            val tokens = parser.tokenizer.tokenize(it)
+            val result = parser.typeParam.tryParseToEnd(tokens)
+            when (result) {
+                is Parsed -> {}
+                else -> {
+                    val t = tokens.joinToString { it.toString() }
+                    result shouldBe "$it -> \n   $t"
+                }
+            }
+        }
+    }
+
+    @Test
     fun testJava1() {
         val path = javaClass.classLoader?.getResource("Test1.javasource")?.path ?: ""
         val text = File(path).readText()

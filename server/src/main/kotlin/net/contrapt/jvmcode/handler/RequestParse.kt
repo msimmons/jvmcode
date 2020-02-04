@@ -7,7 +7,7 @@ import net.contrapt.jvmcode.language.JavaParseRequest
 import net.contrapt.jvmcode.service.ParseService
 import net.contrapt.jvmcode.model.LanguageParser
 
-class RequestParse(vertx: Vertx, val parseService: ParseService) : AbstractHandler(vertx) {
+class RequestParse(vertx: Vertx, val parseService: ParseService) : AbstractHandler(vertx, true) {
 
     override fun processMessage(message: Message<JsonObject>): JsonObject {
         val request = message.body().mapTo(JavaParseRequest::class.java)

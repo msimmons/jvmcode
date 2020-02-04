@@ -34,8 +34,8 @@ data class ParseContext(
             parent = scopeId()
         }
         add(symbol)
-        val padding = "  ".repeat(scopes.size)
-        println("$padding:$token:$symbol")
+        //val padding = "  ".repeat(scopes.size)
+        //println("$padding:$token:$symbol")
         if (createScope) {
             //println("Start Scope: ${symbol}")
             scopes.push(symbol)
@@ -43,14 +43,14 @@ data class ParseContext(
         return symbol
     }
 
-    fun addThis(token: TokenMatch, symbolType: ParseSymbolType) {
+    fun addThis(token: TokenMatch) {
         val name = "this"
         val start = token.position
         val end = token.position
         val id = nextId()
         val symbol = JavaParseSymbol(id, name, "", JavaParseLocation(start, end)).apply {
             this.type = token.text
-            this.symbolType = symbolType
+            this.symbolType = ParseSymbolType.THIS
             parent = scopeId()
         }
         add(symbol)

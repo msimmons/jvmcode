@@ -10,7 +10,7 @@ import net.contrapt.jvmcode.service.model.ProjectUpdateRequest
  * Handles message from a user supplied project (usually when restoring a workspace) and publishes
  * results back
  */
-class UpdateUserProject(vertx: Vertx, val projectService: ProjectService) : AbstractHandler(vertx) {
+class UpdateUserProject(vertx: Vertx, val projectService: ProjectService) : AbstractHandler(vertx, true) {
 
     override fun processMessage(message: Message<JsonObject>): JsonObject {
         val request = message.body().mapTo(ProjectUpdateRequest::class.java)

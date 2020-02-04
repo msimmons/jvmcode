@@ -9,9 +9,9 @@ import net.contrapt.jvmcode.service.ProjectService
 class JarEntry(vertx: Vertx, val projectService: ProjectService) : AbstractHandler(vertx, true) {
 
     override fun processMessage(message: Message<JsonObject>): JsonObject {
-        val jarEntryData = message.body().getJsonObject("jarEntry").mapTo(JarEntryData::class.java)
+        val fqcn = message.body().getString("fqcn")
         val jarFile = message.body().getString("jarFile")
-        val resolved = projectService.getJarEntryContents(jarFile, jarEntryData.fqcn)
+        val resolved = projectService.getJarEntryContents(jarFile, fqcn)
         return JsonObject.mapFrom(resolved)
     }
 

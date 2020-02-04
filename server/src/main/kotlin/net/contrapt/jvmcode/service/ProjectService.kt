@@ -1,5 +1,6 @@
 package net.contrapt.jvmcode.service
 
+import io.vertx.core.*
 import io.vertx.core.logging.LoggerFactory
 import javassist.bytecode.ClassFile
 import net.contrapt.jvmcode.model.*
@@ -47,9 +48,11 @@ class ProjectService(
     init {
         javaVersion = getVersion()
         jdkSource =  JDKDependencySource.create(config, javaHome, javaVersion)
-        jdkSource.dependencies.forEach {
-            indexJarData(it)
-            indexSourceJarData(it)
+        jdkSource.dependencies.associate { dep ->
+            indexJarData(dep)
+            dep.sourceFileName to dep
+        }.forEach {
+            indexSourceJarData(it.value)
         }
         userSource = UserDependencySource()
     }
@@ -123,8 +126,7 @@ class ProjectService(
             userPath.sourceDirs.addAll(it.sourceDirs)
         }
         userSource.dependencies.forEach {
-            indexJarData(it)
-            indexSourceJarData(it)
+            indexDependency(it)
         }
     }
 
@@ -141,8 +143,7 @@ class ProjectService(
         externalPaths.addAll(request.paths)
         externalSource.filter { it.source == request.source }.forEach {
             it.dependencies.forEach {
-                indexJarData(it)
-                indexSourceJarData(it)
+                indexDependency(it)
             }
         }
     }
@@ -151,8 +152,20 @@ class ProjectService(
         dependencyMap.getOrPut(entry.fqcn, { mutableSetOf() }).add(entry to dependencyData)
     }
 
+    private fun indexDependency(dep: DependencyData) {
+        Vertx.currentContext().apply {
+            executeBlocking( Handler<Promise<Unit>> { f -> indexJarData(dep) }, false, Handler { ar ->
+                if (ar.failed()) throw ar.cause()
+            })
+            executeBlocking( Handler<Promise<Unit>> { f -> indexSourceJarData(dep) }, false, Handler { ar ->
+                if (ar.failed()) throw ar.cause()
+            })
+        }
+    }
+
     fun indexJarData(dependencyData: DependencyData) : JarData {
         if (jarDataMap.containsKey(dependencyData.fileName)) return jarDataMap[dependencyData.fileName]!!
+        logger.info("Indexing ${dependencyData.fileName}")
         val pkgMap = mutableMapOf<String, MutableSet<JarEntryData>>()
         val isJmod = dependencyData.fileName.endsWith(".jmod")
         val jarFile = runCatching { JarFile(dependencyData.fileName) }
@@ -179,6 +192,7 @@ class ProjectService(
             .toSortedSet()
         val jarData = JarData(dependencyData.fileName, packages)
         jarDataMap[dependencyData.fileName] = jarData
+        logger.info("Finished indexing ${dependencyData.fileName}")
         return jarData
     }
 
@@ -187,6 +201,7 @@ class ProjectService(
         if (jarFileName.isNullOrEmpty()) return
         val jarFile = runCatching { JarFile(jarFileName) }
         if (jarFile.isFailure) return
+        logger.info("Indexing ${jarFileName}")
         jarFile.getOrThrow().use {
             it.entries().asSequence().forEach { entry ->
                 val ed = SourceEntryData.create(entry.name, jarFileName)
@@ -194,6 +209,7 @@ class ProjectService(
                     .add(ed to dependencyData)
             }
         }
+        logger.info("Finished indexing ${jarFileName}")
     }
 
     private fun createEntryData(entry: JarEntry, isJmod: Boolean) : JarEntryData {

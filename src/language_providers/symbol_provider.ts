@@ -54,18 +54,21 @@ export class JvmSymbolProvider implements vscode.DocumentSymbolProvider, vscode.
 
     private getSymbolKind(symbol: ParseSymbol) : vscode.SymbolKind {
         switch(symbol.symbolType) {
-            case "PACKAGE": return vscode.SymbolKind.Namespace
+            case "PACKAGE": return vscode.SymbolKind.Package
             case "IMPORT": return vscode.SymbolKind.Module
             case "CLASS": return vscode.SymbolKind.Class
             case "INTERFACE": return vscode.SymbolKind.Interface
             case "ENUM": return vscode.SymbolKind.Enum
+            case "ANNOTATION": return vscode.SymbolKind.Class
             case "CONSTRUCTOR": return vscode.SymbolKind.Constructor
             case "METHOD": return vscode.SymbolKind.Method
             case "FIELD": return vscode.SymbolKind.Field
+            case "THIS": return vscode.SymbolKind.Field
             case "VARIABLE": return vscode.SymbolKind.Variable
             case "BLOCK": return vscode.SymbolKind.Namespace
-            case "CONTROL": return vscode.SymbolKind.Namespace
-            case "TYPEREF": return vscode.SymbolKind.Class
+            case "CONTROL": return vscode.SymbolKind.Operator
+            case "TYPEREF": return vscode.SymbolKind.Constant
+            case "TYPEPARAM": return vscode.SymbolKind.TypeParameter
             default: return vscode.SymbolKind.Object
         }
     }

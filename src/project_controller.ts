@@ -1,7 +1,7 @@
 'use strict';
 
 import * as vscode from 'vscode'
-import { JarEntryData, JvmProject, ClassData, ClassEntryData } from "server-models"
+import { JarEntryData, JvmProject, ClassData, ClassEntryData, SourceEntryData } from "server-models"
 import { ProjectTreeProvider } from './project_tree_provider';
 import { JarContentProvider } from './jar_content_provider';
 import { ProjectService } from './project_service';
@@ -13,6 +13,7 @@ import { ConfigService } from './config_service';
 import { url } from 'inspector';
 import { URL } from 'url';
 import { encode } from 'punycode';
+import { performance } from 'perf_hooks';
 
 /**
 * Responsible for managing various views related to a project
@@ -29,6 +30,7 @@ export class ProjectController {
     private pathRootNode: PathRootNode
     private depedencyRootNode: DependencyRootNode
     private classpath: string
+    private entryNodeMap: Map<string, JarEntryNode[]> = new Map()// Lazy cache of FQCN to entryNode
     
     public constructor(context: vscode.ExtensionContext, service: ProjectService) {
         this.context = context
@@ -147,13 +149,39 @@ export class ProjectController {
     * for class resources
     * @param entryNode 
     */
-    private async resolveJarEntryData(entryNode: JarEntryNode) : Promise<JarEntryData> {
+    private async resolveJarEntryNode(entryNode: JarEntryNode) : Promise<JarEntryData> {
         switch (entryNode.data.type) {
             case 'CLASS':
-                if (!(entryNode.data as ClassEntryData).srcEntry) return this.service.getJarEntryContent(entryNode)
+                if (!(entryNode.data as ClassEntryData).srcEntry) {
+                    return this.service.resolveJarEntryData(entryNode.data.fqcn, entryNode.dependency.fileName)
+                }
             default:
                 return entryNode.data
         }
+    }
+
+    private getEntryUri(entry: JarEntryNode) : vscode.Uri {
+        let srcEntry : SourceEntryData = (entry.data.type === 'CLASS') ? (entry.data as ClassEntryData).srcEntry : undefined
+        let path = srcEntry ? srcEntry.path : entry.data.path
+        let jarFile = srcEntry ? srcEntry.jarFile : entry.dependency.fileName
+        let authority = dependencyLabel(entry.dependency)
+        return vscode.Uri.file(path).with({scheme: this.contentProvider.scheme, authority: authority, fragment: jarFile})
+    }
+
+    async getFqcnUri(fqcn: string) : Promise<vscode.Uri> {
+        let entries = this.entryNodeMap.get(fqcn)
+        if (!entries) {
+            entries = (await this.getJarEntryNodes()).filter(entry => entry.data.fqcn === fqcn)
+            this.entryNodeMap.set(fqcn, entries)
+        }
+        if (!entries.length) return undefined
+        let entry = entries[0]
+        let data = await this.resolveJarEntryNode(entry)
+        entry.data = data
+        let uri = this.getEntryUri(entry)
+        let classData = (data.type === 'CLASS') ? (data as ClassEntryData).classData : undefined
+        if (classData) this.contentProvider.addClassData(uri, classData)
+        return uri
     }
     
     /**
@@ -162,21 +190,9 @@ export class ProjectController {
     * @param entryNode 
     */
     private openJarEntryContent(entryNode: JarEntryNode) {
-        let jarFile = undefined
-        let path = undefined
-        let classData = undefined
-        if (entryNode.data.type === 'CLASS') {
-            let d = entryNode.data as ClassEntryData
-            classData = d.classData
-            if (d.srcEntry) {
-                jarFile = d.srcEntry.jarFile
-                path = d.srcEntry.path
-            }
-        }
-        if (!jarFile) jarFile = entryNode.dependency.fileName
-        if (!path) path = entryNode.data.path
-        let authority = dependencyLabel(entryNode.dependency)
-        let uri = vscode.Uri.file(path).with({scheme: this.contentProvider.scheme, authority: authority, fragment: jarFile})
+        // Cache by fqcn? but its not a list
+        let classData = (entryNode.data.type === 'CLASS') ? (entryNode.data as ClassEntryData).classData : undefined
+        let uri = this.getEntryUri(entryNode)
         if (classData) this.contentProvider.addClassData(uri, classData)
         vscode.workspace.openTextDocument(uri).then((doc) => {
             let options : vscode.TextDocumentShowOptions = {preview: false}
@@ -223,7 +239,7 @@ export class ProjectController {
     */
     public openJarEntry(entryNode: JarEntryNode) {
         vscode.window.withProgress({ location: vscode.ProgressLocation.Window, title: entryNode.name}, (progess) => {
-            return this.resolveJarEntryData(entryNode).then((reply) => {
+            return this.resolveJarEntryNode(entryNode).then((reply) => {
                 entryNode.data = reply
                 this.openJarEntryContent(entryNode)
             }).catch(error => {

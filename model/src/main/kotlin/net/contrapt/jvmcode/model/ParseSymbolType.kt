@@ -7,6 +7,7 @@ enum class ParseSymbolType(val isDef: Boolean = false, val isMember: Boolean = f
     CONTROL,
     CLASS(true),
     INTERFACE(true),
+    ANNOTATION(true),
     ENUM(true),
     OBJECT(true),
     CONSTRUCTOR(true),
@@ -15,5 +16,7 @@ enum class ParseSymbolType(val isDef: Boolean = false, val isMember: Boolean = f
     VARIABLE(true),
     TYPEREF, // Type reference
     SYMREF, // Variable reference
+    TYPEPARAM, // A generic type parameter <K,V>
+    THIS, // special field for this
     LITERAL // A literal value
 }

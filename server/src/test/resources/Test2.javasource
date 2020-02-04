@@ -97,7 +97,7 @@ public class TryIt extends Object implements Serializable, Comparable {
     @MethodAnnotation
     public abstract <T extends String<T>> int genericMethod(Class<T> clazz[]) throws IllegalStateException;
 
-    static inner class AnInnerOne<List<String>> {
+    static inner class AnInnerOne<T extends List<? super Integer>> {
        public AnInnerOne(@JsonName("foo") int foo) {
 
             i == 3;
@@ -157,6 +157,15 @@ enum MyEnum {
     TWO,
     TRHEE
 }
+
+@SuppressWarnings("unchecked")
+    public static <T extends Comparable<? super T>>
+    void parallelSort(T[] a, int fromIndex, int toIndex) {
+    }
+
+private Class(ClassLoader loader, Class<?> arrayComponentType) {
+}
+
 /*
 null
 */
