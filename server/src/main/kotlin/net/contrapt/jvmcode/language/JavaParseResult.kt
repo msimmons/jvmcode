@@ -8,8 +8,8 @@ data class JavaParseResult(
         override val name: String = "vsc-java",
         override val file: String
 ) : ParseResult {
-    override var  pkg: ParseSymbol? = null
-    override val imports: MutableList<ParseSymbol> = mutableListOf()
-    override val symbols: MutableList<ParseSymbol> = mutableListOf()
+    override var  pkg: JavaParseSymbol? = null
+    override var imports: MutableList<JavaParseSymbol> = mutableListOf()
+    override var symbols: MutableList<JavaParseSymbol> = mutableListOf()
     var parseTime = 0L
 }

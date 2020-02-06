@@ -1,6 +1,7 @@
 package net.contrapt.jvmcode.language
 
 import com.github.h0tk3y.betterParse.lexer.TokenMatch
+import net.contrapt.jvmcode.model.ParseLocation
 import net.contrapt.jvmcode.model.ParseSymbolType
 import java.util.*
 
@@ -28,7 +29,7 @@ data class ParseContext(
         val start = token.position
         val end = start + name.length - 1
         val id = nextId()
-        val symbol = JavaParseSymbol(id, name, classifier, JavaParseLocation(start, end)).apply {
+        val symbol = JavaParseSymbol(id, name, classifier, ParseLocation(start, end)).apply {
             this.type = type ?: name
             this.symbolType = symbolType
             parent = scopeId()
@@ -48,7 +49,7 @@ data class ParseContext(
         val start = token.position
         val end = token.position
         val id = nextId()
-        val symbol = JavaParseSymbol(id, name, "", JavaParseLocation(start, end)).apply {
+        val symbol = JavaParseSymbol(id, name, "", ParseLocation(start, end)).apply {
             this.type = token.text
             this.symbolType = ParseSymbolType.THIS
             parent = scopeId()
@@ -61,7 +62,7 @@ data class ParseContext(
         val start = token.position
         val end = token.position
         val id = nextId()
-        val symbol = JavaParseSymbol(id, name, "", JavaParseLocation(start, end)).apply {
+        val symbol = JavaParseSymbol(id, name, "", ParseLocation(start, end)).apply {
             this.type = token.text
             this.symbolType = symbolType
             parent = scopeId()
@@ -77,7 +78,7 @@ data class ParseContext(
             val end = start + n.length - 1
             offset = offset + n.length + 1
             val id = nextId()
-            val symbol = JavaParseSymbol(id, n, "", JavaParseLocation(start, end)).apply {
+            val symbol = JavaParseSymbol(id, n, "", ParseLocation(start, end)).apply {
                 this.type = type ?: name
                 this.symbolType = ParseSymbolType.SYMREF
                 parent = scopeId()
@@ -97,7 +98,7 @@ data class ParseContext(
     fun endScope(token: TokenMatch) {
         if (!scopes.empty()) {
             val scope = scopes.pop()
-            scope.scopeEnd = JavaParseLocation(token.position, token.position)
+            scope.scopeEnd = ParseLocation(token.position, token.position)
             //println("End Scope: ${scope}")
         }
     }

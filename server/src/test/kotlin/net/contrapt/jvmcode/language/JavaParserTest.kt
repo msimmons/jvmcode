@@ -1,14 +1,25 @@
 package net.contrapt.jvmcode.language
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.github.h0tk3y.betterParse.parser.Parsed
 import com.github.h0tk3y.betterParse.parser.tryParseToEnd
 import io.kotlintest.matchers.numerics.shouldBeLessThanOrEqual
+import io.kotlintest.matchers.string.beEqualIgnoringCase
+import io.kotlintest.matchers.string.shouldMatch
+import io.kotlintest.should
 import io.kotlintest.shouldBe
 import io.vertx.core.json.Json
+import io.vertx.core.json.jackson.DatabindCodec
 import org.junit.jupiter.api.Test
 import java.io.File
+import kotlin.math.exp
 
 class JavaParserTest {
+
+    val objectMapper = ObjectMapper().apply {
+        registerModule(KotlinModule())
+    }
 
     @Test
     fun testExpressions() {
@@ -78,42 +89,63 @@ class JavaParserTest {
     @Test
     fun testJava1() {
         val path = javaClass.classLoader?.getResource("Test1.javasource")?.path ?: ""
+        val json = javaClass.classLoader?.getResource("Test1.json")?.readText() ?: ""
         val text = File(path).readText()
         val request = JavaParseRequest(file = path, text = text)
         val parser = JavaParser()
         val result = parser.parse(request)
+        val expected = objectMapper.readValue(json, JavaParseResult::class.java)
+        compareResults(result, expected)
+        //File("Test1.json").writeText(Json.encodePrettily(result))
         result.parseTime shouldBeLessThanOrEqual 1000
     }
 
     @Test
     fun testJava2() {
         val path = javaClass.classLoader?.getResource("Test2.javasource")?.path ?: ""
+        val json = javaClass.classLoader?.getResource("Test2.json")?.readText() ?: ""
         val text = File(path).readText()
         val request = JavaParseRequest(file = path, text = text)
         val parser = JavaParser()
+        val expected = objectMapper.readValue(json, JavaParseResult::class.java)
         val result = parser.parse(request)
+        compareResults(result, expected)
+        //File("Test2.json").writeText(Json.encodePrettily(result))
         result.parseTime shouldBeLessThanOrEqual 1000
     }
 
     @Test
     fun testJava3() {
         val path = javaClass.classLoader?.getResource("Test3.javasource")?.path ?: ""
+        val json = javaClass.classLoader?.getResource("Test3.json")?.readText() ?: ""
         val text = File(path).readText()
         val request = JavaParseRequest(file = path, text = text)
         val parser = JavaParser()
         val result = parser.parse(request)
-        println(Json.encodePrettily(result.symbols))
+        val expected = objectMapper.readValue(json, JavaParseResult::class.java)
+        compareResults(result, expected)
+        //File("Test3.json").writeText(Json.encodePrettily(result))
         result.parseTime shouldBeLessThanOrEqual 1000
     }
 
     @Test
     fun testJava4() {
         val path = javaClass.classLoader?.getResource("Test4.javasource")?.path ?: ""
+        val json = javaClass.classLoader?.getResource("Test4.json")?.readText() ?: ""
         val text = File(path).readText()
         val request = JavaParseRequest(file = path, text = text)
         val parser = JavaParser()
         val result = parser.parse(request)
-        println(Json.encodePrettily(result.symbols))
+        val expected = objectMapper.readValue(json, JavaParseResult::class.java)
+        compareResults(result, expected)
+        //File("Test4.json").writeText(Json.encodePrettily(result))
         result.parseTime shouldBeLessThanOrEqual 1000
+    }
+
+    fun compareResults(actual: JavaParseResult, expected: JavaParseResult) {
+        actual.symbols.size shouldBe expected.symbols.size
+        actual.symbols.forEach {
+            it shouldBe expected.symbols[it.id]
+        }
     }
 }

@@ -70,7 +70,7 @@ class ParseService(val symbolRepository: SymbolRepository) {
         else return "${typeDefName(symbols[symbol.parent], symbols)}.${symbol.name}"
     }
 
-    private fun resolveSymbolRef(symbol: ParseSymbol, symbols: MutableList<ParseSymbol>) {
+    private fun resolveSymbolRef(symbol: ParseSymbol, symbols: MutableList<out ParseSymbol>) {
         val caller = when (val c = symbol.caller) {
             null -> null
             else -> symbols[c]
