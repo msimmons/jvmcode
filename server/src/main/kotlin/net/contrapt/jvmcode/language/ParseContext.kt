@@ -1,18 +1,28 @@
 package net.contrapt.jvmcode.language
 
 import com.github.h0tk3y.betterParse.lexer.TokenMatch
+import io.vertx.core.logging.LoggerFactory
 import net.contrapt.jvmcode.model.ParseLocation
 import net.contrapt.jvmcode.model.ParseSymbolType
 import java.util.*
 
 data class ParseContext(
-    val request: JavaParseRequest,
-    val result: JavaParseResult = JavaParseResult(file = request.file),
-    var parenCount: Int = 0,
-    var inAssignment: Boolean = false,
-    val tokens: MutableList<TokenMatch> = mutableListOf(),
-    val scopes: Stack<JavaParseSymbol> = Stack()
+    val request: JavaParseRequest
 ) {
+    val logger = LoggerFactory.getLogger(javaClass)
+
+    val result: JavaParseResult = JavaParseResult(file = request.file)
+    var parenCount: Int = 0
+    var braceCount: Int = 0
+    var inAssignment: Boolean = false
+    val tokens: MutableList<TokenMatch> = mutableListOf()
+    val scopes: Stack<JavaParseSymbol> = Stack()
+    var pendingScope: Boolean = false
+
+    fun logMatch(name: String, token: TokenMatch? = null) {
+        val t = token ?: tokens.firstOrNull()
+        logger.debug("Match[${t?.row}] $name (${scopes.size}")
+    }
 
     private fun nextId() = result.symbols.size
     private fun scopeId() = if (scopes.empty()) -1 else scopes.peek().id
@@ -24,22 +34,28 @@ data class ParseContext(
         }
     }
 
+    fun addBlock(token: TokenMatch) {
+        val isScope = !pendingScope
+        pendingScope = false
+        //println("Adding block isScope=$isScope at ${token.row}")
+        addSymbol(token, ParseSymbolType.BLOCK, "", "", createScope = isScope)
+        pendingScope = false
+    }
+
     fun addSymbol(token: TokenMatch, symbolType: ParseSymbolType, classifier: String = "", type: String? = null, createScope: Boolean = false): JavaParseSymbol {
         val name = token.text
         val start = token.position
         val end = start + name.length - 1
         val id = nextId()
-        val symbol = JavaParseSymbol(id, name, classifier, ParseLocation(start, end)).apply {
-            this.type = type ?: name
-            this.symbolType = symbolType
-            parent = scopeId()
+        val symbol = JavaParseSymbol(scopeId(), id, name, type ?: name, symbolType, ParseLocation(start, end)).apply {
+            this.classifier = classifier
+            this.row = token.row
         }
         add(symbol)
-        //val padding = "  ".repeat(scopes.size)
-        //println("$padding:$token:$symbol")
         if (createScope) {
             //println("Start Scope: ${symbol}")
             scopes.push(symbol)
+            //pendingScope = true
         }
         return symbol
     }
@@ -49,23 +65,8 @@ data class ParseContext(
         val start = token.position
         val end = token.position
         val id = nextId()
-        val symbol = JavaParseSymbol(id, name, "", ParseLocation(start, end)).apply {
-            this.type = token.text
-            this.symbolType = ParseSymbolType.THIS
-            parent = scopeId()
-        }
-        add(symbol)
-    }
-
-    fun addSuper(token: TokenMatch, symbolType: ParseSymbolType) {
-        val name = "super"
-        val start = token.position
-        val end = token.position
-        val id = nextId()
-        val symbol = JavaParseSymbol(id, name, "", ParseLocation(start, end)).apply {
-            this.type = token.text
-            this.symbolType = symbolType
-            parent = scopeId()
+        val symbol = JavaParseSymbol(scopeId(), id, name, token.text, ParseSymbolType.THIS, ParseLocation(start, end)).apply {
+            this.row = token.row
         }
         add(symbol)
     }
@@ -73,24 +74,22 @@ data class ParseContext(
     fun addSymbolRef(token: TokenMatch) {
         val names = token.text
         var offset = 0
-        names.split(".").forEachIndexed { i, n ->
+        names.split(".").forEachIndexed { i, name ->
             val start = token.position + offset
-            val end = start + n.length - 1
-            offset = offset + n.length + 1
+            val end = start + name.length - 1
+            offset += name.length + 1
             val id = nextId()
-            val symbol = JavaParseSymbol(id, n, "", ParseLocation(start, end)).apply {
-                this.type = type ?: name
-                this.symbolType = ParseSymbolType.SYMREF
-                parent = scopeId()
+            val symbol = JavaParseSymbol(scopeId(), id, name, name, ParseSymbolType.SYMREF, ParseLocation(start, end)).apply {
                 caller = if (i == 0) null else id - 1
+                row = token.row
             }
-            //println("   ${token.text} $offset $symbol")
             add(symbol)
         }
     }
 
     private fun add(symbol: JavaParseSymbol) {
-        //println(symbol)
+        //val padding = "  ".repeat(scopes.size)
+        //println("$padding:[${tokens.last().row}]:$symbol")
         result.symbols.add(symbol)
         if (!scopes.empty()) scopes.peek().children.add(symbol.id)
     }
@@ -101,6 +100,10 @@ data class ParseContext(
             scope.scopeEnd = ParseLocation(token.position, token.position)
             //println("End Scope: ${scope}")
         }
+    }
+
+    fun setUnmatched() {
+        result.unmatched.add(tokens.first().row to tokens.last().row)
     }
 
     fun clear() {

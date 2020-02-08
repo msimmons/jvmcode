@@ -39,9 +39,9 @@ class ProjectServiceTest {
         val jarEntries = service.indexJarData(depData)
         jarEntries.packages.size shouldBe beGreaterThan(0)
         val resourceEntry = jarEntries.packages.first().entries.first()
-        service.getJarEntryContents(depData.fileName, resourceEntry.fqcn) shouldBe resourceEntry
+        service.resolveJarEntrySource(depData.fileName, resourceEntry.fqcn) shouldBe resourceEntry
         val classEntry = jarEntries.packages.first { it.name == "java.lang" }.entries.first { it.type == JarEntryType.CLASS }
-        val javaEntry = service.getJarEntryContents(depData.fileName, classEntry.fqcn)
+        val javaEntry = service.resolveJarEntrySource(depData.fileName, classEntry.fqcn)
         if (File(depData.sourceFileName ?: "").exists()) {
             (javaEntry as ClassEntryData).srcEntry shouldNotBe null
         }
@@ -61,10 +61,10 @@ class ProjectServiceTest {
         val jarEntries = service.indexJarData(depData)
         jarEntries.packages.size shouldBe beGreaterThan(0)
         val resourceEntry = jarEntries.packages.first().entries.first()
-        val contents = service.getJarEntryContents(depData.fileName, resourceEntry.fqcn)
-        //contents shouldBe resourceEntry
+        val resolved = service.resolveJarEntrySource(depData.fileName, resourceEntry.fqcn)
+        resolved shouldBe resourceEntry
         val classEntry = jarEntries.packages.first { it.name == "java.lang" }.entries.first { it.type == JarEntryType.CLASS }
-        val javaEntry = service.getJarEntryContents(depData.fileName, classEntry.fqcn)
+        val javaEntry = service.resolveJarEntrySource(depData.fileName, classEntry.fqcn)
         if (File(depData.sourceFileName ?: "").exists()) {
             (javaEntry as ClassEntryData).srcEntry shouldNotBe null
         }

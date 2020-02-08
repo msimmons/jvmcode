@@ -12,4 +12,5 @@ data class JavaParseResult(
     override var imports: MutableList<JavaParseSymbol> = mutableListOf()
     override var symbols: MutableList<JavaParseSymbol> = mutableListOf()
     var parseTime = 0L
+    val unmatched = mutableListOf<Pair<Int, Int>>()
 }

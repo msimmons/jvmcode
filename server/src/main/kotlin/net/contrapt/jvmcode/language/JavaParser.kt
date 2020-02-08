@@ -6,13 +6,12 @@ import com.github.h0tk3y.betterParse.grammar.parser
 import com.github.h0tk3y.betterParse.lexer.TokenMatch
 import com.github.h0tk3y.betterParse.parser.Parsed
 import com.github.h0tk3y.betterParse.parser.Parser
+import com.github.h0tk3y.betterParse.parser.tryParseToEnd
 import io.vertx.core.logging.LoggerFactory
 import io.vertx.core.shareddata.Shareable
 import net.contrapt.jvmcode.model.LanguageParser
 import net.contrapt.jvmcode.model.ParseRequest
-import net.contrapt.jvmcode.model.ParseResult
 import net.contrapt.jvmcode.model.ParseSymbolType
-import java.io.File
 
 /**
  * array init
@@ -23,7 +22,7 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
     val logger = LoggerFactory.getLogger(javaClass)
 
     class MatchProcessor(val block: (ParseContext) -> Unit)
-    class MatchProducer(val block: (ParseContext) -> JavaParseSymbol)
+    class MatchProducer(val block: (ParseContext, Boolean) -> JavaParseSymbol)
 
     // Comments
     val BEGIN_COMMENT by token("/\\*")
@@ -51,6 +50,7 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
     val GT by token(">")
     val LT by token("<")
     val AMPERSAND by token("&")
+    val PIPE by token("\\|")
     val SUPER by token("super\\b")
 
     // Keywords
@@ -75,7 +75,14 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
 
     val GOTO by token("(break|continue)\\b")
     val LABEL by token("(case|default)\\b")
-    val CONTROL by token("(if|else|switch|for|while|do|try|catch|finally|default)\\b")
+    val IF_WHILE_SWITCH by token("(if|while|switch)\\b")
+    val ELSE by token("else\\b")
+    val DO by token("do\\b")
+    val FINALLY by token("finally\\b")
+    val FOR by token("for\\b")
+    val TRY by token("try\\b")
+    val CATCH by token("catch\\b")
+    val CONTROL by token("(default)\\b")
     val TYPE by token("(void|boolean|byte|char|short|int|long|double|float)\\b")
 
     val FALSE by token("false\\b")
@@ -93,7 +100,7 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
     val DOT by token("\\.")
     val OTHER by token(".")
 
-    val OPERATOR by INFIX_OPERATOR or QUESTION or GT or LT or COLON or AMPERSAND
+    val OPERATOR by INFIX_OPERATOR or GT or LT or AMPERSAND or PIPE
     val LITERAL by STRING_LITERAL or BIN_LITERAL or CHAR_LITERAL or HEX_LITERAL or NUM_LITERAL or OCT_LITERAL or UNICODE_LITERAL or FALSE or TRUE or NULL
     val MODIFIERS by zeroOrMore(MODIFIER or SYNCRONIZED)
 
@@ -110,26 +117,30 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
     val varNames by separated(varName, COMMA) map {
         it.terms
     }
+
     val typeSpec by (typeRef or QUESTION) * optional(parser(::typeArgs)) * zeroOrMore(O_BRACKET * C_BRACKET) map {
-        MatchProducer { ctx ->
+        MatchProducer { ctx, scope ->
             it.t2?.block?.invoke(ctx)
-            ctx.addSymbol(it.t1, ParseSymbolType.TYPEREF).apply { arrayDim = it.t3.size }
+            ctx.addSymbol(it.t1, ParseSymbolType.TYPEREF, createScope = scope).apply { arrayDim = it.t3.size }
         }
-        //Triple(it.t1, it.t3.size, it.t2)
     }
-    fun addTypeSpec(ctx: ParseContext, typeSpec: Triple<TokenMatch, Int, MatchProcessor?>) : JavaParseSymbol {
-        typeSpec.third?.block?.invoke(ctx)
-        return ctx.addSymbol(typeSpec.first, ParseSymbolType.TYPEREF).apply { arrayDim = typeSpec.second }
+
+    val symSpec by symRef * optional(parser(::typeArgs)) * zeroOrMore(O_BRACKET * C_BRACKET) map {
+        MatchProducer { ctx, scope ->
+            it.t2?.block?.invoke(ctx)
+            ctx.addSymbol(it.t1, ParseSymbolType.SYMREF, createScope = scope).apply { arrayDim = it.t3.size }
+        }
     }
 
     val typeArg by typeSpec * optional(-(EXTENDS or SUPER) * typeSpec) map {
         MatchProcessor { ctx ->
-            it.t1.block(ctx)
-            //addTypeSpec(ctx, it.t1)
+            it.t1.block(ctx, false)
         }
     }
+
     val typeArgs : Parser<MatchProcessor> by LT * separated(typeArg, COMMA, true) * GT map {
         MatchProcessor { ctx ->
+            ctx.logMatch("typeArgs", it.t1)
             it.t2.terms.forEach { it.block(ctx) }
         }
     }
@@ -138,14 +149,14 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
     val typeParam by (typeRef or QUESTION) * optional(-(EXTENDS or SUPER) * separated(typeSpec, AMPERSAND)) map {
         (typeRef, typeSpecs) ->
         MatchProcessor { ctx ->
-            val types = typeSpecs?.terms?.map { it.block(ctx) }
+            ctx.logMatch("typeArgs", typeRef)
+            val types = typeSpecs?.terms?.map { it.block(ctx, false) }
             val type = types?.firstOrNull()?.type
-            //val type = typeSpecs?.terms?.firstOrNull()?.first?.text
             if (typeRef.type != QUESTION)
                 ctx.addSymbol(typeRef, ParseSymbolType.TYPEPARAM, type = type)
-            //typeSpecs?.terms?.forEach { addTypeSpec(ctx, it) }
         }
     }
+
     val typeParams by -LT * separated(typeParam, COMMA, true) * -GT map {
         MatchProcessor { ctx ->
             it.terms.forEach { it.block(ctx) }
@@ -161,17 +172,20 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
             }
         }
     }
+
     val annotationArray by -O_BRACE * separated(annotationScalar, COMMA, true) * -C_BRACE map {
         MatchProcessor { ctx ->
             it.terms.forEach { it.block(ctx) }
         }
     }
+
     val annotationParam by (annotationScalar or annotationArray) * optional(-ASSIGN * (annotationScalar or annotationArray)) map {
         MatchProcessor { ctx ->
             it.t1.block(ctx)
             it.t2?.block?.invoke(ctx)
         }
     }
+
     val annotationRef: Parser<MatchProcessor> by -AT * (typeRef) * optional(-O_PAREN * separated(annotationParam, COMMA, true) * -C_PAREN) map {
         MatchProcessor { ctx ->
             it.t2?.terms?.forEach { param ->
@@ -180,13 +194,15 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
             ctx.addSymbol(it.t1, ParseSymbolType.TYPEREF)
         }
     }
+
     val extendsClause by optional(-EXTENDS * separated(typeSpec, COMMA)) * optional(-IMPLEMENTS * separated(typeSpec, COMMA)) map {
         (extends, implements) ->
         MatchProcessor { ctx ->
-            extends?.terms?.forEach { it.block(ctx) } //addTypeSpec(ctx, it) }
-            implements?.terms?.forEach { it.block(ctx) } //addTypeSpec(ctx, it) }
+            extends?.terms?.forEach { it.block(ctx, false) }
+            implements?.terms?.forEach { it.block(ctx, false) }
         }
     }
+
     val throwsClause by optional(-THROWS * separated(typeRef, COMMA)) map {
         MatchProcessor { ctx ->
             it?.terms?.forEach { ctx.addSymbol(it, ParseSymbolType.TYPEREF) }
@@ -197,13 +213,14 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
         MatchProcessor { ctx ->
             annotations.forEach { it.block(ctx) }
             //val type = ctx.addSymbol(typeSpec.first, ParseSymbolType.TYPEREF).apply { arrayDim = typeSpec.second }
-            val type = typeSpec.block(ctx)
+            val type = typeSpec.block(ctx, false)
             ctx.addSymbol(varName.first, ParseSymbolType.VARIABLE, "", type.name).apply {
                 arrayDim = varName.second + type.arrayDim
             }
             //typeSpec.third?.block?.invoke(ctx)
         }
     }
+
     val paramDefs by -O_PAREN * separated(paramDef, COMMA, true) * -C_PAREN map {
         MatchProcessor { ctx ->
             it.terms.forEach { it.block(ctx) }
@@ -211,93 +228,137 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
     }
 
     val literalExp by LITERAL map {MatchProcessor{}}
-    val varExp by (IDENT or TYPE) * zeroOrMore(-O_BRACKET * parser(::expression) * -C_BRACKET) map {
+
+    val arrayLiteral by -O_BRACE * separated(parser(::Expression), COMMA, true) * -C_BRACE map {
         MatchProcessor { ctx ->
+            ctx.logMatch("arrayLiteral")
+            it.terms.forEach { it.block(ctx) }
+        }
+    }
+
+    val varExp by (IDENT or TYPE) * zeroOrMore(-O_BRACKET * parser(::Expression) * -C_BRACKET) map {
+        MatchProcessor { ctx ->
+            ctx.logMatch("varExp")
             ctx.addSymbolRef(it.t1)
             it.t2.forEach { it.block(ctx) }
         }
     }
-    val castExp by -O_PAREN * typeSpec * -C_PAREN * parser(::expression) map {
+
+    val castExp by -O_PAREN * typeSpec * -C_PAREN * parser(::Expression) map {
         MatchProcessor {ctx->
-            //addTypeSpec(ctx, it.t1)
-            it.t1.block(ctx)
+            ctx.logMatch("castExp")
+            it.t1.block(ctx, false)
             it.t2.block(ctx)
         }
     }
-    val methodExp by IDENT * optional(typeArgs) * -O_PAREN * separated(parser(::expression), COMMA, true) * -C_PAREN map {
+
+    val methodRef by symRef * optional(typeArgs) * -O_PAREN * separated(parser(::Expression), COMMA, true) * -C_PAREN map {
         MatchProcessor{ctx->
+            ctx.logMatch("methodRef")
             ctx.addSymbolRef(it.t1)
             it.t2?.block?.invoke(ctx)
             it.t3.terms.forEach { it.block(ctx) }
         }
     }
-    val newArrayExp by -NEW * varExp * optional(typeArgs) * zeroOrMore(O_BRACKET * C_BRACKET) map {
-        MatchProcessor { ctx ->
-            it.t1.block(ctx)
-        }
-    }
-    val newExp by -NEW * varExp * optional(typeArgs) * -O_PAREN * separated(parser(::expression), COMMA, true) * -C_PAREN map {
+
+    val newExp by -NEW * symSpec * -O_PAREN * separated(parser(::Expression), COMMA, true) * -C_PAREN * optional(O_BRACE) map {
         MatchProcessor{ ctx ->
-            it.t1.block(ctx)
-            it.t2?.block?.invoke(ctx)
-            it.t3.terms.forEach { it.block(ctx) }
+            ctx.logMatch("newExp")
+            val createScope = it.t3 != null
+            it.t1.block(ctx, createScope)
+            it.t2.terms.forEach { it.block(ctx) }
         }
     }
-    val loopExp by typeSpec * varName * -COLON * parser(::expression) map {
+
+    val arrayRef by oneOrMore(-O_BRACKET * optional(parser(::Expression)) * -C_BRACKET) map {
         MatchProcessor { ctx ->
-            //val type = addTypeSpec(ctx, it.t1)
-            val type = it.t1.block(ctx)
-            ctx.addSymbol(it.t2.first, ParseSymbolType.VARIABLE, "", type.name).apply { arrayDim = it.t2.second }
-            it.t3.block(ctx)
+            ctx.logMatch("arrayRef")
+            it.forEach { it?.block?.invoke(ctx) }
         }
     }
-    val initExp by typeSpec * varNames * -ASSIGN * parser(::expression) map {
+
+    val newArray by -NEW * typeSpec * (arrayLiteral or arrayRef) map {
         MatchProcessor { ctx ->
-            //val type = addTypeSpec(ctx, it.t1)
-            val type = it.t1.block(ctx)
+            ctx.logMatch("newArray")
+            it.t1.block(ctx, false)
+        }
+    }
+
+    val assignmentExp by -ASSIGN * parser(::Expression) map {
+        MatchProcessor { ctx ->
+            ctx.logMatch("assignmentExp")
+            it.block(ctx)
+        }
+    }
+
+    val varInit by typeSpec * varNames * assignmentExp map {
+        MatchProcessor { ctx ->
+            ctx.logMatch("varInit")
+            val type = it.t1.block(ctx, false)
             it.t2.forEach {
                 ctx.addSymbol(it.first, ParseSymbolType.VARIABLE, "", type.name).apply { arrayDim = it.second }
             }
             it.t3.block(ctx)
         }
     }
-    val arrayExp by oneOrMore(-O_BRACKET * optional(parser(::expression)) * -C_BRACKET) map {
+
+    val compoundExp by -O_PAREN * parser(::Expression) * -C_PAREN map {
         MatchProcessor { ctx ->
-            it.forEach { it?.block?.invoke(ctx) }
-        }
-    }
-    val compoundExp by -O_PAREN * parser(::expression) * -C_PAREN map {
-        MatchProcessor { ctx ->
+            ctx.logMatch("compoundExp")
             it.block(ctx)
         }
     }
 
-    val expression : Parser<MatchProcessor> by oneOrMore(
-        initExp or loopExp or methodExp or arrayExp or castExp or varExp or literalExp or compoundExp or
-            OPERATOR or OTHER or DOT or ASSIGN or LABEL or RETURN or THROW or GOTO or NEW or COMMA
-    ) map {
+    val elvisExp by -QUESTION * parser(::Expression) * -COLON map {
+        MatchProcessor { ctx ->
+            ctx.logMatch("elvisExp")
+            it.block(ctx)
+        }
+    }
+
+    val labelExp by -LABEL * optional(parser(::Expression)) * -COLON map {
+        MatchProcessor { ctx ->
+            ctx.logMatch("labelExp")
+            it?.block?.invoke(ctx)
+        }
+    }
+
+    val Expression : Parser<MatchProcessor> by oneOrMore(
+        varInit or methodRef or arrayRef or castExp or varExp or literalExp or
+            compoundExp or arrayLiteral or newExp or newArray or elvisExp or labelExp or
+            OPERATOR or OTHER or DOT or ASSIGN or RETURN or THROW or GOTO or COMMA) map {
         MatchProcessor{ ctx ->
+            ctx.logMatch("Expression", null)
             it.forEach {m ->
                 when (m) {
                     is MatchProcessor -> m.block(ctx)
+                    is MatchProducer -> m.block(ctx, false)
                 }
             }
         }
     }
 
-    val Block : Parser<MatchProcessor> by optional(MODIFIER) * O_BRACE map {
+    val statementLabel by IDENT * COLON map {
         MatchProcessor { ctx ->
-            ctx.addSymbol(it.t2, ParseSymbolType.BLOCK, it.t1?.text ?: "", type = "", createScope = true)
+            ctx.addSymbol(it.t1, ParseSymbolType.SYMREF, type = "label")
         }
     }
 
-    val PackageDecl by -PACKAGE * IDENT * -SEMI map {
+    val Block : Parser<MatchProcessor> by optional(MODIFIER) * optional(statementLabel) * O_BRACE map {
         MatchProcessor { ctx ->
-            ctx.result.pkg = ctx.addSymbol(it, ParseSymbolType.PACKAGE)
+            ctx.logMatch("Block", it.t3)
+            it.t2?.block?.invoke(ctx)
+            ctx.addBlock(it.t3)
         }
     }
 
-    val ImportDecl by -IMPORT * optional(MODIFIER) * (IDENT or WILD_IDENT) map {
+    val PackageDecl by -PACKAGE * IDENT * SEMI map {
+        MatchProcessor { ctx ->
+            ctx.result.pkg = ctx.addSymbol(it.t1, ParseSymbolType.PACKAGE)
+        }
+    }
+
+    val ImportDecl by -IMPORT * optional(MODIFIER) * (IDENT or WILD_IDENT) * SEMI map {
         MatchProcessor { ctx ->
             val imp = ctx.addSymbol(it.t2, ParseSymbolType.IMPORT).apply {
                 isWild = it.t2.type == WILD_IDENT
@@ -307,9 +368,10 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
         }
     }
 
-    val TypeDef by zeroOrMore(annotationRef) * MODIFIERS * DECLARE * typeName * optional(typeParams) * extendsClause * -O_BRACE map {
+    val TypeDef by zeroOrMore(annotationRef) * MODIFIERS * DECLARE * typeName * optional(typeParams) * extendsClause * O_BRACE map {
         (annotations, _, declare, name, generics, extends) ->
         MatchProcessor { ctx ->
+            ctx.logMatch("TypeDef", name)
             annotations.forEach { ann -> ann.block(ctx) }
             val symType = when(declare.text) {
                 "class" -> ParseSymbolType.CLASS
@@ -325,8 +387,10 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
         }
     }
 
-    val ConstructorDef by zeroOrMore(annotationRef) * MODIFIERS * constructorName * paramDefs * throwsClause * O_BRACE map { (annotations, _, name, params, throws) ->
+    val ConstructorDef by zeroOrMore(annotationRef) * MODIFIERS * constructorName * paramDefs * throwsClause * O_BRACE map {
+        (annotations, _, name, params, throws) ->
         MatchProcessor { ctx ->
+            ctx.logMatch("ConstructorDef", name)
             annotations.forEach { it.block(ctx) }
             ctx.addSymbol(name, ParseSymbolType.CONSTRUCTOR, createScope = true)
             params.block(ctx)
@@ -334,13 +398,13 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
         }
     }
 
-    val MethodDef by zeroOrMore(annotationRef) * MODIFIERS * optional(typeParams) * typeSpec * methodName * paramDefs * throwsClause * (O_BRACE or SEMI) map {
+    val MethodDef by zeroOrMore(annotationRef) * MODIFIERS * optional(typeParams) * typeSpec * methodName * paramDefs * throwsClause * (SEMI or O_BRACE) map {
         (annotations, _, typeParams, typespec, name, params, throws, term) ->
         MatchProcessor { ctx ->
+            ctx.logMatch("MethodDef", name)
             annotations.forEach { it.block(ctx) }
             throws.block(ctx)
-            //val type = addTypeSpec(ctx, typespec)
-            val type = typespec.block(ctx)
+            val type = typespec.block(ctx, false)
             ctx.addSymbol(name, ParseSymbolType.METHOD, "", type.name, createScope = true)
             typeParams?.block?.invoke(ctx)
             params.block(ctx)
@@ -348,56 +412,104 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
         }
     }
 
-    val VarDef by zeroOrMore(annotationRef) * MODIFIERS * -VAR * varNames * optional(-ASSIGN * expression ) * -SEMI map {
+    val VarDef by zeroOrMore(annotationRef) * MODIFIERS * -VAR * varNames * optional(assignmentExp) * optional(SEMI) map {
         (annotations, _, names, expression) ->
         MatchProcessor { ctx->
+            ctx.logMatch("VarDef", names.first().first)
             annotations.forEach { it.block(ctx) }
             names.forEach { ctx.addSymbol(it.first, ParseSymbolType.VARIABLE).apply { arrayDim = it.second } }
             expression?.block?.invoke(ctx)
         }
     }
 
-    val FieldDef by zeroOrMore(annotationRef) * MODIFIERS * typeSpec * separated(fieldName, COMMA) * optional(-ASSIGN * expression ) * (SEMI or O_BRACE) map {
-        (annotations, _, typespec, names, expression, term) ->
+    val FieldDef by zeroOrMore(annotationRef) * MODIFIERS * typeSpec * separated(fieldName, COMMA) * optional(assignmentExp) * optional(SEMI) map {
+        (annotations, _, typespec, names, expression) ->
         MatchProcessor { ctx ->
+            ctx.logMatch("FieldDef", names.terms.first().first)
             annotations.forEach { it.block(ctx) }
-            //typespec.third?.block?.invoke(ctx)
-            //val type = ctx.addSymbol(typespec.first, ParseSymbolType.TYPEREF).apply { arrayDim = typespec.second }
-            val type = typespec.block(ctx)
+            val type = typespec.block(ctx, false)
             val symbolType = if (ctx.inType()) ParseSymbolType.FIELD else ParseSymbolType.VARIABLE
             names.terms.forEach { ctx.addSymbol(it.first, symbolType, "", type.name).apply { arrayDim = it.second } }
             expression?.block?.invoke(ctx)
-            if (term.type == O_BRACE) ctx.addSymbol(term, ParseSymbolType.BLOCK, createScope = true)
         }
     }
 
-    val simpleControl by oneOrMore(CONTROL) * O_BRACE map {
+    val ifControl by (IF_WHILE_SWITCH or SYNCRONIZED) * -O_PAREN * Expression * -C_PAREN * optional(Expression) * (O_BRACE or SEMI) map {
+        (control, exp1, exp2, term) ->
         MatchProcessor { ctx ->
-            ctx.addSymbol(it.t1.last(), ParseSymbolType.CONTROL, classifier = "{}", type="", createScope = true)
-        }
-    }
-    val statementControl by oneOrMore(CONTROL) * expression * SEMI map {
-        MatchProcessor { ctx ->
-            it.t2.block(ctx)
-        }
-    }
-    val complexControl by oneOrMore(CONTROL or SYNCRONIZED) * -O_PAREN * separated(optional(expression), SEMI) * -C_PAREN * optional(expression) * (O_BRACE or SEMI) map {
-        (controls, params, expression, term) ->
-        MatchProcessor { ctx ->
-            ctx.addSymbol(controls.last(), ParseSymbolType.CONTROL, classifier = "()", type = "", createScope = true)
-            params.terms.forEach { it?.block?.invoke(ctx) }
-            expression?.block?.invoke(ctx)
+            ctx.logMatch("ifControl", control)
+            ctx.addSymbol(control, ParseSymbolType.CONTROL, classifier = "", type="", createScope = true)
+            exp1.block(ctx)
+            exp2?.block?.invoke(ctx)
             if (term.type == SEMI) ctx.endScope(term)
         }
     }
-    val ControlStatement by optional(IDENT * COLON) * (simpleControl or statementControl or complexControl) map {
+
+    val elseControl by (ELSE or DO or TRY or FINALLY) * optional(Expression) * (O_BRACE or SEMI) map {
+        (control, exp1, term) ->
         MatchProcessor { ctx ->
+            ctx.logMatch("elseControl", control)
+            ctx.addSymbol(control, ParseSymbolType.CONTROL, classifier = "", type="", createScope = true)
+            exp1?.block?.invoke(ctx)
+            if (term.type == SEMI) ctx.endScope(term)
+        }
+    }
+
+    val elseIfControl by ELSE * (ifControl or elseControl) map {
+        MatchProcessor { ctx ->
+            ctx.logMatch("elseIfControl", it.t1)
             it.t2.block(ctx)
         }
     }
 
-    val Statement by optional(expression) * (SEMI or O_BRACE or C_BRACE) map { (expr, term) ->
+    val forControl by (FOR or TRY) * -O_PAREN * separated(optional(Expression), SEMI, true) * -C_PAREN * optional(Expression) * (O_BRACE or SEMI) map {
+        (control, exps, exp, term) ->
         MatchProcessor { ctx ->
+            ctx.logMatch("forControl", control)
+            ctx.addSymbol(control, ParseSymbolType.CONTROL, classifier = "", type = "", createScope = true)
+            exps.terms.forEach { it?.block?.invoke(ctx) }
+            exp?.block?.invoke(ctx)
+            if (term.type == SEMI) ctx.endScope(term)
+        }
+    }
+
+    val forLoop by FOR * -O_PAREN * typeSpec * varName * -COLON * Expression * -C_PAREN * optional(Expression) * (O_BRACE or SEMI) map {
+        (control, typespec, name, exp1, exp2, term) ->
+        MatchProcessor { ctx ->
+            ctx.logMatch("forLoop", control)
+            ctx.addSymbol(control, ParseSymbolType.CONTROL, classifier = "", type = "", createScope = true)
+            val type = typespec.block(ctx, false)
+            ctx.addSymbol(name.first, ParseSymbolType.VARIABLE, "", type.name).apply { arrayDim = name.second }
+            exp1.block(ctx)
+            exp2?.block?.invoke(ctx)
+            if (term.type == SEMI) ctx.endScope(term)
+        }
+    }
+
+    val catchControl by CATCH * -O_PAREN * separated(typeSpec, PIPE) * varName * -C_PAREN * O_BRACE map {
+        (control, typespecs, name, _) ->
+        MatchProcessor { ctx ->
+            ctx.logMatch("catchControl", control)
+            ctx.addSymbol(control, ParseSymbolType.CONTROL, classifier = "", type = "", createScope = true)
+            typespecs.terms.forEach { ts ->
+                val type = ts.block(ctx, false)
+                ctx.addSymbol(name.first, ParseSymbolType.VARIABLE, "", type.name).apply { arrayDim = name.second }
+            }
+        }
+    }
+
+    val ControlStatement by optional(statementLabel) * (ifControl or forControl or forLoop or elseIfControl or elseControl or catchControl) map {
+        MatchProcessor { ctx ->
+            it.t1?.block?.invoke(ctx)
+            it.t2.block(ctx)
+        }
+    }
+
+    val Statement by optional(statementLabel) * optional(Expression) * SEMI map {
+        (label, expr, term) ->
+        MatchProcessor { ctx ->
+            ctx.logMatch("Statement", term)
+            label?.block?.invoke(ctx)
             expr?.block?.invoke(ctx)
             if (term.type == O_BRACE) ctx.addSymbol(term, ParseSymbolType.BLOCK, createScope = true)
             if (term.type == C_BRACE) ctx.endScope(term)
@@ -406,21 +518,34 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
 
     val CloseBlock : Parser<MatchProcessor> by C_BRACE map {
         MatchProcessor { ctx ->
+            ctx.logMatch("CloseBlock", it)
             ctx.endScope(it)
         }
     }
 
     val Rules : Parser<MatchProcessor> = Block or PackageDecl or ImportDecl or TypeDef or ConstructorDef or MethodDef or VarDef or FieldDef or
-        ControlStatement or CloseBlock or Statement
+        ControlStatement or CloseBlock or Statement or Expression
 
     private fun processToken(context: ParseContext, token: TokenMatch, inComment: Boolean) {
         if (inComment) return
         when (token.type) {
             O_PAREN -> context.parenCount++
             C_PAREN -> context.parenCount--
+            O_BRACE -> context.braceCount++
+            C_BRACE -> context.braceCount--
+            ASSIGN -> context.inAssignment = true
         }
         when (token.type) {
             WS, NL, LINE_COMMENT -> {}
+            O_BRACE, SEMI -> {
+                context.tokens.add(token)
+                processTokens(context, token)
+            }
+            C_BRACE -> {
+                processTokens(context, token)
+                context.tokens.add(token)
+                processTokens(context, token)
+            }
             else -> context.tokens.add(token)
         }
     }
@@ -429,12 +554,23 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
         if (context.tokens.size == 0) return
         if (context.parenCount > 0) return
         //println("Trying ${context.tokens.first()} -> ${context.tokens.last()}")
-        val parsed = Rules.tryParse(context.tokens.asSequence())
+        val parsed = Rules.tryParseToEnd(context.tokens.asSequence())
         when (parsed) {
-            is Parsed -> parsed.value.block(context)
-            else -> logger.warn("NO MATCH: (${token.row})\n   ${context.tokens}")
+            is Parsed -> {
+                parsed.value.block(context)
+                context.clear()
+            }
+            else -> {
+                if (token.type != O_BRACE && token.type != C_BRACE) {
+                    logger.warn("NO MATCH: (${token.row})\n   ${context.tokens}\n   ${context.tokens.joinToString(" ") { it.text }}")
+                    context.setUnmatched()
+                    context.clear()
+                }
+                else {
+                    logger.debug("CONTINUING WITH ${token.type}")
+                }
+            }
         }
-        context.clear()
     }
 
     override fun parse(request: ParseRequest) : JavaParseResult {
@@ -447,9 +583,6 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
                 BEGIN_COMMENT -> inComment = true
                 END_COMMENT -> inComment = false
                 else -> processToken(context, it, inComment)
-            }
-            when (it.type) {
-                O_BRACE, SEMI, C_BRACE -> processTokens(context, it)
             }
         }
         context.result.parseTime = System.currentTimeMillis()-start
