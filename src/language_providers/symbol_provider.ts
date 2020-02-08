@@ -49,7 +49,17 @@ export class JvmSymbolProvider implements vscode.DocumentSymbolProvider, vscode.
         let fullRange = new vscode.Range(start, scopeEnd)
         let selectionRange = new vscode.Range(start, end)
         let arrayDim = "[]".repeat(symbol.arrayDim)
-        return new vscode.DocumentSymbol(`${symbol.name}${symbol.classifier}`, `${symbol.type}${arrayDim}`, kind, fullRange, selectionRange)
+        let tag = this.getSymbolTag(symbol)
+        return new vscode.DocumentSymbol(`${symbol.name}${tag} ${symbol.classifier}`, `${symbol.type}${arrayDim}`, kind, fullRange, selectionRange)
+    }
+
+    private getSymbolTag(symbol: ParseSymbol): string {
+        switch(symbol.symbolType) {
+            case "CONSTRUCTOR": 
+            case "METHOD": 
+                return "()"
+            default: return ""
+        }
     }
 
     private getSymbolKind(symbol: ParseSymbol) : vscode.SymbolKind {
@@ -66,7 +76,7 @@ export class JvmSymbolProvider implements vscode.DocumentSymbolProvider, vscode.
             case "THIS": return vscode.SymbolKind.Field
             case "VARIABLE": return vscode.SymbolKind.Variable
             case "BLOCK": return vscode.SymbolKind.Namespace
-            case "CONTROL": return vscode.SymbolKind.Operator
+            case "CONTROL": return vscode.SymbolKind.Namespace
             case "TYPEREF": return vscode.SymbolKind.Constant
             case "TYPEPARAM": return vscode.SymbolKind.TypeParameter
             default: return vscode.SymbolKind.Object
