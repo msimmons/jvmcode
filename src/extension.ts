@@ -2,16 +2,22 @@
 
 import * as vscode from 'vscode'
 import { JvmServer } from './jvm_server'
-import { JarEntryNode, dependencyLabel } from './models';
+import { JarEntryNode, TreeNode } from './models';
 import { ProjectService } from './project_service';
 import { ProjectController } from './project_controller';
 import { StatsController } from './stats_controller';
+import { LanguageService } from './language_service';
+import { LanguageController } from './language_controller';
+import { ClassData } from 'server-models'
+import { ConfigService } from './config_service';
 
 export let server: JvmServer
 export let projectService: ProjectService
 export let projectController: ProjectController
+export let languageService: LanguageService
+export let languageController: LanguageController
 let statsController: StatsController
-export let extensionContext: vscode.ExtensionContext
+export let extensionContext: vscode.ExtensionContext // Allows test to access the context?
 
 export function activate(context: vscode.ExtensionContext) {
     extensionContext = context
@@ -20,9 +26,15 @@ export function activate(context: vscode.ExtensionContext) {
     if (!server) {
         server = new JvmServer(context)
         server.start()
-        projectService = new ProjectService(context, server)
-        projectController = new ProjectController(projectService)
+        projectService = new ProjectService(server)
+        projectController = new ProjectController(context, projectService)
+        // We don't start the project controller unless we get a request or there are user items
+        languageService = new LanguageService(server)
+        languageController = new LanguageController(languageService, projectController)
+        context.subscriptions.push(languageController)
+        languageController.start()
         statsController = new StatsController(server)
+        statsController.start()
     }
 
     //
@@ -32,18 +44,6 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.start', () => {
         server = new JvmServer(context)
         server.start()
-    }))
-
-    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.echo', () => {
-        vscode.window.showInputBox().then((message) => {
-            if (message) {
-                server.send('jvmcode.echo', { message: message }).then((reply) => {
-                    vscode.window.showInformationMessage('Got reply: ' + JSON.stringify(reply.body))
-                }).catch((error) => {
-                    vscode.window.showErrorMessage('Got error: ' + error.message)
-                })
-            }
-        })
     }))
 
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.log-level', () => {
@@ -65,36 +65,10 @@ export function activate(context: vscode.ExtensionContext) {
 
     /**
      * Allow the user to find any class in the projects current dependencies
-     * Maybe show local project classes first, if no match, show dependency classes (possibly pre-filtered)
      */
-    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.find-class', () => {
-        projectController.start() // TODO This won't work correctly first time -- async timing
-        let jarEntries = projectService.getJarEntryNodes()
-        let classes = projectService.getClasses()
-        Promise.all([jarEntries]).then((results) => {
-            let quickPick = vscode.window.createQuickPick()
-            let classItems = classes.map((c) => {
-                return { label: c.name, detail: c.pkg, entry: c } as vscode.QuickPickItem
-            })
-            let jarItems = results[0].map((r) => {
-                let detail = r.data.pkg + ' (' + dependencyLabel(r.dependency) + ')'
-                return { label: r.name, detail: detail, entry: r } as vscode.QuickPickItem
-            })
-            quickPick.items = classItems.concat(jarItems)
-            quickPick.onDidAccept(selection => {
-                quickPick.dispose()
-                if (quickPick.selectedItems.length) {
-                    projectController.openJarEntry(quickPick.selectedItems[0]['entry'])
-                }
-            })
-            quickPick.onDidChangeSelection(selection => {
-                //console.log(`change ${selection}`)
-            })
-            quickPick.onDidChangeActive(event => {
-                //console.log(`active ${event} ${quickPick.activeItems}`)
-            })
-            quickPick.show()
-        })
+    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.find-class', async () => {
+        await projectController.start() // TODO This won't work correctly first time -- async timing
+        projectController.findClass()
     }))
 
     /**
@@ -108,10 +82,8 @@ export function activate(context: vscode.ExtensionContext) {
      * Allows the user to manually enter a jar dependency
      */
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.add-dependency', () => {
-        vscode.window.showOpenDialog({filters: {'Dependency': ['jar']}, canSelectMany: false}).then((jarFile) => {
-            if (!jarFile || jarFile.length === 0) return
-            projectService.addDependency(jarFile[0]['path'])
-        })
+        projectController.start()
+        projectController.addDependency()
     }))
 
     /**
@@ -119,26 +91,83 @@ export function activate(context: vscode.ExtensionContext) {
      */
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.add-classdir', () => {
         projectController.start()
-        vscode.window.showInputBox({placeHolder: 'Class directory'}).then((classDir) => {
-            if (!classDir) return
-            projectService.addClassDirectory(classDir)
-        })
+        projectController.addClassDir()
+    }))
+
+    /**
+     * Allows the user to manually enter a source directory
+     */
+    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.add-sourcedir', () => {
+        projectController.start()
+        projectController.addSourceDir()
+    }))
+
+    /**
+     * Allows removal of a user specified path or dependency (from the project view)
+     */
+    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.remove-user-item', (event) => {
+        projectController.removeUserItem(event as TreeNode)
+    }))
+
+    /**
+     * Return the classpath as a string (mostly for use in tasks)
+     */
+    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.classpath', () : string => {
+        projectController.start()
+        return projectController.getClasspath()
+    }))
+
+    /**
+     * Return the fqcn of the current file (for use in tasks)
+     */
+    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.fqcn', () : string => {
+        projectController.start()
+        return projectController.getFQCN()
     }))
 
     /**
      * Allow the user to execute the given main application class
      */
-    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.exec-class', () => {
+    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.exec-class', async () => {
         projectController.start()
-        let classes = projectService.getClasses().map((c) => {return c.pkg + '.' + c.name})
+        let classData = await projectController.getClassdata()
+        let classes = classData.filter(cd => cd.methods.find(m => m.isMain)).map(c => c.name)
         vscode.window.showQuickPick(classes).then((mainClass) => {
             if (!mainClass) return
-            let cp = projectService.getClasspath()
+            let cp = projectController.getClasspath()
+            let cmd = ConfigService.getJavaCommand()
             let def = {type: 'jvmcode'} as vscode.TaskDefinition
             let args = cp ? ['-cp', cp] : []
             args = args.concat([mainClass])
-            let exec = new vscode.ProcessExecution('/usr/bin/java', args, {})
+            let exec = new vscode.ProcessExecution(cmd, args, {})
             let task = new vscode.Task(def, vscode.workspace.workspaceFolders[0], mainClass, 'jvmcode', exec, [])
+            vscode.tasks.executeTask(task)
+        })
+    }))
+
+    /**
+     * Test a customexecution task
+     */
+    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.exec-custom', () => {
+        vscode.window.showQuickPick(['foo', 'bar']).then((choice) => {
+            if (!choice) return
+            let def = {type: 'jvmcode'} as vscode.TaskDefinition
+            const writeEmitter = new vscode.EventEmitter<string>();
+            const closeEmitter = new vscode.EventEmitter<any>();
+            const pty: vscode.Pseudoterminal = {
+              onDidWrite: writeEmitter.event,
+              onDidClose: closeEmitter.event,
+              open: () => {
+                  writeEmitter.fire(choice)
+                  writeEmitter.fire('\nDoing stuff\n')
+                  setTimeout(() => { closeEmitter.fire() }, 1000)
+              },
+              close: () => { console.log('Closed')}
+            };
+            let exec = new vscode.CustomExecution(async () => {
+                return pty
+            })
+            let task = new vscode.Task(def, vscode.workspace.workspaceFolders[0], choice, 'jvmcode', exec, [])
             vscode.tasks.executeTask(task)
         })
     }))
@@ -174,6 +203,6 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {
-    server.shutdown()
+export async function deactivate() {
+    await server.shutdown()
 }

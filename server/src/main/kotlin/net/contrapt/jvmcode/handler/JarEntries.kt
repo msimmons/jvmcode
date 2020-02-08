@@ -10,7 +10,7 @@ class JarEntries(vertx: Vertx, val projectService: ProjectService) : AbstractHan
 
     override fun processMessage(message: Message<JsonObject>): JsonObject {
         val dependencyData = message.body().getJsonObject("dependency").mapTo(Dependency::class.java)
-        val jarData = projectService.getJarData(dependencyData)
+        val jarData = projectService.indexJarData(dependencyData)
         return JsonObject.mapFrom(jarData)
     }
 

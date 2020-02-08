@@ -1,4 +1,4 @@
-version: 2
+version: 2.1
 
 references:
   jvm_cache_keys: &jvm_cache_keys
@@ -23,8 +23,6 @@ jobs:
         auth:
           username: $DOCKER_USER
           password: $DOCKER_PASSWORD
-    environment:
-      ORG_GRADLE_PROJECT_git_m2repo_uri: /home/work/m2repo
     steps:
       - checkout
       - restore_cache:
@@ -33,10 +31,14 @@ jobs:
       - restore_cache:
           keys:
             *npm_cache_keys
-      - run: ./gradlew build
       - run: 
           shell: /bin/bash --login -eo pipefail 
           command: |
+            export ORG_GRADLE_PROJECT_gh_registry_uri=$GH_REGISTRY_URI
+            export ORG_GRADLE_PROJECT_gh_registry_user=$GH_REGISTRY_USER
+            export ORG_GRADLE_PROJECT_gh_registry_key=$GH_REGISTRY_KEY
+            export ORG_GRADLE_PROJECT_build_tag=$CIRCLE_BUILD_NUM
+            ./gradlew --no-daemon build
             source ~/.nvm/nvm.sh
             nvm i 8
             npm i vsce -g
@@ -44,7 +46,6 @@ jobs:
             vsce package
             mkdir dist
             cp *.vsix dist
-
       - save_cache:
           key: *jvm_cache_key
           paths:
@@ -59,8 +60,39 @@ jobs:
           path: dist
       - store_test_results:
           path: server/build/test-results
+      - persist_to_workspace:
+          root: /home/work
+          paths:
+            - build
+  publish:
+    working_directory: /home/work/build
+    docker:
+      - image: msimmons/nodejvm:latest
+        auth:
+          username: $DOCKER_USER
+          password: $DOCKER_PASSWORD
+    steps:
+      - attach_workspace:
+          at: /home/work
+      - run: 
+          command: |
+            ORG_GRADLE_PROJECT_gh_registry_uri=$GH_REGISTRY_URI
+            ORG_GRADLE_PROJECT_gh_registry_user=$GH_REGISTRY_USER
+            ORG_GRADLE_PROJECT_gh_registry_key=$GH_REGISTRY_KEY
+            ORG_GRADLE_PROJECT_build_tag=$CIRCLE_BUILD_NUM
+            ./gradlew --no-daemon publish
 workflows:
-  version: 2
+  version: 2.1
   build_publish:
     jobs:
-      - build
+      - build:
+          context: github_registry
+      - publish:
+          requires:
+            - build
+          context: github_registry
+          filters:
+            branches:
+              only:
+                - develop
+                - master

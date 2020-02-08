@@ -1,12 +1,12 @@
 package net.contrapt.jvmcode.service.model
 
-import net.contrapt.jvmcode.model.ClasspathData
+import net.contrapt.jvmcode.model.PathData
 
-class UserClasspath(
+class UserPath(
         override val sourceDirs: MutableSet<String> = mutableSetOf(),
         override val classDirs: MutableSet<String> = mutableSetOf()
-) : ClasspathData {
+) : PathData {
     override val source: String = "USER"
-    override val name: String = "USER"
-    override val module: String = "USER"
+    override val name: String = "User"
+    override val module: String = "All"
 }

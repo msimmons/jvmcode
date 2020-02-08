@@ -33,9 +33,9 @@ class Dependency(
         /**
          * Create a user added dependency
          */
-        fun create(jarFile: String): Dependency {
+        fun create(jarFile: String, srcFile: String?): Dependency {
             val fileName = jarFile.split(File.separator).last()
-            return Dependency(jarFile, null, null, "", fileName, "")
+            return Dependency(jarFile, srcFile, null, "", fileName, "")
         }
 
     }

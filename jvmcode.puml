@@ -1,0 +1,60 @@
+@startuml "JVM Code Sequences"
+autonumber
+hide footbox
+
+participant "Extension" as vscode order 10
+participant "Server" as jvm order 20
+participant "Project" as project order 30
+participant "Language" as lang order 50
+
+== Get Dependencies and Paths ==
+vscode -> project: RefreshRequest
+project -> vscode: RefreshResult
+project -> jvm: ProjectUpdateRequest
+jvm -> vscode: JvmProject
+
+== Ensure Compiled ==
+== Index Class Files ==
+
+
+
+
+
+lang -> vscode: LanguageRequest
+note right of vscode
+   Watch language files
+end note
+
+vscode -> lang: lang.RequestCompile
+lang -> vscode: Diagnostics
+
+vscode -> lang: lang.RequestParse
+lang -> jvm: Symbols (revolve types, store symbols)
+jvm -> vscode: Symbols?
+
+vscode -> vscode: triggerCompletion
+vscode -> lang: completeForLocation
+lang -> jvm: getSymbolOrScopeAtCursor
+jvm -> lang: symbol, scope, completions
+note right of jvm
+- Find symbol or scope by location
+  - For dot find the members of the symbol
+  - For other 1) symbols in scope (including imports) 2) universe of classes 3) narrow down to appropriate type
+  - Pass it thru lang for formatting, additional annotations etc?
+end note
+lang -> vscode: completions
+
+@enduml
+
+createDiagnosticCollection: lang compile
+registerCompletionItemProvider: lang, jvm, symbols
+registerHoverProvider: ?
+registerSignatureProvider: lang formats signature, jvm refelctive signature, symbols
+registerDefinitionProvider: symbols
+registerTypeDefinitionProvider: symbols
+registerImplementationPovider: jvm reflection
+registerReferenceProvider: symbols
+registerDocumentSymbolProvider: symbols
+registerCodeActionProvider: lang (add this info to diagnostics?)
+registerCodeLensProvider: jvm, lang, symbols
+registerRenameProvider: symbols

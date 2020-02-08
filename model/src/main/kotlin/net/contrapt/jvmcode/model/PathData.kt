@@ -9,7 +9,7 @@ package net.contrapt.jvmcode.model
  * @property sourceDirs The set of source directories that this describes
  * @property classDirs The set of associated class directories
  */
-interface ClasspathData {
+interface PathData {
     val source: String
     val name: String
     val module: String

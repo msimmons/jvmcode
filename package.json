@@ -1,11 +1,12 @@
 {
   "name": "jvmcode",
   "displayName": "JVMCode",
-  "description": "Event Bus Bridge to JVM Extensions",
-  "version": "1.0.2",
+  "description": "JVM Services",
+  "version": "1.0.3",
   "publisher": "contrapt",
+  "license": "Apache 2.0",
   "engines": {
-    "vscode": "^1.29.0"
+    "vscode": "^1.40.2"
   },
   "repository": {
     "type": "git",
@@ -29,10 +30,6 @@
         "title": "JVM: Start Server"
       },
       {
-        "command": "jvmcode.echo",
-        "title": "JVM: Echo Message"
-      },
-      {
         "command": "jvmcode.log-level",
         "title": "JVM: Set Log Level"
       },
@@ -49,20 +46,56 @@
         "title": "JVM: Add Class Directory"
       },
       {
+        "command": "jvmcode.add-sourcedir",
+        "title": "JVM: Add Source Directory"
+      },
+      {
         "command": "jvmcode.find-class",
         "title": "JVM: Find Class"
       },
       {
         "command": "jvmcode.exec-class",
         "title": "JVM: Execute Class"
+      },
+      {
+        "command": "jvmcode.exec-custom",
+        "title": "JVM: Execute Custom"
+      },
+      {
+        "command": "jvmcode.remove-user-item",
+        "title": "JVM: Remove User Item"
       }
     ],
     "views": {
       "explorer": [
         {
-          "id": "jvmcode.dependency-tree",
-          "name": "JVM Dependencies",
+          "id": "jvmcode.project-tree",
+          "name": "JVM Project",
           "when": "jvmcode.context.isJvmProject"
+        }
+      ]
+    },
+    "menus": {
+      "view/item/context": [
+        {
+          "command": "jvmcode.remove-user-item",
+          "when": "viewItem == 'user-item'",
+          "group": "JVM"
+        },
+        {
+          "command": "jvmcode.add-dependency",
+          "when": "viewItem == 'user-source'",
+          "group": "JVM"
+        },
+        {
+          "command": "jvmcode.add-sourcedir",
+          "when": "viewItem == 'user-path'",
+          "group": "JVM"
+        },
+        {
+          "command": "jvmcode.add-classdir",
+          "when": "viewItem == 'user-path'",
+          "group": "JVM"
         }
       ]
     },
@@ -130,6 +163,16 @@
             "scala"
           ],
           "description": "A list of extensions used to look for source files in dependency source jars"
+        },
+        "jvmcode.outputDirMap": {
+          "type": "array",
+          "default": [
+            "java:java",
+            "kt:kotlin",
+            "groovy:groovy",
+            "scala:scala"
+          ],
+          "description": "Helps map source file extension to the a directory containing the given keyword: 'ext:keyword' (this is a hack)"
         }
       }
     }
@@ -149,7 +192,9 @@
     "vscode": "^1.1.36"
   },
   "dependencies": {
+    "@types/jszip": "^3.1.7",
+    "jszip": "^3.2.2",
     "node-uuid": "^1.4.8",
-    "vertx3-eventbus-client": "^3.8.3"
+    "vertx3-eventbus-client": "^3.8.4"
   }
 }

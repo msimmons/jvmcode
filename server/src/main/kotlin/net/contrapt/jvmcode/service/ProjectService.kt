@@ -1,14 +1,21 @@
 package net.contrapt.jvmcode.service
 
+import io.vertx.core.*
 import io.vertx.core.logging.LoggerFactory
+import javassist.bytecode.ClassFile
 import net.contrapt.jvmcode.model.*
 import net.contrapt.jvmcode.service.model.*
+import java.io.DataInputStream
 import java.io.File
-import java.io.InputStream
+import java.lang.IllegalArgumentException
+import java.lang.IllegalStateException
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
 
-class ProjectService(var config: JvmConfig, val javaHome : String) {
+class ProjectService(
+    var config: JvmConfig, val javaHome : String,
+    val symbolRepo: SymbolRepository
+) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -17,21 +24,36 @@ class ProjectService(var config: JvmConfig, val javaHome : String) {
     //TODO store user added ones persistently?
     private val userSource: UserDependencySource
     // Classpath data added by user
-    private val userClasspath = UserClasspath()
+    private val userPath = UserPath()
 
     // All the external dependencies being tracked
     private val externalSource = mutableSetOf<DependencySourceData>()
     // Classpath data added by other extensions
-    private val externalClasspath = mutableSetOf<ClasspathData>()
+    private val externalPaths = mutableSetOf<PathData>()
 
-    // Map of entry FQCN to entry data and dependency it belongs to
-    private val entryMap = mutableMapOf<String, Pair<JarEntryData, DependencyData>>()
+    // Map of entry FQCN to the dependency it belongs to -- allow for multiple with same FQCN
+    private val dependencyMap = mutableMapOf<String, MutableSet<Pair<JarEntryData,DependencyData>>>()
+
+    // Map of jarFile to [JarData]
+    private val jarDataMap = mutableMapOf<String, JarData>()
+
+    // Map of source file name to source entry -- allow for multiple with same path
+    private val sourceMap = mutableMapOf<String, MutableSet<Pair<SourceEntryData, DependencyData>>>()
+
+    // Map of path to class data for all project classes
+    private val classMap = mutableMapOf<String, ClassData>()
 
     val javaVersion : String
 
     init {
         javaVersion = getVersion()
         jdkSource =  JDKDependencySource.create(config, javaHome, javaVersion)
+        jdkSource.dependencies.associate { dep ->
+            indexJarData(dep)
+            dep.sourceFileName to dep
+        }.forEach {
+            indexSourceJarData(it.value)
+        }
         userSource = UserDependencySource()
     }
 
@@ -55,163 +77,220 @@ class ProjectService(var config: JvmConfig, val javaHome : String) {
     fun getJvmProject(config: JvmConfig = this.config) : JvmProject {
         this.config = config
         val sorted = listOf(jdkSource, userSource) + externalSource
-        return JvmProject(sorted, externalClasspath + userClasspath, getClasspath())
+        return JvmProject(sorted, externalPaths + userPath, getClasspath())
     }
 
     /**
      * User adds a single JAR file dependency
-     * TODO add an optional source jar
      */
-    fun addUserDependency(jarFile: String) {
-        userSource.dependencies.add(Dependency.create(jarFile))
+    fun addUserDependency(jarFile: String, srcFile: String?) {
+        userSource.dependencies.add(Dependency.create(jarFile, srcFile))
     }
 
     /**
-     * User adds an output directory
-     * TODO add an optional source dir
+     * Remove a user dependency
      */
-    fun addUserClassDirectory(classDir: String) {
-        userClasspath.classDirs.add(classDir)
+    fun removeUserDependency(jarFile: String) {
+        userSource.dependencies.removeIf { it.fileName == jarFile }
+    }
+
+    /**
+     * User adds a path component
+     */
+    fun addUserPath(pathData: PathData) {
+        pathData.classDirs.forEach { userPath.classDirs.add(it) }
+        pathData.sourceDirs.forEach { userPath.sourceDirs.add(it) }
+    }
+
+    /**
+     * Remove a user path component
+     */
+    fun removeUserPath(path: String) {
+        userPath.classDirs.remove(path)
+        userPath.sourceDirs.remove(path)
+    }
+
+    /**
+     * Update all user project info in single operation (for restoring user settings)
+     */
+    fun updateUserProject(request: ProjectUpdateRequest) {
+        request.dependencySources.forEach {
+            userSource.dependencies.forEach { jarDataMap.remove(it.fileName) }
+            userSource.dependencies.clear()
+            userSource.dependencies.addAll(it.dependencies)
+        }
+        request.paths.forEach {
+            userPath.classDirs.clear()
+            userPath.sourceDirs.clear()
+            userPath.classDirs.addAll(it.classDirs)
+            userPath.sourceDirs.addAll(it.sourceDirs)
+        }
+        userSource.dependencies.forEach {
+            indexDependency(it)
+        }
     }
 
     /**
      * Process update of project dependency information from an external source
      */
     fun updateProject(request: ProjectUpdateRequest) {
+        externalSource.filter { it.source == request.source }.forEach {
+            it.dependencies.forEach { jarDataMap.remove(it.fileName) }
+        }
         externalSource.removeIf { it.source == request.source }
-        externalClasspath.removeIf { it.source == request.source }
+        externalPaths.removeIf { it.source == request.source }
         externalSource.addAll(request.dependencySources)
-        externalClasspath.addAll(request.classDirs)
+        externalPaths.addAll(request.paths)
+        externalSource.filter { it.source == request.source }.forEach {
+            it.dependencies.forEach {
+                indexDependency(it)
+            }
+        }
     }
 
-    /**
-     * For the given dependency, find all the entries contained in the jar file and organize them by package
-     * in the resulting data structures [JarData] -> [JarEntryData]
-     */
-    fun getJarData(dependencyData: DependencyData) : JarData {
+    private fun addDependencyMap(entry: JarEntryData, dependencyData: DependencyData) {
+        dependencyMap.getOrPut(entry.fqcn, { mutableSetOf() }).add(entry to dependencyData)
+    }
+
+    private fun indexDependency(dep: DependencyData) {
+        Vertx.currentContext().apply {
+            executeBlocking( Handler<Promise<Unit>> { _ -> indexJarData(dep) }, false, Handler { ar ->
+                if (ar.failed()) throw ar.cause()
+            })
+            executeBlocking( Handler<Promise<Unit>> { _ -> indexSourceJarData(dep) }, false, Handler { ar ->
+                if (ar.failed()) throw ar.cause()
+            })
+        }
+    }
+
+    fun indexJarData(dependencyData: DependencyData) : JarData {
+        if (jarDataMap.containsKey(dependencyData.fileName)) return jarDataMap[dependencyData.fileName]!!
+        logger.debug("Indexing ${dependencyData.fileName}")
         val pkgMap = mutableMapOf<String, MutableSet<JarEntryData>>()
         val isJmod = dependencyData.fileName.endsWith(".jmod")
-        try {
-            val jarFile = JarFile(dependencyData.fileName)
-            jarFile.entries().toList().forEach { entry ->
-                val jed = JarEntryData.create(entry.name, isJmod)
-                when (jed.type) {
-                    JarEntryType.PACKAGE -> pkgMap.putIfAbsent(jed.pkg, sortedSetOf())
-                    else -> {
-                        pkgMap.getOrPut(jed.pkg, { sortedSetOf()}).add(jed)
-                        entryMap.put(jed.fqcn(), Pair(jed, dependencyData))
+        val jarFile = runCatching { JarFile(dependencyData.fileName) }
+        jarFile.getOrElse { e -> throw RuntimeException("Unable to get jar entries for ${dependencyData.fileName}", e) }.use {
+            it.entries().toList().forEach { entry ->
+                when (val ed = createEntryData(entry, isJmod)) {
+                    is PackageEntryData -> pkgMap.putIfAbsent(ed.pkg, sortedSetOf())
+                    is ClassEntryData -> {
+                        pkgMap.getOrPut(ed.pkg, { sortedSetOf() }).add(ed)
+                        symbolRepo.saveJarEntry(ed)
+                        addDependencyMap(ed, dependencyData)
                     }
+                    is ResourceEntryData -> {
+                        pkgMap.getOrPut(ed.pkg, { sortedSetOf() }).add(ed)
+                        addDependencyMap(ed, dependencyData)
+                    }
+                    else -> logger.warn("Unhandled when for $ed")
                 }
             }
-            return JarData(dependencyData.fileName,
-                    pkgMap.asSequence()
-                    .map {
-                        entry -> JarPackageData(entry.key).apply { entries.addAll(entry.value) }
-                    }
-                    .filter { pkg ->
-                        pkg.entries.size > 0 && !config.excludes.any { exclude -> pkg.name.startsWith(exclude) }
-                    }
-                    .toSortedSet()
-            )
         }
-        catch (e: Exception) {
-            throw RuntimeException("Unable to get jar entries for ${dependencyData.fileName}", e)
+        val packages = pkgMap.asSequence()
+            .map { entry -> JarPackageData(entry.key).apply { entries.addAll(entry.value) } }
+            .filter { pkg -> pkg.entries.size > 0 && !config.excludes.any { exclude -> pkg.name.startsWith(exclude)} }
+            .toSortedSet()
+        val jarData = JarData(dependencyData.fileName, packages)
+        jarDataMap[dependencyData.fileName] = jarData
+        logger.debug("Finished indexing ${dependencyData.fileName}")
+        return jarData
+    }
+
+    fun indexSourceJarData(dependencyData: DependencyData) {
+        val jarFileName = dependencyData.sourceFileName
+        if (jarFileName.isNullOrEmpty()) return
+        val jarFile = runCatching { JarFile(jarFileName) }
+        if (jarFile.isFailure) return
+        logger.debug("Indexing ${jarFileName}")
+        jarFile.getOrThrow().use {
+            it.entries().asSequence().forEach { entry ->
+                val ed = SourceEntryData.create(entry.name, jarFileName)
+                sourceMap.getOrPut(ed.name, { mutableSetOf() })
+                    .add(ed to dependencyData)
+            }
+        }
+        logger.debug("Finished indexing ${jarFileName}")
+    }
+
+    private fun createEntryData(entry: JarEntry, isJmod: Boolean) : JarEntryData {
+        if (entry.isDirectory) {
+            return PackageEntryData.create(entry.name, isJmod)
+        }
+        else if (entry.name.endsWith(".class")) {
+            return ClassEntryData.create(entry.name, isJmod)
+        }
+        else {
+            return ResourceEntryData.create(entry.name, isJmod)
         }
     }
 
     /**
-     * Fill in the contents of the given [JarEntryData] -- if a class, try and find the source or TODO decompile
-     * If resource, return the contents as is
+     * Get [ClassData] for all project classes
      */
-    fun getJarEntryContents(entry: JarEntryData) : JarEntryData {
-        val entryRecord = entryMap[entry.fqcn()]
-        if ( entryRecord == null ) return entry
-        val dependency = entryRecord.second
-        if (dependency.sourceFileName != null && entry.type == JarEntryType.CLASS) return getContentFromSourceJar(dependency.sourceFileName ?: "", dependency.jmod, entry)
-        else return getContentFromJar(dependency.fileName, entry)
+    fun getClassData() : ClassDataHolder {
+        val paths = userPath.classDirs + externalPaths.flatMap { it.classDirs }
+        paths.forEach {dir ->
+            File(dir).walkTopDown().filter { it.extension == "class" && !it.name.contains("$") }.forEach {
+                val data = ClassData.create(ClassFile(DataInputStream(it.inputStream())))
+                data.lastModified = it.lastModified()
+                data.path = it.path
+                classMap.put(it.path, data)
+            }
+        }
+        return ClassDataHolder(classMap.values)
+    }
+
+    /**
+     * Resolve the location of the source code for the given [JarEntryData]
+     * If it is a class, resolve the [ClassData] and resolve the [ClassEntryData.srcEntry]
+     * If a resource, return the entry as is.
+     * TODO decompile a class?
+     */
+    fun resolveJarEntrySource(jarFile: String, fqcn: String) : JarEntryData {
+        val entryPair = dependencyMap[fqcn]?.firstOrNull { it.second.fileName == jarFile }
+        if ( entryPair == null ) throw IllegalArgumentException("No such entry $fqcn in $jarFile")
+        val entry = entryPair.first
+        val dependencyData = entryPair.second
+        return when (entry) {
+            is ClassEntryData -> {
+                ensureResolved(dependencyData.fileName, entry)
+                entry.srcEntry = getSourceEntryData(entry, dependencyData)
+                entry
+            }
+            is ResourceEntryData -> entry
+            else -> throw IllegalStateException("Unhandled type for ${entry}")
+        }
+    }
+
+    private fun ensureResolved(file: String, entry: ClassEntryData) {
+        if (entry.isResolved()) return
+        val jarFile = JarFile(file)
+        val jarEntry = jarFile.getJarEntry(entry.path)
+        val cf = ClassFile(DataInputStream(jarFile.getInputStream(jarEntry)))
+        entry.resolve(ClassData.create(cf))
     }
 
     /**
      * Return the full classpath implied by the current dependencies (minus jdk dependencies)
      */
     fun getClasspath() : String {
-        val components = userClasspath.classDirs +
-                externalClasspath.flatMap { it.classDirs } +
+        val components = userPath.classDirs +
+                externalPaths.flatMap { it.classDirs } +
                 userSource.dependencies.map { it.fileName } +
                 externalSource.asSequence().flatMap { it.dependencies.asSequence().map { it.fileName } }
         return components.joinToString(File.pathSeparator) { it }
     }
 
-    private fun getContentFromSourceJar(fileName: String, jmod: String?, entry: JarEntryData) : JarEntryData {
-        try {
-            val jarFile = JarFile(fileName)
-            val prefix = if (jmod == null) "" else "${jmod}${File.separator}"
-            val entryPath = "${prefix}${entry.pkg.replace(".", File.separator)}${File.separator}${entry.name}"
-            var jarEntry : JarEntry? = null
-            jarEntry = config.extensions.fold(jarEntry) { curEntry, ext ->
-                if (curEntry == null) jarFile.getJarEntry("${entryPath}.${ext}") else curEntry
-            }
-            if (jarEntry == null) {
-                return entry // TODO could use getContentFromJar if we had a decompiler
-            } else {
-                val sourceEntry = pathToJarEntry(entry.pkg, jarEntry.name)
-                sourceEntry.text = jarFile.getInputStream(jarEntry).bufferedReader().use {
-                    it.readText()
-                }
-                return sourceEntry
+    private fun getSourceEntryData(entry: ClassEntryData, dependencyData: DependencyData) : SourceEntryData? {
+        val srcName = entry.srcName()
+        val entries = sourceMap.getOrElse(srcName) {
+            val srcEntry : Set<Pair<SourceEntryData, DependencyData>>? = null
+            config.extensions.fold(srcEntry) { curEntry, ext ->
+                if (curEntry == null) sourceMap.get("$srcName.$ext") else curEntry
             }
         }
-        catch (e: Exception) {
-            logger.warn("Unable to read content for ${entry.name} from ${fileName}", e)
-            return entry
-        }
+        val found = entries?.firstOrNull { it.second.fileName == dependencyData.fileName }
+        return if (found != null) found.first else entries?.firstOrNull()?.first
     }
-
-    private fun getContentFromJar(fileName: String, entry: JarEntryData) : JarEntryData {
-        try {
-            val jarFile = JarFile(fileName)
-            val jarEntry = jarFile.getJarEntry(entry.path)
-            jarFile.getInputStream(jarEntry).use {
-                entry.text = when (entry.type) {
-                    JarEntryType.RESOURCE -> getResourceFromJar(it)
-                    JarEntryType.CLASS -> getClassFromJar(it)
-                    JarEntryType.PACKAGE -> throw IllegalStateException()
-                }
-            }
-            return entry
-        }
-        catch (e: Exception) {
-            throw RuntimeException("Unable to read content for ${entry.name}")
-        }
-    }
-
-    private fun getResourceFromJar(stream: InputStream) : String {
-        return stream.bufferedReader().use {
-            it.readText()
-        }
-    }
-
-    private fun getClassFromJar(stream: InputStream) : String {
-        stream.use {  it.readBytes() } // TODO Decompile the byte code some day
-        return "No Source Found"
-    }
-
-    /**
-     * Turn a jar path into a JarEntryData
-     */
-    private fun pathToJarEntry(packageName: String, path: String) : JarEntryData {
-        val parts = path.split("/")
-        val fileName = parts[parts.size-1]
-        val type = when (fileName.endsWith(".class")) {
-            true -> JarEntryType.CLASS
-            else -> JarEntryType.RESOURCE
-        }
-        val name = when (type) {
-            JarEntryType.CLASS -> fileName.replace(".class", "")
-            else -> fileName
-        }
-        return JarEntryData(name, type, packageName, "")
-    }
-
 
 }

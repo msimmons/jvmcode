@@ -15,7 +15,7 @@ class JarEntryDataTest {
                 Triple("classes/net/File.java", true, Pair("net", "File.java"))
         )
         testData.forEach {
-            val jed = JarEntryData.create(it.first, it.second)
+            val jed = ClassEntryData.create(it.first, it.second)
             jed.pkg shouldBe it.third.first
             jed.name shouldBe it.third.second
         }

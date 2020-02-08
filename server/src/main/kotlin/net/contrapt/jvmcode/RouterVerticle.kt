@@ -4,6 +4,7 @@ import io.vertx.core.AbstractVerticle
 import io.vertx.core.DeploymentOptions
 import io.vertx.core.Handler
 import io.vertx.core.http.HttpServer
+import io.vertx.core.http.HttpServerOptions
 import io.vertx.core.json.JsonObject
 import io.vertx.core.logging.LoggerFactory
 import io.vertx.ext.bridge.BridgeEventType
@@ -13,17 +14,23 @@ import io.vertx.ext.web.handler.StaticHandler
 import io.vertx.ext.web.handler.sockjs.BridgeEvent
 import io.vertx.ext.web.handler.sockjs.BridgeOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
+import io.vertx.ext.web.handler.sockjs.SockJSHandlerOptions
 import net.contrapt.jvmcode.handler.*
+import net.contrapt.jvmcode.service.ParseService
 import net.contrapt.jvmcode.model.JvmConfig
+import net.contrapt.jvmcode.service.CompileService
 import net.contrapt.jvmcode.service.ProjectService
+import net.contrapt.jvmcode.service.SymbolRepository
 import java.io.File
 
-class RouterVerticle(val startupToken: String, var config: JvmConfig) : AbstractVerticle() {
+class RouterVerticle(val startupToken: String, var config: JvmConfig, symbolRepository: SymbolRepository) : AbstractVerticle() {
 
     private val logger = LoggerFactory.getLogger(javaClass)
     private val deployments = mutableMapOf<String, String>()
     private val javaHome = System.getProperty("java.home").replace("${File.separator}jre", "")
-    private val projectService = ProjectService(config, javaHome)
+    private val parseService = ParseService(symbolRepository)
+    private val compileService = CompileService(symbolRepository)
+    private val projectService = ProjectService(config, javaHome, symbolRepository)
 
     var httpPort = 0
         private set
@@ -36,7 +43,11 @@ class RouterVerticle(val startupToken: String, var config: JvmConfig) : Abstract
     }
 
     fun startRouter() {
-        httpServer = vertx.createHttpServer()
+        val httpServerOptions = HttpServerOptions().apply {
+            maxWebsocketFrameSize = 1024 * 1024
+            maxWebsocketMessageSize = 1024 * 1024
+        }
+        httpServer = vertx.createHttpServer(httpServerOptions)
         router = Router.router(vertx)
 
         val bridgeOptions = BridgeOptions().apply {
@@ -44,7 +55,6 @@ class RouterVerticle(val startupToken: String, var config: JvmConfig) : Abstract
             addOutboundPermitted(PermittedOptions().apply { addressRegex = ".*" })
             setReplyTimeout(5 * 60 * 1000)
         }
-
         val sockJs = SockJSHandler.create(vertx)
         sockJs.bridge(bridgeOptions, bridgeEventHandler())
 
@@ -189,14 +199,23 @@ class RouterVerticle(val startupToken: String, var config: JvmConfig) : Abstract
 
         /**
          * Update project info (dependencies, classpath) -- likely called by other extensions such as Gradle or Maven integration
-         * { source: string, project: JvmProject }
          */
         vertx.eventBus().consumer<JsonObject>("jvmcode.update-project", UpdateProject(vertx, projectService))
+
+        /**
+         * Update project info (dependencies, classpath) for user defined project
+         */
+        vertx.eventBus().consumer<JsonObject>("jvmcode.update-user-project", UpdateUserProject(vertx, projectService))
 
         /**
          * Return the jar entries for the given dependency
          */
         vertx.eventBus().consumer<JsonObject>("jvmcode.jar-entries", JarEntries(vertx, projectService))
+
+        /**
+         * Return all the class data for this project
+         */
+        vertx.eventBus().consumer<JsonObject>("jvmcode.classdata", ClassDataHandler(vertx, projectService))
 
         /**
          * Return the contents of the given jar entry
@@ -209,14 +228,34 @@ class RouterVerticle(val startupToken: String, var config: JvmConfig) : Abstract
         vertx.eventBus().consumer<JsonObject>("jvmcode.add-dependency", AddDependency(vertx, projectService))
 
         /**
-         * Add a single class directory to the classpath
+         * Remove a single jar file dependency
          */
-        vertx.eventBus().consumer<JsonObject>("jvmcode.add-classdir", AddClassDir(vertx, projectService))
+        vertx.eventBus().consumer<JsonObject>("jvmcode.remove-dependency", RemoveDependency(vertx, projectService))
+
+        /**
+         * Add one or more path components (from the user)
+         */
+        vertx.eventBus().consumer<JsonObject>("jvmcode.add-path", AddPath(vertx, projectService))
+
+        /**
+         * Remove a user entered path component
+         */
+        vertx.eventBus().consumer<JsonObject>("jvmcode.remove-path", RemovePath(vertx, projectService))
 
         /**
          * Return the classpath for the current set of dependencies
          */
         vertx.eventBus().consumer<JsonObject>("jvmcode.classpath", GetClasspath(vertx, projectService))
 
+        /**
+         * Request compilation for the given files
+         */
+        vertx.eventBus().consumer<JsonObject>("jvmcode.request-compile", RequestCompile(vertx, compileService))
+
+        /**
+         * Request parsing the given file
+         */
+        vertx.eventBus().consumer<JsonObject>("jvmcode.request-parse", RequestParse(vertx, parseService))
     }
+
 }
