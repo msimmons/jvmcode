@@ -1,0 +1,5180 @@
+{
+  "pkg" : {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3031,
+      "end" : 3045
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 127,
+    "parent" : -1,
+    "id" : 187,
+    "name" : "org.slf4j.event",
+    "type" : "org.slf4j.event",
+    "symbolType" : "PACKAGE",
+    "location" : {
+      "start" : 3031,
+      "end" : 3045
+    },
+    "wild" : false,
+    "static" : false
+  },
+  "imports" : [ {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 113,
+      "end" : 132
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 10,
+    "parent" : -1,
+    "id" : 1,
+    "name" : "java.math.BigDecimal",
+    "type" : "java.math.BigDecimal",
+    "symbolType" : "IMPORT",
+    "location" : {
+      "start" : 113,
+      "end" : 132
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 142,
+      "end" : 152
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 11,
+    "parent" : -1,
+    "id" : 2,
+    "name" : "java.math.*",
+    "type" : "java.math.*",
+    "symbolType" : "IMPORT",
+    "location" : {
+      "start" : 142,
+      "end" : 152
+    },
+    "wild" : true,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 169,
+      "end" : 184
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 12,
+    "parent" : -1,
+    "id" : 3,
+    "name" : "net.contrapt.FOO",
+    "type" : "net.contrapt.FOO",
+    "symbolType" : "IMPORT",
+    "location" : {
+      "start" : 169,
+      "end" : 184
+    },
+    "wild" : false,
+    "static" : true
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3060,
+      "end" : 3075
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 129,
+    "parent" : -1,
+    "id" : 188,
+    "name" : "org.slf4j.Marker",
+    "type" : "org.slf4j.Marker",
+    "symbolType" : "IMPORT",
+    "location" : {
+      "start" : 3060,
+      "end" : 3075
+    },
+    "wild" : false,
+    "static" : false
+  } ],
+  "symbols" : [ {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 74,
+      "end" : 102
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 8,
+    "parent" : -1,
+    "id" : 0,
+    "name" : "net.contrapt.jvmcode.language",
+    "type" : "net.contrapt.jvmcode.language",
+    "symbolType" : "PACKAGE",
+    "location" : {
+      "start" : 74,
+      "end" : 102
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 113,
+      "end" : 132
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 10,
+    "parent" : -1,
+    "id" : 1,
+    "name" : "java.math.BigDecimal",
+    "type" : "java.math.BigDecimal",
+    "symbolType" : "IMPORT",
+    "location" : {
+      "start" : 113,
+      "end" : 132
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 142,
+      "end" : 152
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 11,
+    "parent" : -1,
+    "id" : 2,
+    "name" : "java.math.*",
+    "type" : "java.math.*",
+    "symbolType" : "IMPORT",
+    "location" : {
+      "start" : 142,
+      "end" : 152
+    },
+    "wild" : true,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 169,
+      "end" : 184
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 12,
+    "parent" : -1,
+    "id" : 3,
+    "name" : "net.contrapt.FOO",
+    "type" : "net.contrapt.FOO",
+    "symbolType" : "IMPORT",
+    "location" : {
+      "start" : 169,
+      "end" : 184
+    },
+    "wild" : false,
+    "static" : true
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 258,
+      "end" : 262
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 15,
+    "parent" : -1,
+    "id" : 4,
+    "name" : "value",
+    "type" : "value",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 258,
+      "end" : 262
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 265,
+      "end" : 270
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 15,
+    "parent" : -1,
+    "id" : 5,
+    "name" : "Nested",
+    "type" : "Nested",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 265,
+      "end" : 270
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 280,
+      "end" : 285
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 15,
+    "parent" : -1,
+    "id" : 6,
+    "name" : "value2",
+    "type" : "value2",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 280,
+      "end" : 285
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 287,
+      "end" : 289
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 15,
+    "parent" : -1,
+    "id" : 7,
+    "name" : "bar",
+    "type" : "bar",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 287,
+      "end" : 289
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 242,
+      "end" : 256
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 15,
+    "parent" : -1,
+    "id" : 8,
+    "name" : "ClassAnnotation",
+    "type" : "ClassAnnotation",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 242,
+      "end" : 256
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ 10, 11, 12, 13, 14, 18, 23, 24, 25, 26, 27, 32, 33, 153, 154, 155, 156, 163, 180, 181, 182, 183 ],
+    "scopeEnd" : {
+      "start" : 3020,
+      "end" : 3020
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 16,
+    "parent" : -1,
+    "id" : 9,
+    "name" : "TryIt",
+    "type" : "TryIt",
+    "symbolType" : "CLASS",
+    "location" : {
+      "start" : 305,
+      "end" : 309
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 319,
+      "end" : 324
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 16,
+    "parent" : 9,
+    "id" : 10,
+    "name" : "Object",
+    "type" : "Object",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 319,
+      "end" : 324
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 337,
+      "end" : 348
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 16,
+    "parent" : 9,
+    "id" : 11,
+    "name" : "Serializable",
+    "type" : "Serializable",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 337,
+      "end" : 348
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 351,
+      "end" : 360
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 16,
+    "parent" : 9,
+    "id" : 12,
+    "name" : "Comparable",
+    "type" : "Comparable",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 351,
+      "end" : 360
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 305,
+      "end" : 305
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 16,
+    "parent" : 9,
+    "id" : 13,
+    "name" : "this",
+    "type" : "TryIt",
+    "symbolType" : "THIS",
+    "location" : {
+      "start" : 305,
+      "end" : 305
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ 15, 16, 17 ],
+    "scopeEnd" : {
+      "start" : 430,
+      "end" : 430
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 18,
+    "parent" : 9,
+    "id" : 14,
+    "name" : "{",
+    "type" : "",
+    "symbolType" : "BLOCK",
+    "location" : {
+      "start" : 376,
+      "end" : 376
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 386,
+      "end" : 391
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 19,
+    "parent" : 14,
+    "id" : 15,
+    "name" : "System",
+    "type" : "System",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 386,
+      "end" : 391
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 393,
+      "end" : 402
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : 15,
+    "row" : 19,
+    "parent" : 14,
+    "id" : 16,
+    "name" : "properties",
+    "type" : "properties",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 393,
+      "end" : 402
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 404,
+      "end" : 406
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : 16,
+    "row" : 19,
+    "parent" : 14,
+    "id" : 17,
+    "name" : "set",
+    "type" : "set",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 404,
+      "end" : 406
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ 19, 20, 21, 22 ],
+    "scopeEnd" : {
+      "start" : 480,
+      "end" : 480
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 22,
+    "parent" : 9,
+    "id" : 18,
+    "name" : "TryIt",
+    "type" : "TryIt",
+    "symbolType" : "CONSTRUCTOR",
+    "location" : {
+      "start" : 444,
+      "end" : 448
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 450,
+      "end" : 452
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 22,
+    "parent" : 18,
+    "id" : 19,
+    "name" : "int",
+    "type" : "int",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 450,
+      "end" : 452
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 454,
+      "end" : 454
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 22,
+    "parent" : 18,
+    "id" : 20,
+    "name" : "a",
+    "type" : "int",
+    "symbolType" : "VARIABLE",
+    "location" : {
+      "start" : 454,
+      "end" : 454
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 457,
+      "end" : 472
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 22,
+    "parent" : 18,
+    "id" : 21,
+    "name" : "java.lang.String",
+    "type" : "java.lang.String",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 457,
+      "end" : 472
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 474,
+      "end" : 474
+    },
+    "arrayDim" : 1,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 22,
+    "parent" : 18,
+    "id" : 22,
+    "name" : "b",
+    "type" : "java.lang.String",
+    "symbolType" : "VARIABLE",
+    "location" : {
+      "start" : 474,
+      "end" : 474
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 487,
+      "end" : 492
+    },
+    "arrayDim" : 2,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 24,
+    "parent" : 9,
+    "id" : 23,
+    "name" : "String",
+    "type" : "String",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 487,
+      "end" : 492
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 498,
+      "end" : 500
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 24,
+    "parent" : 9,
+    "id" : 24,
+    "name" : "foo",
+    "type" : "String",
+    "symbolType" : "FIELD",
+    "location" : {
+      "start" : 498,
+      "end" : 500
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 503,
+      "end" : 505
+    },
+    "arrayDim" : 2,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 24,
+    "parent" : 9,
+    "id" : 25,
+    "name" : "bar",
+    "type" : "String",
+    "symbolType" : "FIELD",
+    "location" : {
+      "start" : 503,
+      "end" : 505
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 534,
+      "end" : 540
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 26,
+    "parent" : 9,
+    "id" : 26,
+    "name" : "Integer",
+    "type" : "Integer",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 534,
+      "end" : 540
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ 28, 29, 30, 31 ],
+    "scopeEnd" : {
+      "start" : 577,
+      "end" : 577
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 26,
+    "parent" : 9,
+    "id" : 27,
+    "name" : "abstractMethod",
+    "type" : "Integer",
+    "symbolType" : "METHOD",
+    "location" : {
+      "start" : 542,
+      "end" : 555
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 557,
+      "end" : 559
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 26,
+    "parent" : 27,
+    "id" : 28,
+    "name" : "int",
+    "type" : "int",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 557,
+      "end" : 559
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 561,
+      "end" : 562
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 26,
+    "parent" : 27,
+    "id" : 29,
+    "name" : "p1",
+    "type" : "int",
+    "symbolType" : "VARIABLE",
+    "location" : {
+      "start" : 561,
+      "end" : 562
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 565,
+      "end" : 570
+    },
+    "arrayDim" : 1,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 26,
+    "parent" : 27,
+    "id" : 30,
+    "name" : "String",
+    "type" : "String",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 565,
+      "end" : 570
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 574,
+      "end" : 575
+    },
+    "arrayDim" : 1,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 26,
+    "parent" : 27,
+    "id" : 31,
+    "name" : "p2",
+    "type" : "String",
+    "symbolType" : "VARIABLE",
+    "location" : {
+      "start" : 574,
+      "end" : 575
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 592,
+      "end" : 595
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 28,
+    "parent" : 9,
+    "id" : 32,
+    "name" : "void",
+    "type" : "void",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 592,
+      "end" : 595
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 95, 102, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 124, 129, 131, 145, 152 ],
+    "scopeEnd" : {
+      "start" : 2234,
+      "end" : 2234
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 28,
+    "parent" : 9,
+    "id" : 33,
+    "name" : "aMethod",
+    "type" : "void",
+    "symbolType" : "METHOD",
+    "location" : {
+      "start" : 597,
+      "end" : 603
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 605,
+      "end" : 607
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 28,
+    "parent" : 33,
+    "id" : 34,
+    "name" : "int",
+    "type" : "int",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 605,
+      "end" : 607
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 609,
+      "end" : 609
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 28,
+    "parent" : 33,
+    "id" : 35,
+    "name" : "a",
+    "type" : "int",
+    "symbolType" : "VARIABLE",
+    "location" : {
+      "start" : 609,
+      "end" : 609
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 612,
+      "end" : 617
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 28,
+    "parent" : 33,
+    "id" : 36,
+    "name" : "String",
+    "type" : "String",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 612,
+      "end" : 617
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 619,
+      "end" : 619
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 28,
+    "parent" : 33,
+    "id" : 37,
+    "name" : "b",
+    "type" : "String",
+    "symbolType" : "VARIABLE",
+    "location" : {
+      "start" : 619,
+      "end" : 619
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 623,
+      "end" : 625
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 28,
+    "parent" : 33,
+    "id" : 38,
+    "name" : "ann",
+    "type" : "ann",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 623,
+      "end" : 625
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 634,
+      "end" : 637
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 28,
+    "parent" : 33,
+    "id" : 39,
+    "name" : "Long",
+    "type" : "Long",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 634,
+      "end" : 637
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 639,
+      "end" : 639
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 28,
+    "parent" : 33,
+    "id" : 40,
+    "name" : "c",
+    "type" : "Long",
+    "symbolType" : "VARIABLE",
+    "location" : {
+      "start" : 639,
+      "end" : 639
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 652,
+      "end" : 653
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 29,
+    "parent" : 33,
+    "id" : 41,
+    "name" : "tl",
+    "type" : "tl",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 652,
+      "end" : 653
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 655,
+      "end" : 657
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : 41,
+    "row" : 29,
+    "parent" : 33,
+    "id" : 42,
+    "name" : "set",
+    "type" : "set",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 655,
+      "end" : 657
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 663,
+      "end" : 675
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 29,
+    "parent" : 33,
+    "id" : 43,
+    "name" : "SoftReference",
+    "type" : "SoftReference",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 663,
+      "end" : 675
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 679,
+      "end" : 680
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 29,
+    "parent" : 33,
+    "id" : 44,
+    "name" : "ob",
+    "type" : "ob",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 679,
+      "end" : 680
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 693,
+      "end" : 693
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 30,
+    "parent" : 33,
+    "id" : 45,
+    "name" : "v",
+    "type" : "v",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 693,
+      "end" : 693
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 708,
+      "end" : 708
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 31,
+    "parent" : 33,
+    "id" : 46,
+    "name" : "v",
+    "type" : "v",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 708,
+      "end" : 708
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 724,
+      "end" : 724
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 32,
+    "parent" : 33,
+    "id" : 47,
+    "name" : "v",
+    "type" : "v",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 724,
+      "end" : 724
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 740,
+      "end" : 740
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 33,
+    "parent" : 33,
+    "id" : 48,
+    "name" : "v",
+    "type" : "v",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 740,
+      "end" : 740
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 757,
+      "end" : 757
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 34,
+    "parent" : 33,
+    "id" : 49,
+    "name" : "v",
+    "type" : "v",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 757,
+      "end" : 757
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 773,
+      "end" : 773
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 35,
+    "parent" : 33,
+    "id" : 50,
+    "name" : "v",
+    "type" : "v",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 773,
+      "end" : 773
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 789,
+      "end" : 789
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 36,
+    "parent" : 33,
+    "id" : 51,
+    "name" : "v",
+    "type" : "v",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 789,
+      "end" : 789
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 804,
+      "end" : 804
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 37,
+    "parent" : 33,
+    "id" : 52,
+    "name" : "v",
+    "type" : "v",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 804,
+      "end" : 804
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 820,
+      "end" : 820
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 38,
+    "parent" : 33,
+    "id" : 53,
+    "name" : "v",
+    "type" : "v",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 820,
+      "end" : 820
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 836,
+      "end" : 836
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 39,
+    "parent" : 33,
+    "id" : 54,
+    "name" : "v",
+    "type" : "v",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 836,
+      "end" : 836
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 852,
+      "end" : 852
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 40,
+    "parent" : 33,
+    "id" : 55,
+    "name" : "v",
+    "type" : "v",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 852,
+      "end" : 852
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 888,
+      "end" : 888
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 42,
+    "parent" : 33,
+    "id" : 56,
+    "name" : "v",
+    "type" : "v",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 888,
+      "end" : 888
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 904,
+      "end" : 904
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 43,
+    "parent" : 33,
+    "id" : 57,
+    "name" : "v",
+    "type" : "v",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 904,
+      "end" : 904
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 920,
+      "end" : 920
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 44,
+    "parent" : 33,
+    "id" : 58,
+    "name" : "v",
+    "type" : "v",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 920,
+      "end" : 920
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 935,
+      "end" : 935
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 45,
+    "parent" : 33,
+    "id" : 59,
+    "name" : "v",
+    "type" : "v",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 935,
+      "end" : 935
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 950,
+      "end" : 950
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 46,
+    "parent" : 33,
+    "id" : 60,
+    "name" : "v",
+    "type" : "v",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 950,
+      "end" : 950
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 966,
+      "end" : 966
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 47,
+    "parent" : 33,
+    "id" : 61,
+    "name" : "v",
+    "type" : "v",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 966,
+      "end" : 966
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 982,
+      "end" : 982
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 48,
+    "parent" : 33,
+    "id" : 62,
+    "name" : "v",
+    "type" : "v",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 982,
+      "end" : 982
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 998,
+      "end" : 998
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 49,
+    "parent" : 33,
+    "id" : 63,
+    "name" : "v",
+    "type" : "v",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 998,
+      "end" : 998
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1014,
+      "end" : 1014
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 50,
+    "parent" : 33,
+    "id" : 64,
+    "name" : "b",
+    "type" : "b",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1014,
+      "end" : 1014
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1016,
+      "end" : 1021
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : 64,
+    "row" : 50,
+    "parent" : 33,
+    "id" : 65,
+    "name" : "length",
+    "type" : "length",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1016,
+      "end" : 1021
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1025,
+      "end" : 1028
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 50,
+    "parent" : 33,
+    "id" : 66,
+    "name" : "trim",
+    "type" : "trim",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1025,
+      "end" : 1028
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1032,
+      "end" : 1039
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 50,
+    "parent" : 33,
+    "id" : 67,
+    "name" : "subtring",
+    "type" : "subtring",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1032,
+      "end" : 1039
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1057,
+      "end" : 1068
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 51,
+    "parent" : 33,
+    "id" : 68,
+    "name" : "JsonProperty",
+    "type" : "JsonProperty",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 1057,
+      "end" : 1068
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1077,
+      "end" : 1079
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 51,
+    "parent" : 33,
+    "id" : 69,
+    "name" : "int",
+    "type" : "int",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 1077,
+      "end" : 1079
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1081,
+      "end" : 1081
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 51,
+    "parent" : 33,
+    "id" : 70,
+    "name" : "a",
+    "type" : "int",
+    "symbolType" : "VARIABLE",
+    "location" : {
+      "start" : 1081,
+      "end" : 1081
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1092,
+      "end" : 1094
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 52,
+    "parent" : 33,
+    "id" : 71,
+    "name" : "int",
+    "type" : "int",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 1092,
+      "end" : 1094
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1096,
+      "end" : 1096
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 52,
+    "parent" : 33,
+    "id" : 72,
+    "name" : "b",
+    "type" : "int",
+    "symbolType" : "VARIABLE",
+    "location" : {
+      "start" : 1096,
+      "end" : 1096
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1122,
+      "end" : 1124
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 53,
+    "parent" : 33,
+    "id" : 73,
+    "name" : "int",
+    "type" : "int",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 1122,
+      "end" : 1124
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1126,
+      "end" : 1126
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 53,
+    "parent" : 33,
+    "id" : 74,
+    "name" : "c",
+    "type" : "int",
+    "symbolType" : "VARIABLE",
+    "location" : {
+      "start" : 1126,
+      "end" : 1126
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1129,
+      "end" : 1129
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 53,
+    "parent" : 33,
+    "id" : 75,
+    "name" : "d",
+    "type" : "int",
+    "symbolType" : "VARIABLE",
+    "location" : {
+      "start" : 1129,
+      "end" : 1129
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1147,
+      "end" : 1150
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 54,
+    "parent" : 33,
+    "id" : 76,
+    "name" : "char",
+    "type" : "char",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 1147,
+      "end" : 1150
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1152,
+      "end" : 1152
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 54,
+    "parent" : 33,
+    "id" : 77,
+    "name" : "u",
+    "type" : "char",
+    "symbolType" : "VARIABLE",
+    "location" : {
+      "start" : 1152,
+      "end" : 1152
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1177,
+      "end" : 1179
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 55,
+    "parent" : 33,
+    "id" : 78,
+    "name" : "int",
+    "type" : "int",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 1177,
+      "end" : 1179
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1181,
+      "end" : 1183
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 55,
+    "parent" : 33,
+    "id" : 79,
+    "name" : "foo",
+    "type" : "int",
+    "symbolType" : "VARIABLE",
+    "location" : {
+      "start" : 1181,
+      "end" : 1183
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1201,
+      "end" : 1203
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 55,
+    "parent" : 33,
+    "id" : 80,
+    "name" : "bar",
+    "type" : "bar",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1201,
+      "end" : 1203
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1208,
+      "end" : 1210
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 55,
+    "parent" : 33,
+    "id" : 81,
+    "name" : "foo",
+    "type" : "foo",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1208,
+      "end" : 1210
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1212,
+      "end" : 1214
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 55,
+    "parent" : 33,
+    "id" : 82,
+    "name" : "bar",
+    "type" : "bar",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1212,
+      "end" : 1214
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1218,
+      "end" : 1220
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 55,
+    "parent" : 33,
+    "id" : 83,
+    "name" : "biz",
+    "type" : "biz",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1218,
+      "end" : 1220
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1231,
+      "end" : 1234
+    },
+    "arrayDim" : 1,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 56,
+    "parent" : 33,
+    "id" : 84,
+    "name" : "byte",
+    "type" : "byte",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 1231,
+      "end" : 1234
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1238,
+      "end" : 1239
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 56,
+    "parent" : 33,
+    "id" : 85,
+    "name" : "bb",
+    "type" : "byte",
+    "symbolType" : "VARIABLE",
+    "location" : {
+      "start" : 1238,
+      "end" : 1239
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1243,
+      "end" : 1243
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 56,
+    "parent" : 33,
+    "id" : 86,
+    "name" : "x",
+    "type" : "x",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1243,
+      "end" : 1243
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1273,
+      "end" : 1273
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 57,
+    "parent" : 33,
+    "id" : 87,
+    "name" : "f",
+    "type" : "f",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1273,
+      "end" : 1273
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1277,
+      "end" : 1277
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 57,
+    "parent" : 33,
+    "id" : 88,
+    "name" : "g",
+    "type" : "g",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1277,
+      "end" : 1277
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1294,
+      "end" : 1294
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 58,
+    "parent" : 33,
+    "id" : 89,
+    "name" : "f",
+    "type" : "f",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1294,
+      "end" : 1294
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ 91, 92, 93, 94 ],
+    "scopeEnd" : {
+      "start" : 1388,
+      "end" : 1388
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 59,
+    "parent" : 33,
+    "id" : 90,
+    "name" : "if",
+    "type" : "",
+    "symbolType" : "CONTROL",
+    "location" : {
+      "start" : 1312,
+      "end" : 1313
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1338,
+      "end" : 1338
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 60,
+    "parent" : 90,
+    "id" : 91,
+    "name" : "g",
+    "type" : "g",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1338,
+      "end" : 1338
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1360,
+      "end" : 1360
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 61,
+    "parent" : 90,
+    "id" : 92,
+    "name" : "g",
+    "type" : "g",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1360,
+      "end" : 1360
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1364,
+      "end" : 1367
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 61,
+    "parent" : 90,
+    "id" : 93,
+    "name" : "this",
+    "type" : "this",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1364,
+      "end" : 1367
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1369,
+      "end" : 1375
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : 93,
+    "row" : 61,
+    "parent" : 90,
+    "id" : 94,
+    "name" : "aMethod",
+    "type" : "aMethod",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1369,
+      "end" : 1375
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ 96, 97, 98, 99, 100, 101 ],
+    "scopeEnd" : {
+      "start" : 1433,
+      "end" : 1433
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 63,
+    "parent" : 33,
+    "id" : 95,
+    "name" : "for",
+    "type" : "",
+    "symbolType" : "CONTROL",
+    "location" : {
+      "start" : 1398,
+      "end" : 1400
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1403,
+      "end" : 1405
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 63,
+    "parent" : 95,
+    "id" : 96,
+    "name" : "int",
+    "type" : "int",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 1403,
+      "end" : 1405
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1407,
+      "end" : 1407
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 63,
+    "parent" : 95,
+    "id" : 97,
+    "name" : "i",
+    "type" : "int",
+    "symbolType" : "VARIABLE",
+    "location" : {
+      "start" : 1407,
+      "end" : 1407
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1412,
+      "end" : 1412
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 63,
+    "parent" : 95,
+    "id" : 98,
+    "name" : "i",
+    "type" : "i",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1412,
+      "end" : 1412
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1417,
+      "end" : 1417
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 63,
+    "parent" : 95,
+    "id" : 99,
+    "name" : "i",
+    "type" : "i",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1417,
+      "end" : 1417
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1422,
+      "end" : 1422
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 63,
+    "parent" : 95,
+    "id" : 100,
+    "name" : "x",
+    "type" : "x",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1422,
+      "end" : 1422
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1432,
+      "end" : 1432
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 63,
+    "parent" : 95,
+    "id" : 101,
+    "name" : "y",
+    "type" : "y",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1432,
+      "end" : 1432
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ 103, 104, 105, 106, 107 ],
+    "scopeEnd" : {
+      "start" : 1507,
+      "end" : 1507
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 64,
+    "parent" : 33,
+    "id" : 102,
+    "name" : "for",
+    "type" : "",
+    "symbolType" : "CONTROL",
+    "location" : {
+      "start" : 1443,
+      "end" : 1445
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1449,
+      "end" : 1454
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 64,
+    "parent" : 102,
+    "id" : 103,
+    "name" : "String",
+    "type" : "String",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 1449,
+      "end" : 1454
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1456,
+      "end" : 1456
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 64,
+    "parent" : 102,
+    "id" : 104,
+    "name" : "s",
+    "type" : "String",
+    "symbolType" : "VARIABLE",
+    "location" : {
+      "start" : 1456,
+      "end" : 1456
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1460,
+      "end" : 1466
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 64,
+    "parent" : 102,
+    "id" : 105,
+    "name" : "strings",
+    "type" : "strings",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1460,
+      "end" : 1466
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1483,
+      "end" : 1493
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 65,
+    "parent" : 102,
+    "id" : 106,
+    "name" : "doSomething",
+    "type" : "doSomething",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1483,
+      "end" : 1493
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1495,
+      "end" : 1495
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 65,
+    "parent" : 102,
+    "id" : 107,
+    "name" : "s",
+    "type" : "s",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1495,
+      "end" : 1495
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1517,
+      "end" : 1517
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 67,
+    "parent" : 33,
+    "id" : 108,
+    "name" : "x",
+    "type" : "x",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1517,
+      "end" : 1517
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1525,
+      "end" : 1527
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 67,
+    "parent" : 33,
+    "id" : 109,
+    "name" : "Foo",
+    "type" : "Foo",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1525,
+      "end" : 1527
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1540,
+      "end" : 1540
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 68,
+    "parent" : 33,
+    "id" : 110,
+    "name" : "x",
+    "type" : "x",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1540,
+      "end" : 1540
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1542,
+      "end" : 1552
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : 110,
+    "row" : 68,
+    "parent" : 33,
+    "id" : 111,
+    "name" : "doSomething",
+    "type" : "doSomething",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1542,
+      "end" : 1552
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1554,
+      "end" : 1554
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 68,
+    "parent" : 33,
+    "id" : 112,
+    "name" : "x",
+    "type" : "x",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1554,
+      "end" : 1554
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1557,
+      "end" : 1557
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 68,
+    "parent" : 33,
+    "id" : 113,
+    "name" : "y",
+    "type" : "y",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1557,
+      "end" : 1557
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1560,
+      "end" : 1562
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 68,
+    "parent" : 33,
+    "id" : 114,
+    "name" : "foo",
+    "type" : "foo",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1560,
+      "end" : 1562
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1576,
+      "end" : 1576
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 69,
+    "parent" : 33,
+    "id" : 115,
+    "name" : "y",
+    "type" : "y",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1576,
+      "end" : 1576
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1580,
+      "end" : 1580
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 69,
+    "parent" : 33,
+    "id" : 116,
+    "name" : "x",
+    "type" : "x",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1580,
+      "end" : 1580
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1582,
+      "end" : 1587
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : 116,
+    "row" : 69,
+    "parent" : 33,
+    "id" : 117,
+    "name" : "aField",
+    "type" : "aField",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1582,
+      "end" : 1587
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1602,
+      "end" : 1602
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 70,
+    "parent" : 33,
+    "id" : 118,
+    "name" : "do",
+    "type" : "",
+    "symbolType" : "CONTROL",
+    "location" : {
+      "start" : 1598,
+      "end" : 1599
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ 120 ],
+    "scopeEnd" : {
+      "start" : 1700,
+      "end" : 1700
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 71,
+    "parent" : 33,
+    "id" : 119,
+    "name" : "try",
+    "type" : "",
+    "symbolType" : "CONTROL",
+    "location" : {
+      "start" : 1612,
+      "end" : 1614
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ 121, 122, 123 ],
+    "scopeEnd" : {
+      "start" : 1690,
+      "end" : 1690
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 72,
+    "parent" : 119,
+    "id" : 120,
+    "name" : "while",
+    "type" : "",
+    "symbolType" : "CONTROL",
+    "location" : {
+      "start" : 1630,
+      "end" : 1634
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1637,
+      "end" : 1637
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 72,
+    "parent" : 120,
+    "id" : 121,
+    "name" : "x",
+    "type" : "x",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1637,
+      "end" : 1637
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1642,
+      "end" : 1642
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 72,
+    "parent" : 120,
+    "id" : 122,
+    "name" : "y",
+    "type" : "y",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1642,
+      "end" : 1642
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1663,
+      "end" : 1673
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 73,
+    "parent" : 120,
+    "id" : 123,
+    "name" : "doSomething",
+    "type" : "doSomething",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1663,
+      "end" : 1673
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ 125, 126, 127, 128 ],
+    "scopeEnd" : {
+      "start" : 1777,
+      "end" : 1777
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 76,
+    "parent" : 33,
+    "id" : 124,
+    "name" : "catch",
+    "type" : "",
+    "symbolType" : "CONTROL",
+    "location" : {
+      "start" : 1710,
+      "end" : 1714
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1717,
+      "end" : 1725
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 76,
+    "parent" : 124,
+    "id" : 125,
+    "name" : "Exception",
+    "type" : "Exception",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 1717,
+      "end" : 1725
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1727,
+      "end" : 1727
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 76,
+    "parent" : 124,
+    "id" : 126,
+    "name" : "e",
+    "type" : "Exception",
+    "symbolType" : "VARIABLE",
+    "location" : {
+      "start" : 1727,
+      "end" : 1727
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1744,
+      "end" : 1749
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 77,
+    "parent" : 124,
+    "id" : 127,
+    "name" : "System",
+    "type" : "System",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1744,
+      "end" : 1749
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1751,
+      "end" : 1757
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : 127,
+    "row" : 77,
+    "parent" : 124,
+    "id" : 128,
+    "name" : "println",
+    "type" : "println",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1751,
+      "end" : 1757
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ 130 ],
+    "scopeEnd" : {
+      "start" : 1834,
+      "end" : 1834
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 79,
+    "parent" : 33,
+    "id" : 129,
+    "name" : "finally",
+    "type" : "",
+    "symbolType" : "CONTROL",
+    "location" : {
+      "start" : 1787,
+      "end" : 1793
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1809,
+      "end" : 1821
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 80,
+    "parent" : 129,
+    "id" : 130,
+    "name" : "somethingElse",
+    "type" : "somethingElse",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1809,
+      "end" : 1821
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ 132, 133 ],
+    "scopeEnd" : {
+      "start" : 2033,
+      "end" : 2033
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 82,
+    "parent" : 33,
+    "id" : 131,
+    "name" : "if",
+    "type" : "",
+    "symbolType" : "CONTROL",
+    "location" : {
+      "start" : 1844,
+      "end" : 1845
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1848,
+      "end" : 1855
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 82,
+    "parent" : 131,
+    "id" : 132,
+    "name" : "isLatin1",
+    "type" : "isLatin1",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1848,
+      "end" : 1855
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ 134, 135, 136, 137, 138, 139 ],
+    "scopeEnd" : {
+      "start" : 2023,
+      "end" : 2023
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 83,
+    "parent" : 131,
+    "id" : 133,
+    "name" : "for",
+    "type" : "",
+    "symbolType" : "CONTROL",
+    "location" : {
+      "start" : 1874,
+      "end" : 1876
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1879,
+      "end" : 1881
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 83,
+    "parent" : 133,
+    "id" : 134,
+    "name" : "int",
+    "type" : "int",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 1879,
+      "end" : 1881
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1883,
+      "end" : 1883
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 83,
+    "parent" : 133,
+    "id" : 135,
+    "name" : "i",
+    "type" : "int",
+    "symbolType" : "VARIABLE",
+    "location" : {
+      "start" : 1883,
+      "end" : 1883
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1890,
+      "end" : 1890
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 83,
+    "parent" : 133,
+    "id" : 136,
+    "name" : "i",
+    "type" : "i",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1890,
+      "end" : 1890
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1894,
+      "end" : 1894
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 83,
+    "parent" : 133,
+    "id" : 137,
+    "name" : "n",
+    "type" : "n",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1894,
+      "end" : 1894
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1897,
+      "end" : 1897
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 83,
+    "parent" : 133,
+    "id" : 138,
+    "name" : "i",
+    "type" : "i",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1897,
+      "end" : 1897
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ 140, 141, 142, 143, 144 ],
+    "scopeEnd" : {
+      "start" : 2009,
+      "end" : 2009
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 84,
+    "parent" : 133,
+    "id" : 139,
+    "name" : "if",
+    "type" : "",
+    "symbolType" : "CONTROL",
+    "location" : {
+      "start" : 1920,
+      "end" : 1921
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1925,
+      "end" : 1927
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 84,
+    "parent" : 139,
+    "id" : 140,
+    "name" : "val",
+    "type" : "val",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1925,
+      "end" : 1927
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1929,
+      "end" : 1929
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 84,
+    "parent" : 139,
+    "id" : 141,
+    "name" : "i",
+    "type" : "i",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1929,
+      "end" : 1929
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1943,
+      "end" : 1944
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 84,
+    "parent" : 139,
+    "id" : 142,
+    "name" : "cs",
+    "type" : "cs",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1943,
+      "end" : 1944
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1946,
+      "end" : 1951
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : 142,
+    "row" : 84,
+    "parent" : 139,
+    "id" : 143,
+    "name" : "charAt",
+    "type" : "charAt",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1946,
+      "end" : 1951
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 1953,
+      "end" : 1953
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 84,
+    "parent" : 139,
+    "id" : 144,
+    "name" : "i",
+    "type" : "i",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 1953,
+      "end" : 1953
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ 146 ],
+    "scopeEnd" : {
+      "start" : 2152,
+      "end" : 2152
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 88,
+    "parent" : 33,
+    "id" : 145,
+    "name" : "else",
+    "type" : "",
+    "symbolType" : "CONTROL",
+    "location" : {
+      "start" : 2035,
+      "end" : 2038
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ 147, 148, 149, 150, 151 ],
+    "scopeEnd" : {
+      "start" : 2142,
+      "end" : 2142
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 89,
+    "parent" : 145,
+    "id" : 146,
+    "name" : "if",
+    "type" : "",
+    "symbolType" : "CONTROL",
+    "location" : {
+      "start" : 2054,
+      "end" : 2055
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 2059,
+      "end" : 2069
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 89,
+    "parent" : 146,
+    "id" : 147,
+    "name" : "StringUTF16",
+    "type" : "StringUTF16",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 2059,
+      "end" : 2069
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 2071,
+      "end" : 2083
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : 147,
+    "row" : 89,
+    "parent" : 146,
+    "id" : 148,
+    "name" : "contentEquals",
+    "type" : "contentEquals",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 2071,
+      "end" : 2083
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 2085,
+      "end" : 2087
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 89,
+    "parent" : 146,
+    "id" : 149,
+    "name" : "val",
+    "type" : "val",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 2085,
+      "end" : 2087
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 2090,
+      "end" : 2091
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 89,
+    "parent" : 146,
+    "id" : 150,
+    "name" : "cs",
+    "type" : "cs",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 2090,
+      "end" : 2091
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 2094,
+      "end" : 2094
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 89,
+    "parent" : 146,
+    "id" : 151,
+    "name" : "n",
+    "type" : "n",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 2094,
+      "end" : 2094
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 2173,
+      "end" : 2178
+    },
+    "arrayDim" : 1,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 93,
+    "parent" : 33,
+    "id" : 152,
+    "name" : "String",
+    "type" : "String",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 2173,
+      "end" : 2178
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 2242,
+      "end" : 2257
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 97,
+    "parent" : 9,
+    "id" : 153,
+    "name" : "MethodAnnotation",
+    "type" : "MethodAnnotation",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 2242,
+      "end" : 2257
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 2344,
+      "end" : 2364
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 98,
+    "parent" : 9,
+    "id" : 154,
+    "name" : "IllegalStateException",
+    "type" : "IllegalStateException",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 2344,
+      "end" : 2364
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 2301,
+      "end" : 2303
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 98,
+    "parent" : 9,
+    "id" : 155,
+    "name" : "int",
+    "type" : "int",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 2301,
+      "end" : 2303
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ 157, 158, 159, 160, 161, 162 ],
+    "scopeEnd" : {
+      "start" : 2365,
+      "end" : 2365
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 98,
+    "parent" : 9,
+    "id" : 156,
+    "name" : "genericMethod",
+    "type" : "int",
+    "symbolType" : "METHOD",
+    "location" : {
+      "start" : 2305,
+      "end" : 2317
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 2297,
+      "end" : 2297
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 98,
+    "parent" : 156,
+    "id" : 157,
+    "name" : "T",
+    "type" : "T",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 2297,
+      "end" : 2297
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 2290,
+      "end" : 2295
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 98,
+    "parent" : 156,
+    "id" : 158,
+    "name" : "String",
+    "type" : "String",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 2290,
+      "end" : 2295
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 2280,
+      "end" : 2280
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 98,
+    "parent" : 156,
+    "id" : 159,
+    "name" : "T",
+    "type" : "String",
+    "symbolType" : "TYPEPARAM",
+    "location" : {
+      "start" : 2280,
+      "end" : 2280
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 2325,
+      "end" : 2325
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 98,
+    "parent" : 156,
+    "id" : 160,
+    "name" : "T",
+    "type" : "T",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 2325,
+      "end" : 2325
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 2319,
+      "end" : 2323
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 98,
+    "parent" : 156,
+    "id" : 161,
+    "name" : "Class",
+    "type" : "Class",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 2319,
+      "end" : 2323
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 2328,
+      "end" : 2332
+    },
+    "arrayDim" : 1,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 98,
+    "parent" : 156,
+    "id" : 162,
+    "name" : "clazz",
+    "type" : "Class",
+    "symbolType" : "VARIABLE",
+    "location" : {
+      "start" : 2328,
+      "end" : 2332
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ 164, 165, 166, 167, 168 ],
+    "scopeEnd" : {
+      "start" : 2793,
+      "end" : 2793
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 100,
+    "parent" : 9,
+    "id" : 163,
+    "name" : "AnInnerOne",
+    "type" : "AnInnerOne",
+    "symbolType" : "CLASS",
+    "location" : {
+      "start" : 2391,
+      "end" : 2400
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 2417,
+      "end" : 2417
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 100,
+    "parent" : 163,
+    "id" : 164,
+    "name" : "?",
+    "type" : "?",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 2417,
+      "end" : 2417
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 2412,
+      "end" : 2415
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 100,
+    "parent" : 163,
+    "id" : 165,
+    "name" : "List",
+    "type" : "List",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 2412,
+      "end" : 2415
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 2402,
+      "end" : 2402
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 100,
+    "parent" : 163,
+    "id" : 166,
+    "name" : "T",
+    "type" : "List",
+    "symbolType" : "TYPEPARAM",
+    "location" : {
+      "start" : 2402,
+      "end" : 2402
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 2391,
+      "end" : 2391
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 100,
+    "parent" : 163,
+    "id" : 167,
+    "name" : "this",
+    "type" : "AnInnerOne",
+    "symbolType" : "THIS",
+    "location" : {
+      "start" : 2391,
+      "end" : 2391
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ 169, 170, 171, 172, 173, 174, 175, 176, 177, 178 ],
+    "scopeEnd" : {
+      "start" : 2787,
+      "end" : 2787
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 101,
+    "parent" : 163,
+    "id" : 168,
+    "name" : "AnInnerOne",
+    "type" : "AnInnerOne",
+    "symbolType" : "CONSTRUCTOR",
+    "location" : {
+      "start" : 2451,
+      "end" : 2460
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 2463,
+      "end" : 2470
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 101,
+    "parent" : 168,
+    "id" : 169,
+    "name" : "JsonName",
+    "type" : "JsonName",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 2463,
+      "end" : 2470
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 2479,
+      "end" : 2481
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 101,
+    "parent" : 168,
+    "id" : 170,
+    "name" : "int",
+    "type" : "int",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 2479,
+      "end" : 2481
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 2483,
+      "end" : 2485
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 101,
+    "parent" : 168,
+    "id" : 171,
+    "name" : "foo",
+    "type" : "int",
+    "symbolType" : "VARIABLE",
+    "location" : {
+      "start" : 2483,
+      "end" : 2485
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 2503,
+      "end" : 2503
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 103,
+    "parent" : 168,
+    "id" : 172,
+    "name" : "i",
+    "type" : "i",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 2503,
+      "end" : 2503
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 2525,
+      "end" : 2530
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 104,
+    "parent" : 168,
+    "id" : 173,
+    "name" : "String",
+    "type" : "String",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 2525,
+      "end" : 2530
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 2532,
+      "end" : 2532
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 104,
+    "parent" : 168,
+    "id" : 174,
+    "name" : "i",
+    "type" : "i",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 2532,
+      "end" : 2532
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 2535,
+      "end" : 2539
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 104,
+    "parent" : 168,
+    "id" : 175,
+    "name" : "hello",
+    "type" : "hello",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 2535,
+      "end" : 2539
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 2541,
+      "end" : 2541
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 104,
+    "parent" : 168,
+    "id" : 176,
+    "name" : "i",
+    "type" : "i",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 2541,
+      "end" : 2541
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 2543,
+      "end" : 2544
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 104,
+    "parent" : 168,
+    "id" : 177,
+    "name" : "jk",
+    "type" : "jk",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 2543,
+      "end" : 2544
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ 179 ],
+    "scopeEnd" : {
+      "start" : 2777,
+      "end" : 2777
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 105,
+    "parent" : 168,
+    "id" : 178,
+    "name" : "switch",
+    "type" : "",
+    "symbolType" : "CONTROL",
+    "location" : {
+      "start" : 2569,
+      "end" : 2574
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 2625,
+      "end" : 2625
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 107,
+    "parent" : 178,
+    "id" : 179,
+    "name" : "x",
+    "type" : "x",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 2625,
+      "end" : 2625
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 2833,
+      "end" : 2851
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 117,
+    "parent" : 9,
+    "id" : 180,
+    "name" : "StringCoding.Result",
+    "type" : "StringCoding.Result",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 2833,
+      "end" : 2851
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 2821,
+      "end" : 2831
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 117,
+    "parent" : 9,
+    "id" : 181,
+    "name" : "ThreadLocal",
+    "type" : "ThreadLocal",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 2821,
+      "end" : 2831
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 2862,
+      "end" : 2873
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 118,
+    "parent" : 9,
+    "id" : 182,
+    "name" : "resultCached",
+    "type" : "ThreadLocal",
+    "symbolType" : "FIELD",
+    "location" : {
+      "start" : 2862,
+      "end" : 2873
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ 184, 185 ],
+    "scopeEnd" : {
+      "start" : 3009,
+      "end" : 3009
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 118,
+    "parent" : 9,
+    "id" : 183,
+    "name" : "ThreadLocal",
+    "type" : "ThreadLocal",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 2881,
+      "end" : 2891
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 2917,
+      "end" : 2935
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 119,
+    "parent" : 183,
+    "id" : 184,
+    "name" : "StringCoding.Result",
+    "type" : "StringCoding.Result",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 2917,
+      "end" : 2935
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ 186 ],
+    "scopeEnd" : {
+      "start" : 3008,
+      "end" : 3008
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 119,
+    "parent" : 183,
+    "id" : 185,
+    "name" : "initialValue",
+    "type" : "StringCoding.Result",
+    "symbolType" : "METHOD",
+    "location" : {
+      "start" : 2937,
+      "end" : 2948
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 2977,
+      "end" : 2995
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 120,
+    "parent" : 185,
+    "id" : 186,
+    "name" : "StringCoding.Result",
+    "type" : "StringCoding.Result",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 2977,
+      "end" : 2995
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3031,
+      "end" : 3045
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 127,
+    "parent" : -1,
+    "id" : 187,
+    "name" : "org.slf4j.event",
+    "type" : "org.slf4j.event",
+    "symbolType" : "PACKAGE",
+    "location" : {
+      "start" : 3031,
+      "end" : 3045
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3060,
+      "end" : 3075
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 129,
+    "parent" : -1,
+    "id" : 188,
+    "name" : "org.slf4j.Marker",
+    "type" : "org.slf4j.Marker",
+    "symbolType" : "IMPORT",
+    "location" : {
+      "start" : 3060,
+      "end" : 3075
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206 ],
+    "scopeEnd" : {
+      "start" : 3379,
+      "end" : 3379
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 136,
+    "parent" : -1,
+    "id" : 189,
+    "name" : "LoggingEvent",
+    "type" : "LoggingEvent",
+    "symbolType" : "INTERFACE",
+    "location" : {
+      "start" : 3140,
+      "end" : 3151
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3140,
+      "end" : 3140
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 136,
+    "parent" : 189,
+    "id" : 190,
+    "name" : "this",
+    "type" : "LoggingEvent",
+    "symbolType" : "THIS",
+    "location" : {
+      "start" : 3140,
+      "end" : 3140
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3160,
+      "end" : 3164
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 138,
+    "parent" : 189,
+    "id" : 191,
+    "name" : "Level",
+    "type" : "Level",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 3160,
+      "end" : 3164
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3176,
+      "end" : 3176
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 138,
+    "parent" : 189,
+    "id" : 192,
+    "name" : "getLevel",
+    "type" : "Level",
+    "symbolType" : "METHOD",
+    "location" : {
+      "start" : 3166,
+      "end" : 3173
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3183,
+      "end" : 3188
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 140,
+    "parent" : 189,
+    "id" : 193,
+    "name" : "Marker",
+    "type" : "Marker",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 3183,
+      "end" : 3188
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3201,
+      "end" : 3201
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 140,
+    "parent" : 189,
+    "id" : 194,
+    "name" : "getMarker",
+    "type" : "Marker",
+    "symbolType" : "METHOD",
+    "location" : {
+      "start" : 3190,
+      "end" : 3198
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3208,
+      "end" : 3213
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 142,
+    "parent" : 189,
+    "id" : 195,
+    "name" : "String",
+    "type" : "String",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 3208,
+      "end" : 3213
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3230,
+      "end" : 3230
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 142,
+    "parent" : 189,
+    "id" : 196,
+    "name" : "getLoggerName",
+    "type" : "String",
+    "symbolType" : "METHOD",
+    "location" : {
+      "start" : 3215,
+      "end" : 3227
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3237,
+      "end" : 3242
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 144,
+    "parent" : 189,
+    "id" : 197,
+    "name" : "String",
+    "type" : "String",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 3237,
+      "end" : 3242
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3256,
+      "end" : 3256
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 144,
+    "parent" : 189,
+    "id" : 198,
+    "name" : "getMessage",
+    "type" : "String",
+    "symbolType" : "METHOD",
+    "location" : {
+      "start" : 3244,
+      "end" : 3253
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3263,
+      "end" : 3268
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 146,
+    "parent" : 189,
+    "id" : 199,
+    "name" : "String",
+    "type" : "String",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 3263,
+      "end" : 3268
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3285,
+      "end" : 3285
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 146,
+    "parent" : 189,
+    "id" : 200,
+    "name" : "getThreadName",
+    "type" : "String",
+    "symbolType" : "METHOD",
+    "location" : {
+      "start" : 3270,
+      "end" : 3282
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3292,
+      "end" : 3297
+    },
+    "arrayDim" : 1,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 148,
+    "parent" : 189,
+    "id" : 201,
+    "name" : "Object",
+    "type" : "Object",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 3292,
+      "end" : 3297
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3319,
+      "end" : 3319
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 148,
+    "parent" : 189,
+    "id" : 202,
+    "name" : "getArgumentArray",
+    "type" : "Object",
+    "symbolType" : "METHOD",
+    "location" : {
+      "start" : 3301,
+      "end" : 3316
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3326,
+      "end" : 3329
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 150,
+    "parent" : 189,
+    "id" : 203,
+    "name" : "long",
+    "type" : "long",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 3326,
+      "end" : 3329
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3345,
+      "end" : 3345
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 150,
+    "parent" : 189,
+    "id" : 204,
+    "name" : "getTimeStamp",
+    "type" : "long",
+    "symbolType" : "METHOD",
+    "location" : {
+      "start" : 3331,
+      "end" : 3342
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3352,
+      "end" : 3360
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 152,
+    "parent" : 189,
+    "id" : 205,
+    "name" : "Throwable",
+    "type" : "Throwable",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 3352,
+      "end" : 3360
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3376,
+      "end" : 3376
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 152,
+    "parent" : 189,
+    "id" : 206,
+    "name" : "getThrowable",
+    "type" : "Throwable",
+    "symbolType" : "METHOD",
+    "location" : {
+      "start" : 3362,
+      "end" : 3373
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ 208, 209, 210, 211 ],
+    "scopeEnd" : {
+      "start" : 3423,
+      "end" : 3423
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 155,
+    "parent" : -1,
+    "id" : 207,
+    "name" : "MyEnum",
+    "type" : "MyEnum",
+    "symbolType" : "ENUM",
+    "location" : {
+      "start" : 3386,
+      "end" : 3391
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3386,
+      "end" : 3386
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 155,
+    "parent" : 207,
+    "id" : 208,
+    "name" : "this",
+    "type" : "MyEnum",
+    "symbolType" : "THIS",
+    "location" : {
+      "start" : 3386,
+      "end" : 3386
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3399,
+      "end" : 3401
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 156,
+    "parent" : 207,
+    "id" : 209,
+    "name" : "ONE",
+    "type" : "ONE",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 3399,
+      "end" : 3401
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3408,
+      "end" : 3410
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 157,
+    "parent" : 207,
+    "id" : 210,
+    "name" : "TWO",
+    "type" : "TWO",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 3408,
+      "end" : 3410
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3417,
+      "end" : 3421
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 158,
+    "parent" : 207,
+    "id" : 211,
+    "name" : "TRHEE",
+    "type" : "TRHEE",
+    "symbolType" : "SYMREF",
+    "location" : {
+      "start" : 3417,
+      "end" : 3421
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3427,
+      "end" : 3442
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 161,
+    "parent" : -1,
+    "id" : 212,
+    "name" : "SuppressWarnings",
+    "type" : "SuppressWarnings",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 3427,
+      "end" : 3442
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3513,
+      "end" : 3516
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 163,
+    "parent" : -1,
+    "id" : 213,
+    "name" : "void",
+    "type" : "void",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 3513,
+      "end" : 3516
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ 215, 216, 217, 218, 219, 220, 221, 222, 223 ],
+    "scopeEnd" : {
+      "start" : 3572,
+      "end" : 3572
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 163,
+    "parent" : -1,
+    "id" : 214,
+    "name" : "parallelSort",
+    "type" : "void",
+    "symbolType" : "METHOD",
+    "location" : {
+      "start" : 3518,
+      "end" : 3529
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3497,
+      "end" : 3497
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 162,
+    "parent" : 214,
+    "id" : 215,
+    "name" : "?",
+    "type" : "?",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 3497,
+      "end" : 3497
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3486,
+      "end" : 3495
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 162,
+    "parent" : 214,
+    "id" : 216,
+    "name" : "Comparable",
+    "type" : "Comparable",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 3486,
+      "end" : 3495
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3476,
+      "end" : 3476
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 162,
+    "parent" : 214,
+    "id" : 217,
+    "name" : "T",
+    "type" : "Comparable",
+    "symbolType" : "TYPEPARAM",
+    "location" : {
+      "start" : 3476,
+      "end" : 3476
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3531,
+      "end" : 3531
+    },
+    "arrayDim" : 1,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 163,
+    "parent" : 214,
+    "id" : 218,
+    "name" : "T",
+    "type" : "T",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 3531,
+      "end" : 3531
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3535,
+      "end" : 3535
+    },
+    "arrayDim" : 1,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 163,
+    "parent" : 214,
+    "id" : 219,
+    "name" : "a",
+    "type" : "T",
+    "symbolType" : "VARIABLE",
+    "location" : {
+      "start" : 3535,
+      "end" : 3535
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3538,
+      "end" : 3540
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 163,
+    "parent" : 214,
+    "id" : 220,
+    "name" : "int",
+    "type" : "int",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 3538,
+      "end" : 3540
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3542,
+      "end" : 3550
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 163,
+    "parent" : 214,
+    "id" : 221,
+    "name" : "fromIndex",
+    "type" : "int",
+    "symbolType" : "VARIABLE",
+    "location" : {
+      "start" : 3542,
+      "end" : 3550
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3553,
+      "end" : 3555
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 163,
+    "parent" : 214,
+    "id" : 222,
+    "name" : "int",
+    "type" : "int",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 3553,
+      "end" : 3555
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3557,
+      "end" : 3563
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 163,
+    "parent" : 214,
+    "id" : 223,
+    "name" : "toIndex",
+    "type" : "int",
+    "symbolType" : "VARIABLE",
+    "location" : {
+      "start" : 3557,
+      "end" : 3563
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ 225, 226, 227, 228, 229 ],
+    "scopeEnd" : {
+      "start" : 3640,
+      "end" : 3640
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 166,
+    "parent" : -1,
+    "id" : 224,
+    "name" : "Class",
+    "type" : "Class",
+    "symbolType" : "CONSTRUCTOR",
+    "location" : {
+      "start" : 3583,
+      "end" : 3587
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3589,
+      "end" : 3599
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 166,
+    "parent" : 224,
+    "id" : 225,
+    "name" : "ClassLoader",
+    "type" : "ClassLoader",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 3589,
+      "end" : 3599
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3601,
+      "end" : 3606
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 166,
+    "parent" : 224,
+    "id" : 226,
+    "name" : "loader",
+    "type" : "ClassLoader",
+    "symbolType" : "VARIABLE",
+    "location" : {
+      "start" : 3601,
+      "end" : 3606
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3615,
+      "end" : 3615
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 166,
+    "parent" : 224,
+    "id" : 227,
+    "name" : "?",
+    "type" : "?",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 3615,
+      "end" : 3615
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3609,
+      "end" : 3613
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 166,
+    "parent" : 224,
+    "id" : 228,
+    "name" : "Class",
+    "type" : "Class",
+    "symbolType" : "TYPEREF",
+    "location" : {
+      "start" : 3609,
+      "end" : 3613
+    },
+    "wild" : false,
+    "static" : false
+  }, {
+    "classifier" : "",
+    "children" : [ ],
+    "scopeEnd" : {
+      "start" : 3618,
+      "end" : 3635
+    },
+    "arrayDim" : 0,
+    "symbolDef" : null,
+    "caller" : null,
+    "row" : 166,
+    "parent" : 224,
+    "id" : 229,
+    "name" : "arrayComponentType",
+    "type" : "Class",
+    "symbolType" : "VARIABLE",
+    "location" : {
+      "start" : 3618,
+      "end" : 3635
+    },
+    "wild" : false,
+    "static" : false
+  } ],
+  "parseTime" : 39,
+  "unmatched" : [ ],
+  "languageId" : "java",
+  "name" : "vsc-java",
+  "file" : "/home/mark/work/jvmcode/server/out/test/resources/Test2.javasource"
+}

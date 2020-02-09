@@ -1,7 +1,17 @@
 # Change Log
 All notable changes to the "jvmcode" extension will be documented in this file.
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+## [1.0.0] - 2018-05-14
 
-## [Unreleased]
-- Initial release
+### Added
+- All basic features
+
+### Changed
+
+### Removed
+
+## [1.0.1] - 2018-10-13
+
+### Added
+- Dependency and classpath management
+- Basic java exec with classpath

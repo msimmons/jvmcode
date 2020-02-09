@@ -1,11 +1,20 @@
 {
   "name": "jvmcode",
-  "displayName": "jvmcode",
-  "description": "Event Bus Bridge to JVM extensions",
-  "version": "0.0.1",
+  "displayName": "JVMCode",
+  "description": "JVM Services",
+  "version": "1.0.3",
   "publisher": "contrapt",
+  "license": "Apache 2.0",
   "engines": {
-    "vscode": "^1.15.0"
+    "vscode": "^1.42.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/msimmons/jvmcode"
+  },
+  "author": {
+    "name": "Mark Simmons",
+    "email": "mark@contrapt.net"
   },
   "categories": [
     "Other"
@@ -18,34 +27,98 @@
     "commands": [
       {
         "command": "jvmcode.start",
-        "title": "Start JVM Server"
+        "title": "JVM: Start Server"
       },
       {
-        "command": "jvmcode.sendTo",
-        "title": "Send Message To Address"
+        "command": "jvmcode.log-level",
+        "title": "JVM: Set Log Level"
       },
       {
-        "command": "jvmcode.install",
-        "title": "Install JVM extension"
+        "command": "jvmcode.stop",
+        "title": "JVM: Stop Server"
+      },
+      {
+        "command": "jvmcode.add-dependency",
+        "title": "JVM: Add Dependency"
+      },
+      {
+        "command": "jvmcode.add-classdir",
+        "title": "JVM: Add Class Directory"
+      },
+      {
+        "command": "jvmcode.add-sourcedir",
+        "title": "JVM: Add Source Directory"
+      },
+      {
+        "command": "jvmcode.find-class",
+        "title": "JVM: Find Class"
+      },
+      {
+        "command": "jvmcode.exec-class",
+        "title": "JVM: Execute Class"
+      },
+      {
+        "command": "jvmcode.exec-custom",
+        "title": "JVM: Execute Custom"
+      },
+      {
+        "command": "jvmcode.remove-user-item",
+        "title": "JVM: Remove User Item"
       }
     ],
+    "views": {
+      "explorer": [
+        {
+          "id": "jvmcode.project-tree",
+          "name": "JVM Project",
+          "when": "jvmcode.context.isJvmProject"
+        }
+      ]
+    },
+    "menus": {
+      "view/item/context": [
+        {
+          "command": "jvmcode.remove-user-item",
+          "when": "viewItem == 'user-item'",
+          "group": "JVM"
+        },
+        {
+          "command": "jvmcode.add-dependency",
+          "when": "viewItem == 'user-source'",
+          "group": "JVM"
+        },
+        {
+          "command": "jvmcode.add-sourcedir",
+          "when": "viewItem == 'user-path'",
+          "group": "JVM"
+        },
+        {
+          "command": "jvmcode.add-classdir",
+          "when": "viewItem == 'user-path'",
+          "group": "JVM"
+        }
+      ]
+    },
     "configuration": {
-      "title": "JVM Code Server Configuration",
+      "title": "JVMCode Server Configuration",
       "properties": {
-        "jvmcode.host": {
-          "type": "string",
-          "default": "localhost",
-          "description": "Host that the server is started on "
-        },
-        "jvmcode.port": {
-          "type": "number",
-          "default": 9000,
-          "description": "TCP port server listens on"
-        },
         "jvmcode.javaCommand": {
           "type": "string",
           "default": "/usr/bin/java",
           "description": "Path to java command to execute to start the server"
+        },
+        "jvmcode.srcLocation": {
+          "type": "string",
+          "description": "The location of the JDK source code; defaults to either java_home/src.zip or java_home/lib/src.zip"
+        },
+        "jvmcode.logLevel": {
+          "type": "string",
+          "enum": [
+            "DEBUG",
+            "INFO"
+          ],
+          "default": "INFO",
+          "description": "The server's default log level"
         },
         "jvmcode.javaOptions": {
           "type": "array",
@@ -57,26 +130,71 @@
             "-server"
           ],
           "description": "The JVM options used to start the server"
+        },
+        "jvmcode.excludes": {
+          "type": "array",
+          "default": [
+            "com.sun",
+            "com.oracle",
+            "jdk",
+            "sun",
+            "java.awt",
+            "java.rmi"
+          ],
+          "description": "A list of packages to exclude from dependency list.  Matches all packages with the given prefix"
+        },
+        "jvmcode.jmodIncludes": {
+          "type": "array",
+          "default": [
+            "java.base",
+            "java.compiler",
+            "java.sql",
+            "java.sql.rowset"
+          ],
+          "description": "A list of modules (jdk >= 9) to include from java_home/jmods"
+        },
+        "jvmcode.sourceExtensions": {
+          "type": "array",
+          "default": [
+            "java",
+            "kt",
+            "kts",
+            "groovy",
+            "scala"
+          ],
+          "description": "A list of extensions used to look for source files in dependency source jars"
+        },
+        "jvmcode.outputDirMap": {
+          "type": "array",
+          "default": [
+            "java:java",
+            "kt:kotlin",
+            "groovy:groovy",
+            "scala:scala"
+          ],
+          "description": "Helps map source file extension to the a directory containing the given keyword: 'ext:keyword' (this is a hack)"
         }
       }
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile; server/gradlew build deploy -b server/build.gradle",
+    "vscode:prepublish": "npm run compile; ./gradlew build deploy",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "postinstall": "node ./node_modules/vscode/bin/install",
     "test": "npm run compile && node ./node_modules/vscode/bin/test"
   },
   "devDependencies": {
-    "typescript": "^2.5.2",
-    "vscode": "^1.1.5",
+    "@types/mocha": "^2.2.48",
+    "@types/node": "^8.10.59",
+    "@types/jszip": "^3.1.7",
+    "@types/vscode": "^1.42.0",
     "mocha": "^3.5.0",
-    "@types/node": "^8.0.26",
-    "@types/mocha": "^2.2.42"
+    "typescript": "^3.5.1",
+    "tslint": "^5.16.0"
   },
   "dependencies": {
+    "jszip": "^3.2.2",
     "node-uuid": "^1.4.8",
-    "vertx3-eventbus-client": "^3.5.0"
+    "vertx3-eventbus-client": "^3.8.5"
   }
 }
