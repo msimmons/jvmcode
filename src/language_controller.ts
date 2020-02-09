@@ -2,8 +2,7 @@
 
 import * as vscode from 'vscode'
 import { LanguageService } from './language_service'
-import { CompileRequest, ClassEntryData, LanguageRequest, ParseRequest, ParseResult } from 'server-models'
-import { languageService, languageController, projectService } from './extension';
+import { CompileRequest, LanguageRequest, ParseRequest, ParseResult } from 'server-models'
 import { ProjectController } from './project_controller';
 import * as provider from './language_providers'
 
@@ -27,7 +26,7 @@ export class LanguageController implements vscode.Disposable {
 
     public start() {
         // Temporarily trigger the language verticle to send request
-        languageService.startLanguage()
+        this.languageService.startLanguage()
     }
 
     /** 
@@ -86,7 +85,7 @@ export class LanguageController implements vscode.Disposable {
         this.disposables.push(vscode.languages.registerReferenceProvider(allSelector, new provider.JvmReferenceProvider()))
         this.disposables.push(vscode.languages.registerRenameProvider(fileSelector, new provider.JvmRenameProvider()))
         this.disposables.push(vscode.languages.registerSignatureHelpProvider(fileSelector, new provider.JvmSignatureProvider())) // Meta for trigger chars
-        let symbolProvider = new provider.JvmSymbolProvider()
+        let symbolProvider = new provider.JvmSymbolProvider(this)
         this.disposables.push(vscode.languages.registerDocumentSymbolProvider(allSelector, symbolProvider)) // metadata?
         this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(symbolProvider))
         this.disposables.push(vscode.languages.registerTypeDefinitionProvider(allSelector, new provider.JvmTypeDefinitionProvider()))
