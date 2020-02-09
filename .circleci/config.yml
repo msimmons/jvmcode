@@ -76,10 +76,10 @@ jobs:
           at: /home/work
       - run: 
           command: |
-            ORG_GRADLE_PROJECT_gh_registry_uri=$GH_REGISTRY_URI
-            ORG_GRADLE_PROJECT_gh_registry_user=$GH_REGISTRY_USER
-            ORG_GRADLE_PROJECT_gh_registry_key=$GH_REGISTRY_KEY
-            ORG_GRADLE_PROJECT_build_tag=$CIRCLE_BUILD_NUM
+            export ORG_GRADLE_PROJECT_gh_registry_uri=$GH_REGISTRY_URI
+            export ORG_GRADLE_PROJECT_gh_registry_user=$GH_REGISTRY_USER
+            export ORG_GRADLE_PROJECT_gh_registry_key=$GH_REGISTRY_KEY
+            export ORG_GRADLE_PROJECT_build_tag=$CIRCLE_BUILD_NUM
             ./gradlew --no-daemon publish
 workflows:
   version: 2.1
