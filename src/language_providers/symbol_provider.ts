@@ -1,12 +1,18 @@
 import * as vscode from 'vscode'
-import { languageController } from '../extension';
 import { ProviderResult } from 'vscode';
 import { ParseSymbol } from 'server-models'
+import { LanguageController } from '../language_controller';
 
 /**
  * Requires Symbols and workspace Symbols
  */
 export class JvmSymbolProvider implements vscode.DocumentSymbolProvider, vscode.WorkspaceSymbolProvider {
+
+    controller: LanguageController
+    
+    constructor(languageController: LanguageController) {
+        this.controller = languageController
+    }
 
     provideWorkspaceSymbols(query: string, token: vscode.CancellationToken): vscode.ProviderResult<vscode.SymbolInformation[]> {
         console.log(`WSSym: ${query}`)
@@ -19,7 +25,7 @@ export class JvmSymbolProvider implements vscode.DocumentSymbolProvider, vscode.
 
     provideDocumentSymbols(document: vscode.TextDocument, token: vscode.CancellationToken): ProviderResult<vscode.SymbolInformation[] | vscode.DocumentSymbol[]> {
         return new Promise(async (resolve, reject) => {
-            let result = await languageController.getParseResult(document)
+            let result = await this.controller.getParseResult(document)
             if (!result) {
                 resolve(undefined)
                 return

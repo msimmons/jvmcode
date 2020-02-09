@@ -154,6 +154,10 @@ class JavaParserTest {
 
     @Test
     fun testExpressions() {
+        //TODO   assert d != 1 : "Unity denominator" ;
+        //    assert cmpFracHalf == 0 ;
+        //java.security.AccessController.doPrivileged ( new java.security.PrivilegedAction < > ( ) { public Void run ( ) { values.setAccessible ( true ) ; return null ; } } )
+        //   List < Method > getDeclaredPublicMethods ( String name , Class < ? > . . . parameterTypes ) { Method [ ] methods = privateGetDeclaredMethods ( true ) ;
         val expressions = listOf(
             "new String(\"string\")",
             "x = foo.something() ? 8 + 3 : 15",
