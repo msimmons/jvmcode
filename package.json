@@ -6,7 +6,7 @@
   "publisher": "contrapt",
   "license": "Apache 2.0",
   "engines": {
-    "vscode": "^1.40.2"
+    "vscode": "^1.42.0"
   },
   "repository": {
     "type": "git",
