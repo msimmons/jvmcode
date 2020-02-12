@@ -14,8 +14,7 @@ import net.contrapt.jvmcode.model.ParseRequest
 import net.contrapt.jvmcode.model.ParseSymbolType
 
 /**
- * array init
- * annotation param defs
+ * TODO default methods
  */
 class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
 

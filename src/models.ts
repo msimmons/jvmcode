@@ -239,3 +239,35 @@ export class CompilationContext {
     generatedSrcDir : string
     options: string[]
 }
+
+export interface JUnitFailure {
+    stack: string
+    message: string
+    type: string
+}
+
+export interface JUnitCase {
+    name: string
+    classname: string
+    time: number
+    failure?: JUnitFailure[]
+}
+
+export interface JUnitSuite {
+    name: string
+    tests: number
+    skipped: number
+    failures: number
+    errors: number
+    timestamp: string
+    hostname: string
+    time: number
+    properties: string
+    testcase: JUnitCase[]
+    systemOut: string
+    systemErr: string
+}
+
+export interface JUnitReport {
+    testsuite: JUnitSuite[]
+}
