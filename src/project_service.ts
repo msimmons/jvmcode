@@ -99,7 +99,7 @@ export class ProjectService {
     /**
      * Return all of this project's classdata
      */
-    public async getClassdata() : Promise<ClassData[]> {
+    public async getClassData() : Promise<ClassData[]> {
         let result = await server.send('jvmcode.classdata', {})
         return result.body.data
     }

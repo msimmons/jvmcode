@@ -1,6 +1,7 @@
 package net.contrapt.jvmcode.service
 
 import io.vertx.core.*
+import io.vertx.core.impl.launcher.commands.Watcher
 import io.vertx.core.logging.LoggerFactory
 import javassist.bytecode.ClassFile
 import net.contrapt.jvmcode.model.*
@@ -9,8 +10,13 @@ import java.io.DataInputStream
 import java.io.File
 import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
+import java.util.concurrent.locks.Lock
+import java.util.concurrent.locks.ReentrantLock
+import java.util.concurrent.locks.ReentrantReadWriteLock
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
+import javax.xml.transform.Source
+import kotlin.concurrent.withLock
 
 class ProjectService(
     var config: JvmConfig, val javaHome : String,
@@ -23,25 +29,32 @@ class ProjectService(
 
     //TODO store user added ones persistently?
     private val userSource: UserDependencySource
+    private val userSourceLock = ReentrantLock()
     // Classpath data added by user
     private val userPath = UserPath()
+    private val userPathLock = ReentrantLock()
 
     // All the external dependencies being tracked
     private val externalSource = mutableSetOf<DependencySourceData>()
+    private val externalSourceLock = ReentrantLock()
     // Classpath data added by other extensions
     private val externalPaths = mutableSetOf<PathData>()
 
     // Map of entry FQCN to the dependency it belongs to -- allow for multiple with same FQCN
     private val dependencyMap = mutableMapOf<String, MutableSet<Pair<JarEntryData,DependencyData>>>()
+    private val dependencyMapLock = ReentrantLock()
 
     // Map of jarFile to [JarData]
     private val jarDataMap = mutableMapOf<String, JarData>()
+    private val jarDataMapLock = ReentrantLock()
 
     // Map of source file name to source entry -- allow for multiple with same path
     private val sourceMap = mutableMapOf<String, MutableSet<Pair<SourceEntryData, DependencyData>>>()
+    private val sourceMapLock = ReentrantLock()
 
     // Map of path to class data for all project classes
     private val classMap = mutableMapOf<String, ClassData>()
+    private val classMapLock = ReentrantLock()
 
     val javaVersion : String
 
@@ -80,34 +93,66 @@ class ProjectService(
         return JvmProject(sorted, externalPaths + userPath, getClasspath())
     }
 
+    private fun removeJarData(fileName: String) {
+        jarDataMapLock.withLock { jarDataMap.remove(fileName) }
+    }
+
+    private fun addJarData(fileName: String, entry: JarData) {
+        jarDataMapLock.withLock { jarDataMap.put(fileName, entry) }
+    }
+
+    private fun removeSourceData(entryName: String?) {
+        sourceMapLock.withLock { sourceMap.remove(entryName) }
+    }
+
+    private fun addSourceData(entry: SourceEntryData, dep: DependencyData) {
+        sourceMapLock.withLock {
+            sourceMap.getOrPut(entry.name, { mutableSetOf() }).add(entry to dep)
+        }
+    }
+
+    private fun addClassMap(path: String, data: ClassData) {
+        classMapLock.withLock { classMap.put(path, data) }
+    }
+
     /**
      * User adds a single JAR file dependency
      */
     fun addUserDependency(jarFile: String, srcFile: String?) {
-        userSource.dependencies.add(Dependency.create(jarFile, srcFile))
+        userSourceLock.withLock {
+            userSource.dependencies.add(Dependency.create(jarFile, srcFile))
+        }
     }
 
     /**
      * Remove a user dependency
      */
     fun removeUserDependency(jarFile: String) {
-        userSource.dependencies.removeIf { it.fileName == jarFile }
+        userSourceLock.withLock {
+            userSource.dependencies.removeIf { it.fileName == jarFile }
+        }
     }
 
     /**
      * User adds a path component
      */
     fun addUserPath(pathData: PathData) {
-        pathData.classDirs.forEach { userPath.classDirs.add(it) }
-        pathData.sourceDirs.forEach { userPath.sourceDirs.add(it) }
+        userPathLock.withLock {
+            pathData.classDirs.forEach { userPath.classDirs.add(it) }
+            pathData.sourceDirs.forEach { userPath.sourceDirs.add(it) }
+        }
+        indexClassData(pathData.classDirs)
     }
 
     /**
      * Remove a user path component
      */
     fun removeUserPath(path: String) {
-        userPath.classDirs.remove(path)
-        userPath.sourceDirs.remove(path)
+        userPathLock.withLock {
+            userPath.classDirs.remove(path)
+            userPath.sourceDirs.remove(path)
+        }
+        // Remove class data?
     }
 
     /**
@@ -115,41 +160,54 @@ class ProjectService(
      */
     fun updateUserProject(request: ProjectUpdateRequest) {
         request.dependencySources.forEach {
-            userSource.dependencies.forEach { jarDataMap.remove(it.fileName) }
-            userSource.dependencies.clear()
-            userSource.dependencies.addAll(it.dependencies)
+            userSourceLock.withLock {
+                userSource.dependencies.forEach {
+                    removeJarData(it.fileName)
+                }
+                userSource.dependencies.clear()
+                userSource.dependencies.addAll(it.dependencies)
+            }
         }
         request.paths.forEach {
-            userPath.classDirs.clear()
-            userPath.sourceDirs.clear()
-            userPath.classDirs.addAll(it.classDirs)
-            userPath.sourceDirs.addAll(it.sourceDirs)
+            userPathLock.withLock {
+                userPath.classDirs.clear()
+                userPath.sourceDirs.clear()
+                userPath.classDirs.addAll(it.classDirs)
+                userPath.sourceDirs.addAll(it.sourceDirs)
+            }
         }
         userSource.dependencies.forEach {
             indexDependency(it)
         }
+        indexClassData(userPath.classDirs)
     }
 
     /**
      * Process update of project dependency information from an external source
      */
     fun updateProject(request: ProjectUpdateRequest) {
-        externalSource.filter { it.source == request.source }.forEach {
-            it.dependencies.forEach { jarDataMap.remove(it.fileName) }
-        }
-        externalSource.removeIf { it.source == request.source }
-        externalPaths.removeIf { it.source == request.source }
-        externalSource.addAll(request.dependencySources)
-        externalPaths.addAll(request.paths)
-        externalSource.filter { it.source == request.source }.forEach {
-            it.dependencies.forEach {
-                indexDependency(it)
+        externalSourceLock.withLock {
+            externalSource.filter { it.source == request.source }.forEach {
+                it.dependencies.forEach { removeJarData(it.fileName) }
+            }
+            externalSource.removeIf { it.source == request.source }
+            externalPaths.removeIf { it.source == request.source }
+            externalSource.addAll(request.dependencySources)
+            externalPaths.addAll(request.paths)
+            externalSource.filter { it.source == request.source }.forEach {
+                it.dependencies.forEach {
+                    indexDependency(it)
+                }
             }
         }
+        val paths = request.paths.flatMap { it.classDirs }
+        indexClassData(paths)
     }
 
     private fun addDependencyMap(entry: JarEntryData, dependencyData: DependencyData) {
-        dependencyMap.getOrPut(entry.fqcn, { mutableSetOf() }).add(entry to dependencyData)
+        dependencyMapLock.withLock {
+            dependencyMap.getOrPut(entry.fqcn, { mutableSetOf() }).add(entry to dependencyData)
+        }
     }
 
     private fun indexDependency(dep: DependencyData) {
@@ -191,7 +249,7 @@ class ProjectService(
             .filter { pkg -> pkg.entries.size > 0 && !config.excludes.any { exclude -> pkg.name.startsWith(exclude)} }
             .toSortedSet()
         val jarData = JarData(dependencyData.fileName, packages)
-        jarDataMap[dependencyData.fileName] = jarData
+        addJarData(dependencyData.fileName, jarData)
         logger.debug("Finished indexing ${dependencyData.fileName}")
         return jarData
     }
@@ -205,8 +263,7 @@ class ProjectService(
         jarFile.getOrThrow().use {
             it.entries().asSequence().forEach { entry ->
                 val ed = SourceEntryData.create(entry.name, jarFileName)
-                sourceMap.getOrPut(ed.name, { mutableSetOf() })
-                    .add(ed to dependencyData)
+                addSourceData(ed, dependencyData)
             }
         }
         logger.debug("Finished indexing ${jarFileName}")
@@ -224,19 +281,26 @@ class ProjectService(
         }
     }
 
+    private fun indexClassData(paths: Collection<String>) {
+        paths.forEach {dir ->
+            File(dir).walkTopDown().filter { it.extension == "class" }.forEach {
+                val cached = classMap.get(it.path)
+                if (cached?.lastModified ?: 0 < it.lastModified()) {
+                    val data = ClassData.create(ClassFile(DataInputStream(it.inputStream())))
+                    data.lastModified = it.lastModified()
+                    data.path = it.path
+                    addClassMap(it.path, data)
+                }
+            }
+        }
+    }
+
     /**
      * Get [ClassData] for all project classes
      */
     fun getClassData() : ClassDataHolder {
         val paths = userPath.classDirs + externalPaths.flatMap { it.classDirs }
-        paths.forEach {dir ->
-            File(dir).walkTopDown().filter { it.extension == "class" && !it.name.contains("$") }.forEach {
-                val data = ClassData.create(ClassFile(DataInputStream(it.inputStream())))
-                data.lastModified = it.lastModified()
-                data.path = it.path
-                classMap.put(it.path, data)
-            }
-        }
+        indexClassData(paths)
         return ClassDataHolder(classMap.values)
     }
 
