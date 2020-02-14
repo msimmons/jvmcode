@@ -441,7 +441,8 @@ export class ProjectController {
             return context
         }
         else {
-            vscode.window.showErrorMessage(`Could not find output directory for ${filePath}`)
+            //vscode.window.showErrorMessage(`Could not find output directory for ${filePath}`)
+            console.debug(`Could not find output directory for ${filePath}`)
             return undefined
         }
     }

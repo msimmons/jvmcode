@@ -18,18 +18,29 @@ export class JUnitController implements vscode.Disposable {
     // Problems by test result XML file path
     private problemMap = new Map<string, vscode.DiagnosticCollection>()
     private disposables : vscode.Disposable[] =  []
+    private testStatusItem : vscode.StatusBarItem
 
     public constructor(projectController: ProjectController) {
         this.projectController = projectController
     }
 
     public start() {
-        let pattern = vscode.workspace.workspaceFolders[0].uri.path+"/**/build/test-results/test/*.{xml}"
-        let watcher = vscode.workspace.createFileSystemWatcher(pattern)
+        let pattern = vscode.workspace.workspaceFolders[0].uri.path+"/**/build/test-results/test/*.xml"
+        let watcher = vscode.workspace.createFileSystemWatcher(pattern, false, false, false)
         this.disposables.push(watcher)
         watcher.onDidChange(this.onDidChange())
         watcher.onDidDelete(this.onDidDelete())
         watcher.onDidCreate(this.onDidCreate())
+        this.testStatusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0)
+        this.testStatusItem.tooltip = 'Test Results'
+        this.updateStatus()
+        this.testStatusItem.show()
+        this.disposables.push(this.testStatusItem)
+
+    }
+
+    private updateStatus() {
+        this.testStatusItem.text = `$(beaker) ${this.problemMap.size}`
     }
 
     onDidCreate() {
@@ -46,27 +57,32 @@ export class JUnitController implements vscode.Disposable {
 
     onDidDelete() {
         return async (uri: vscode.Uri) => {
+            console.log(`delete ${uri}`)
             this.removeProblems(uri)
         }
     }
 
     private fqcnFromPath(path: string) : string {
-        return PathHelper.basename(path, 'xml').replace('TEST-', '')
+        return PathHelper.basename(path, '.xml').replace('TEST-', '')
     }
 
     private async createProblems(uri: vscode.Uri) {
         console.log(`createProblems(${uri.path})`)
         let fqcn = this.fqcnFromPath(uri.path)
-        let problems = vscode.languages.createDiagnosticCollection(fqcn)
-        this.disposables.push(problems)
-        this.problemMap.set(fqcn, problems)
+        if (!this.problemMap.has(fqcn)) {
+            let problems = vscode.languages.createDiagnosticCollection(fqcn)
+            this.disposables.push(problems)
+            this.problemMap.set(fqcn, problems)
+        }
+        let problems = this.problemMap.get(fqcn)
         this.doUpdateProblems(uri, fqcn, problems)
     }
 
     private async doUpdateProblems(uri: vscode.Uri, fqcn: string, problems: vscode.DiagnosticCollection) {
+        this.updateStatus()
         console.log(`doUpdateProblems(${uri.path}, ${fqcn})`)
         problems.clear()
-        let pkgs = this.projectController.getPackages()
+        let localPackages = this.projectController.getPackages()
         fs.readFile(uri.path, (err, data) => {
             if (err) console.log(`Error reading ${uri.path}`, err)
             else {
@@ -80,7 +96,7 @@ export class JUnitController implements vscode.Disposable {
                     tagValueProcessor: (val) => {return he.decode(val)}
                 }) as JUnitReport
                 json.testsuite.forEach(ts => {
-                    this.processTestSuite(ts, problems)
+                    this.processTestSuite(uri, ts, problems, localPackages)
                 })
             }
         })
@@ -101,54 +117,53 @@ export class JUnitController implements vscode.Disposable {
         problems.clear()
     }
 
-    private async processTestSuite(suite: JUnitSuite, problems: vscode.DiagnosticCollection) {
+    private async processTestSuite(xmlUri: vscode.Uri, suite: JUnitSuite, problems: vscode.DiagnosticCollection, packages: string[]) {
+        let suitePath = await this.projectController.fqcn2Path(suite.name)
+        let suiteUri = suitePath ? vscode.Uri.file(suitePath) : xmlUri
         suite.testcase.forEach(async tc => {
-            let diagnostics = await this.processTestCase(tc)
-            sourceUri = sourceUri ? sourceUri : uri
-            problems.set(sourceUri, diagnostics)
+            let diagnostics = await this.processTestCase(tc, packages)
+            if (diagnostics.length > 0) {
+                let xmlDiag = new vscode.Diagnostic(new vscode.Range(0,0,0,0), "XML Test Results", vscode.DiagnosticSeverity.Information)
+                let xmlLocation = new vscode.Location(xmlUri, new vscode.Position(0, 0))
+                xmlDiag.relatedInformation = [new vscode.DiagnosticRelatedInformation(xmlLocation, `Tests: ${suite.tests} Failures: ${suite.failures} Skipped: ${suite.skipped} Errors: ${suite.errors}`)]
+                diagnostics.push(xmlDiag)
+                problems.set(suiteUri, diagnostics)
+            }
         })
     }
 
-    private async processTestCase(tcase: JUnitCase) : Promise<vscode.Diagnostic[]> {
-        let sourcePath = await this.projectController.fqcn2Path(tcase.classname)
-        let sourceUri = sourcePath ? vscode.Uri.file(sourcePath) : undefined
+    private async processTestCase(tcase: JUnitCase, packages: string[]) : Promise<vscode.Diagnostic[]> {
         let diagnostics : vscode.Diagnostic[] = []
         if (tcase.failure) {
             tcase.failure.forEach(async f => {
-                let problem = await this.processFailure(tcase, f, sourceUri)
+                let problem = await this.processFailure(tcase, f, packages)
                 diagnostics.push(problem)
             })
-            return diagnostics
         }
+        return diagnostics
     }
 
-    private async processFailure(tcase: JUnitCase, fail: JUnitFailure, uri?: vscode.Uri) : Promise<vscode.Diagnostic> {
-        let locations : vscode.Location[] = []
+    private async processFailure(tcase: JUnitCase, fail: JUnitFailure, packages: string[]) : Promise<vscode.Diagnostic> {
+        let related : vscode.DiagnosticRelatedInformation[] = []
         fail.stack.split('\n').forEach(l => {
             let r = this.STACK_RE.exec(l.trim())
             if (r) {
                 let classname = r[1]
                 let filename = r[2]
                 let pos = +r[3]-1
-                let found = pkgs.find(p => {return classname.startsWith(p)})
+                let found = packages.find(p => {return classname.startsWith(p)})
                 if (found) {
                     let path = this.projectController.filename2Path(filename)
                     if (path) {
                         let location = new vscode.Location(vscode.Uri.file(path), new vscode.Position(pos,0))
-                        locations.push(location)
+                        related.push(new vscode.DiagnosticRelatedInformation(location, `${classname} (${filename}: ${pos+1})`))
                     }
                 }
             }
         })
-        uri = locations.length > 0 && !uri ? locations[0].uri : uri
-        let range = locations.length > 0 ? locations[0].range : new vscode.Range(0, 0, 0, 0)
+        let range = new vscode.Range(0, 0, 0, 0)
         let problem = new vscode.Diagnostic(range, fail.message, vscode.DiagnosticSeverity.Error)
         problem.source = `${tcase.name} (${tcase.time})`
-        let related = []
-        locations.slice(1).forEach(l => {
-            related.push(new vscode.DiagnosticRelatedInformation(l, ''))
-        })
-        related.push(new vscode.DiagnosticRelatedInformation(new vscode.Location(uri, new vscode.Position(0,0)), 'Test Results'))
         problem.relatedInformation = related
         return problem
     }
