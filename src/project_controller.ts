@@ -495,7 +495,7 @@ export class ProjectController {
         if (!srcPath) return undefined
         srcPath = (srcPath.endsWith('/')) ? srcPath : srcPath + '/'
         let pkgName = dirname.replace(srcPath, '').replace(/\//g, '.')
-        return `${pkgName}${classname}`
+        return `${pkgName}.${classname}`
     }
 
     /**
