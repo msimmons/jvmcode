@@ -226,7 +226,7 @@ class ProjectService(
         var entryCount = 0
         if (jarDataMap.containsKey(dependencyData.fileName)) {
             val data = jarDataMap[dependencyData.fileName]!!
-            logger.info("Returning ${data.packages.size} packages for ${dependencyData.fileName}")
+            logger.debug("Returning ${data.packages.size} packages for ${dependencyData.fileName}")
             return data
         }
         logger.debug("Indexing ${dependencyData.fileName}")
@@ -258,7 +258,7 @@ class ProjectService(
         val jarData = JarData(dependencyData.fileName, packages)
         addJarData(dependencyData.fileName, jarData)
         val end = System.currentTimeMillis()
-        logger.info("Finished indexing ${dependencyData.fileName} $entryCount entries in ${end-start}ms")
+        logger.debug("Finished indexing ${dependencyData.fileName} $entryCount entries in ${end-start}ms")
         return jarData
     }
 
@@ -278,7 +278,7 @@ class ProjectService(
             }
         }
         val end = System.currentTimeMillis()
-        logger.info("Finished indexing ${jarFileName} $entryCount entries in ${end-start}ms")
+        logger.debug("Finished indexing ${jarFileName} $entryCount entries in ${end-start}ms")
     }
 
     private fun createEntryData(entry: JarEntry, isJmod: Boolean) : JarEntryData {
@@ -311,7 +311,7 @@ class ProjectService(
             }
         }
         val end = System.currentTimeMillis()
-        logger.info("indexClassData: $fileCount files, $refreshCount refreshed, ${end-start}ms")
+        logger.debug("indexClassData: $fileCount files, $refreshCount refreshed, ${end-start}ms")
     }
 
     /**
@@ -320,7 +320,7 @@ class ProjectService(
     fun getClassData() : ClassDataHolder {
         val paths = userPath.classDirs + externalPaths.flatMap { it.classDirs }
         indexClassData(paths)
-        return ClassDataHolder(classMap.values)
+        return ClassDataHolder(classMap.values.sorted())
     }
 
     /**

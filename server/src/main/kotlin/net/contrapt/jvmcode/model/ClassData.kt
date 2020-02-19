@@ -21,7 +21,7 @@ class ClassData(
         val isFinal: Boolean,
         @get:JsonProperty(value = "isInterface")
         val isInterface: Boolean
-) {
+) : Comparable<ClassData> {
     var path: String? = null
     var lastModified: Long = 0
 
@@ -99,6 +99,10 @@ class ClassData(
                         FieldData(attr.variableName(it), type)
                     }
         }
+    }
+
+    override fun compareTo(other: ClassData): Int {
+        return name.compareTo(other.name)
     }
 
 }
