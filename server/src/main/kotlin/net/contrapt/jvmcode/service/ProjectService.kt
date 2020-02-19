@@ -222,13 +222,20 @@ class ProjectService(
     }
 
     fun indexJarData(dependencyData: DependencyData) : JarData {
-        if (jarDataMap.containsKey(dependencyData.fileName)) return jarDataMap[dependencyData.fileName]!!
+        val start = System.currentTimeMillis()
+        var entryCount = 0
+        if (jarDataMap.containsKey(dependencyData.fileName)) {
+            val data = jarDataMap[dependencyData.fileName]!!
+            logger.info("Returning ${data.packages.size} packages for ${dependencyData.fileName}")
+            return data
+        }
         logger.debug("Indexing ${dependencyData.fileName}")
         val pkgMap = mutableMapOf<String, MutableSet<JarEntryData>>()
         val isJmod = dependencyData.fileName.endsWith(".jmod")
         val jarFile = runCatching { JarFile(dependencyData.fileName) }
         jarFile.getOrElse { e -> throw RuntimeException("Unable to get jar entries for ${dependencyData.fileName}", e) }.use {
             it.entries().toList().forEach { entry ->
+                entryCount++
                 when (val ed = createEntryData(entry, isJmod)) {
                     is PackageEntryData -> pkgMap.putIfAbsent(ed.pkg, sortedSetOf())
                     is ClassEntryData -> {
@@ -250,11 +257,14 @@ class ProjectService(
             .toSortedSet()
         val jarData = JarData(dependencyData.fileName, packages)
         addJarData(dependencyData.fileName, jarData)
-        logger.debug("Finished indexing ${dependencyData.fileName}")
+        val end = System.currentTimeMillis()
+        logger.info("Finished indexing ${dependencyData.fileName} $entryCount entries in ${end-start}ms")
         return jarData
     }
 
     fun indexSourceJarData(dependencyData: DependencyData) {
+        val start = System.currentTimeMillis()
+        var entryCount = 0
         val jarFileName = dependencyData.sourceFileName
         if (jarFileName.isNullOrEmpty()) return
         val jarFile = runCatching { JarFile(jarFileName) }
@@ -262,11 +272,13 @@ class ProjectService(
         logger.debug("Indexing ${jarFileName}")
         jarFile.getOrThrow().use {
             it.entries().asSequence().forEach { entry ->
+                entryCount++
                 val ed = SourceEntryData.create(entry.name, jarFileName)
                 addSourceData(ed, dependencyData)
             }
         }
-        logger.debug("Finished indexing ${jarFileName}")
+        val end = System.currentTimeMillis()
+        logger.info("Finished indexing ${jarFileName} $entryCount entries in ${end-start}ms")
     }
 
     private fun createEntryData(entry: JarEntry, isJmod: Boolean) : JarEntryData {
@@ -282,10 +294,15 @@ class ProjectService(
     }
 
     private fun indexClassData(paths: Collection<String>) {
+        val start = System.currentTimeMillis()
+        var fileCount = 0
+        var refreshCount = 0
         paths.forEach {dir ->
             File(dir).walkTopDown().filter { it.extension == "class" }.forEach {
+                fileCount++
                 val cached = classMap.get(it.path)
                 if (cached?.lastModified ?: 0 < it.lastModified()) {
+                    refreshCount++
                     val data = ClassData.create(ClassFile(DataInputStream(it.inputStream())))
                     data.lastModified = it.lastModified()
                     data.path = it.path
@@ -293,6 +310,8 @@ class ProjectService(
                 }
             }
         }
+        val end = System.currentTimeMillis()
+        logger.info("indexClassData: $fileCount files, $refreshCount refreshed, ${end-start}ms")
     }
 
     /**

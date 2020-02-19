@@ -140,6 +140,7 @@ export class ProjectController {
                     jarEntries = jarEntries.concat(pkg.entries)
                 }
             }
+            console.log(`jarEntries ${jarEntries.length}`)
             return jarEntries
         })
     }
@@ -252,12 +253,15 @@ export class ProjectController {
     * adds external dependeny classes as needed (to limit size of list which could be quite large)
     */
     public findClass() {
+        let start = Date.now()
+        console.log("findClass")
         let jarEntries = this.getJarEntryNodes()
         let classData = this.getClassData()
         let quickPick = vscode.window.createQuickPick()
         quickPick.matchOnDescription = true
         let classItems = undefined
         let jarItems = undefined
+        let lastEvent = undefined
         quickPick.onDidAccept(selection => {
             quickPick.dispose()
             if (quickPick.selectedItems.length) {
@@ -265,33 +269,36 @@ export class ProjectController {
             }
         })
         quickPick.onDidChangeValue(event => {
-            if (event.length > 0 && quickPick.activeItems.length === 0) {
-                if (!jarItems) {
-                    quickPick.busy = true
-                    jarEntries.then((result) => {
-                        jarItems = result.map((r) => {
-                            let detail = dependencyLabel(r.dependency)
-                            return { label: r.name, description: r.package.name , detail: detail, entry: r } as vscode.QuickPickItem
-                        })
-                        quickPick.items = quickPick.items.concat(jarItems.filter((ji) => {
+            if (event.length > 0 || quickPick.activeItems.length === 0) {
+                if (!lastEvent || !event.startsWith(lastEvent)) {
+                    if (jarItems) {
+                        console.log("filtering")
+                        quickPick.items = classItems.concat(jarItems.filter((ji) => {
                             return ji.label.toLowerCase().includes(event.toLowerCase() || ji.description.toLowerCase().includes(event.toLocaleLowerCase()))
                         }))
-                        quickPick.busy = false
-                    }).catch((reason) => {
-                        console.error(reason)
-                        jarItems = []
-                        quickPick.busy = false
-                    })
+                        lastEvent = event
+                    }
                 }
-                quickPick.items = quickPick.items.concat(jarItems.filter((ji) => {
-                    return ji.label.toLowerCase().includes(event.toLowerCase() || ji.description.toLowerCase().includes(event.toLocaleLowerCase()))
-                }))
             }
             else if (event.length === 0) {
+                lastEvent = undefined
                 quickPick.items = classItems
             }
         })
+        jarEntries.then((result) => {
+            let itemStart = Date.now()
+            jarItems = result.map((r) => {
+                let detail = dependencyLabel(r.dependency)
+                return { label: r.name, description: r.package.name , detail: detail, entry: r } as vscode.QuickPickItem
+            })
+            console.log(`jarItems length ${jarItems.length} in ${Date.now()-itemStart}`)
+        }).catch((reason) => {
+            console.error(reason)
+            jarItems = []
+            quickPick.busy = false
+        })
         classData.then((data) => {
+            console.log("classData")
             classItems = data.map((d) => {
                 let path = d.path.replace(vscode.workspace.workspaceFolders[0].uri.path+'/', '')
                 let name = d.name.substring(d.name.lastIndexOf('.')+1)
@@ -300,6 +307,7 @@ export class ProjectController {
             })
             quickPick.items = classItems
             quickPick.busy = false
+            console.log(`classData done ${Date.now()-start}`)
         })
         quickPick.busy = true
         quickPick.show()
