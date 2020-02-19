@@ -243,6 +243,19 @@ export class ProjectController {
             })
         })
     }
+
+    private filterItems(items: vscode.QuickPickItem[], event: string, inDollar: boolean) {
+        if (!items) return []
+        let filterString = event.toLocaleLowerCase().replace('*', '').replace('$','').trim()
+        return items.filter(i => {
+            if (!inDollar && i.label.includes('$')) {
+                return false
+            }
+            else {
+                return i.label.toLocaleLowerCase().includes(filterString) || i.description.toLocaleLowerCase().includes(filterString)
+            }
+        })
+    }
     
     /**
     * Let user find a class from the universe of classes for this project; starts with project classes only and
@@ -254,7 +267,10 @@ export class ProjectController {
         let quickPick = vscode.window.createQuickPick()
         quickPick.matchOnDescription = true
         let classItems : vscode.QuickPickItem[] = undefined
+        let noDollarItems : vscode.QuickPickItem[] = undefined
         let jarItems : vscode.QuickPickItem[] = undefined
+        let inDollar = false
+        let inAsterisk = false
         quickPick.onDidAccept(selection => {
             quickPick.dispose()
             if (quickPick.selectedItems.length) {
@@ -262,19 +278,15 @@ export class ProjectController {
             }
         })
         quickPick.onDidChangeValue(event => {
-            if (event.length > 0 && (quickPick.activeItems.length === 0 || event.endsWith('*'))) {
-                if (jarItems) {
-                    let filtered = jarItems.filter((ji) => {
-                        let label = ji.label.toLowerCase()
-                        let desc = ji.description.toLowerCase()
-                        let e = event.toLowerCase().replace('*', '').trim()
-                        return label.includes(e) || desc.includes(e)
-                    }).sort()
-                    quickPick.items = classItems.concat(filtered)
-                }
-            }
-            else if (event.length === 0) {
-                quickPick.items = classItems
+            let hasDollar = event.includes('$')
+            let hasAsterisk = event.includes('*')
+            let hasZero = quickPick.activeItems.length === 0
+            let changeItems = (hasDollar != inDollar) || (hasAsterisk != inAsterisk) || hasZero
+            inDollar = hasDollar
+            inAsterisk = hasAsterisk
+            if (changeItems) {
+                let filtered = (inAsterisk || hasZero) ? this.filterItems(jarItems, event, inDollar) : []
+                quickPick.items = (inDollar ? classItems : noDollarItems).concat(filtered)
             }
         })
         quickPick.busy = true
@@ -297,7 +309,8 @@ export class ProjectController {
                 let pkg = d.name.substring(0, d.name.lastIndexOf('.'))
                 return { label: name, description: pkg, detail: path, entry: d } as vscode.QuickPickItem
             })
-            quickPick.items = classItems
+            noDollarItems = classItems.filter(i => !i.label.includes('$'))
+            quickPick.items = noDollarItems
             quickPick.busy = false
         })
     }

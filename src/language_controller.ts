@@ -96,6 +96,10 @@ export class LanguageController implements vscode.Disposable {
      */
     async requestCompile(languageId: string, uri: vscode.Uri) {
         let context = this.projectController.getFileContext(uri)
+        if (!context) {
+            console.debug(`Skip compile of ${languageId} ${uri.path}`)
+            return
+        }
         let classpath = this.projectController.getClasspath()
         // TODO Find dependent files also
         let request = {languageId: languageId, files: [context.path], outputDir: context.outputDir, classpath: classpath, sourcepath: context.sourceDir, name: 'vsc-java'} as CompileRequest
