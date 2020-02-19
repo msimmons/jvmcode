@@ -7,6 +7,7 @@ import * as xml from 'fast-xml-parser'
 import * as he from 'he'
 import { JUnitSuite, JUnitReport, JUnitCase, JUnitFailure } from './models';
 import { ProjectController } from './project_controller';
+import { ConfigService } from './config_service';
 
 /**
  * Responsible for managing JUnit integrations, watching for changes in test reports, maybe recognizing test methods
@@ -17,6 +18,7 @@ export class JUnitController implements vscode.Disposable {
     private projectController : ProjectController
     // Problems by test result XML file path
     private problemMap = new Map<string, vscode.DiagnosticCollection>()
+    private resultsMap = new Map<string, JUnitReport>()
     private disposables : vscode.Disposable[] =  []
     private testStatusItem : vscode.StatusBarItem
 
@@ -25,18 +27,28 @@ export class JUnitController implements vscode.Disposable {
     }
 
     public start() {
-        let pattern = vscode.workspace.workspaceFolders[0].uri.path+"/**/build/test-results/test/*.xml"
+        let dir = ConfigService.getConfig().testResultsDir
+        let pattern = vscode.workspace.workspaceFolders[0].uri.path+`/${dir}/**/*.xml`
         let watcher = vscode.workspace.createFileSystemWatcher(pattern, false, false, false)
         this.disposables.push(watcher)
         watcher.onDidChange(this.onDidChange())
         watcher.onDidDelete(this.onDidDelete())
         watcher.onDidCreate(this.onDidCreate())
+        // Watch the directory for 'cleans'
+        let dirWatcher = vscode.workspace.createFileSystemWatcher(vscode.workspace.workspaceFolders[0].uri.path+`/${dir}/*`, true, true, false)
+        this.disposables.push(dirWatcher)
+        dirWatcher.onDidDelete(this.onDidDeleteDir())
+
         this.testStatusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0)
         this.testStatusItem.tooltip = 'Test Results'
+        this.testStatusItem.command = 'jvmcode.show-test-results'
         this.updateStatus()
         this.testStatusItem.show()
         this.disposables.push(this.testStatusItem)
 
+        this.disposables.push(vscode.commands.registerCommand('jvmcode.show-test-results', async () => {
+            this.showTestResults()
+        }))
     }
 
     private updateStatus() {
@@ -57,8 +69,13 @@ export class JUnitController implements vscode.Disposable {
 
     onDidDelete() {
         return async (uri: vscode.Uri) => {
-            console.log(`delete ${uri}`)
             this.removeProblems(uri)
+        }
+    }
+
+    onDidDeleteDir() {
+        return async (uri: vscode.Uri) => {
+            this.removeDir(uri)
         }
     }
 
@@ -67,24 +84,22 @@ export class JUnitController implements vscode.Disposable {
     }
 
     private async createProblems(uri: vscode.Uri) {
-        console.log(`createProblems(${uri.path})`)
         let fqcn = this.fqcnFromPath(uri.path)
-        if (!this.problemMap.has(fqcn)) {
+        if (!this.problemMap.has(uri.path)) {
             let problems = vscode.languages.createDiagnosticCollection(fqcn)
             this.disposables.push(problems)
-            this.problemMap.set(fqcn, problems)
+            this.problemMap.set(uri.path, problems)
         }
-        let problems = this.problemMap.get(fqcn)
+        let problems = this.problemMap.get(uri.path)
         this.doUpdateProblems(uri, fqcn, problems)
     }
 
     private async doUpdateProblems(uri: vscode.Uri, fqcn: string, problems: vscode.DiagnosticCollection) {
         this.updateStatus()
-        console.log(`doUpdateProblems(${uri.path}, ${fqcn})`)
         problems.clear()
         let localPackages = this.projectController.getPackages()
         fs.readFile(uri.path, (err, data) => {
-            if (err) console.log(`Error reading ${uri.path}`, err)
+            if (err) console.error(`Error reading ${uri.path}`, err)
             else {
                 let json = xml.parse(data.toString(), {
                     ignoreAttributes: false, 
@@ -95,6 +110,7 @@ export class JUnitController implements vscode.Disposable {
                     attrValueProcessor: (val) => {return he.decode(val)},
                     tagValueProcessor: (val) => {return he.decode(val)}
                 }) as JUnitReport
+                this.resultsMap.set(uri.path, json)
                 json.testsuite.forEach(ts => {
                     this.processTestSuite(uri, ts, problems, localPackages)
                 })
@@ -104,19 +120,27 @@ export class JUnitController implements vscode.Disposable {
 
     private async updateProblems(uri: vscode.Uri) {
         let fqcn = this.fqcnFromPath(uri.path)
-        let problems = this.problemMap.get(fqcn)
+        let problems = this.problemMap.get(uri.path)
         if (!problems) this.createProblems(uri)
         else this.doUpdateProblems(uri, fqcn, problems)
     }
 
     private async removeProblems(uri: vscode.Uri) {
-        console.log(`removeProblems(${uri.path})`)
-        let fqcn = this.fqcnFromPath(uri.path)
-        let problems = this.problemMap.get(fqcn)
+        this.resultsMap.delete(uri.path)
+        let problems = this.problemMap.get(uri.path)
         if (!problems) return
         problems.clear()
     }
 
+    private removeDir(uri: vscode.Uri) {
+        this.problemMap.forEach((value, key) => {
+            if (key.startsWith(uri.path)) {
+                value.clear()
+                this.resultsMap.delete(key)
+            }
+        })
+    }
+    
     private async processTestSuite(xmlUri: vscode.Uri, suite: JUnitSuite, problems: vscode.DiagnosticCollection, packages: string[]) {
         let suitePath = await this.projectController.fqcn2Path(suite.name)
         let suiteUri = suitePath ? vscode.Uri.file(suitePath) : xmlUri
@@ -166,6 +190,16 @@ export class JUnitController implements vscode.Disposable {
         problem.source = `${tcase.name} (${tcase.time})`
         problem.relatedInformation = related
         return problem
+    }
+
+    private async showTestResults() {
+        let items = Array.from(this.resultsMap.keys())
+        vscode.window.showQuickPick(items).then(item => {
+            if (item) {
+                vscode.workspace.openTextDocument({language: "json", content: JSON.stringify(this.resultsMap.get(item))})
+            }
+        })
+
     }
 
     dispose() {

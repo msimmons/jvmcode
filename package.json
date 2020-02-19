@@ -173,6 +173,11 @@
             "scala:scala"
           ],
           "description": "Helps map source file extension to the a directory containing the given keyword: 'ext:keyword' (this is a hack)"
+        },
+        "jvmcode.testResultsDir": {
+          "type": "string",
+          "default": "**/build/test-results",
+          "description": "Directory to watch for test results relative to workspace"
         }
       }
     }
