@@ -73,7 +73,8 @@ class JavaParserTest {
             "String since() default \"\";",
             "int count()[];",
             "List <Method> getDeclaredPublicMethods (String name, Class<?>... parameterTypes) {",
-            "default TimeZone getTimeZone(Date date) {"
+            "default TimeZone getTimeZone(Date date) {",
+            "Class<? extends String> clazz();"
         )
         expressions.forEach {
             testParser(parser.tokenizer, parser.MethodDef, it)
@@ -185,7 +186,9 @@ class JavaParserTest {
             "b.length().trim().subtring(1, 4)",
             "assert d != 1 : \"Unity denominator\"",
             //"java.security.AccessController.doPrivileged(new java.security.PrivilegedAction<>() {",
-            "assert cmpFracHalf == 0"
+            "assert cmpFracHalf == 0",
+            "0L",
+            "07"
         )
         val parser = JavaParser()
         expressions.forEach {
