@@ -14,7 +14,7 @@ import net.contrapt.jvmcode.model.ParseRequest
 import net.contrapt.jvmcode.model.ParseSymbolType
 
 /**
- * TODO default methods
+ *
  */
 class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
 
@@ -57,6 +57,7 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
     val IMPORT by token("import\\b")
 
     val SYNCRONIZED by token("synchronized\\b")
+    val ASSERT by token("assert\\b")
     val MODIFIER by token("(public|private|protected|final|transient|threadsafe|volatile|abstract|native|strictfp|inner|static)\\b")
     val DECLARE by token("(class|interface|enum|@interface)\\b")
     val AT by token("@")
@@ -73,7 +74,8 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
     val RETURN by token("return\\b")
 
     val GOTO by token("(break|continue)\\b")
-    val LABEL by token("(case|default)\\b")
+    val CASE by token("case\\b")
+    val DEFAULT by token("default\\b")
     val IF_WHILE_SWITCH by token("(if|while|switch)\\b")
     val ELSE by token("else\\b")
     val DO by token("do\\b")
@@ -81,7 +83,6 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
     val FOR by token("for\\b")
     val TRY by token("try\\b")
     val CATCH by token("catch\\b")
-    val CONTROL by token("(default)\\b")
     val TYPE by token("(void|boolean|byte|char|short|int|long|double|float)\\b")
 
     val FALSE by token("false\\b")
@@ -96,12 +97,13 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
     val NUM_LITERAL by token("([-]?[0-9]+(\\.[0-9_]*)?(E[-+]?[0-9_]+)?)[FfL]?|([-]?\\.[0-9_]+(E[-+]?[0-9_]+)?)[FfL]?")
     val WILD_IDENT by  token("[a-zA-Z_\$][.\\w]*[\\w](\\.\\*)")
     val IDENT by token("[a-zA-Z_\$][.\\w]*")
+    val ELLIPSIS by token("\\.\\.\\.")
     val DOT by token("\\.")
     val OTHER by token(".")
 
     val OPERATOR by INFIX_OPERATOR or GT or LT or AMPERSAND or PIPE
     val LITERAL by STRING_LITERAL or BIN_LITERAL or CHAR_LITERAL or HEX_LITERAL or NUM_LITERAL or OCT_LITERAL or UNICODE_LITERAL or FALSE or TRUE or NULL
-    val MODIFIERS by zeroOrMore(MODIFIER or SYNCRONIZED)
+    val MODIFIERS by zeroOrMore(MODIFIER or SYNCRONIZED or DEFAULT)
 
     // Rules
     val literal by LITERAL
@@ -117,7 +119,7 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
         it.terms
     }
 
-    val typeSpec by (typeRef or QUESTION) * optional(parser(::typeArgs)) * zeroOrMore(O_BRACKET * C_BRACKET) map {
+    val typeSpec by (typeRef or QUESTION) * optional(parser(::typeArgs)) * zeroOrMore(O_BRACKET * C_BRACKET) * -optional(ELLIPSIS) map {
         MatchProducer { ctx, scope ->
             it.t2?.block?.invoke(ctx)
             ctx.addSymbol(it.t1, ParseSymbolType.TYPEREF, createScope = scope).apply { arrayDim = it.t3.size }
@@ -260,7 +262,7 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
         }
     }
 
-    val newExp by -NEW * symSpec * -O_PAREN * separated(parser(::Expression), COMMA, true) * -C_PAREN * optional(O_BRACE) map {
+    val newExp by -NEW * typeSpec * -O_PAREN * separated(parser(::Expression), COMMA, true) * -C_PAREN * optional(O_BRACE) map {
         MatchProcessor{ ctx ->
             ctx.logMatch("newExp")
             val createScope = it.t3 != null
@@ -315,16 +317,24 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
         }
     }
 
-    val labelExp by -LABEL * optional(parser(::Expression)) * -COLON map {
+    val labelExp by -(CASE or DEFAULT) * optional(parser(::Expression)) * -COLON map {
         MatchProcessor { ctx ->
             ctx.logMatch("labelExp")
             it?.block?.invoke(ctx)
         }
     }
 
+    val assertExp by -ASSERT * parser(::Expression) * optional(-COLON * parser(::Expression)) map {
+        MatchProcessor { ctx ->
+            it.t1.block(ctx)
+            it.t2?.block?.invoke(ctx)
+        }
+    }
+
+    //java.security.AccessController.doPrivileged ( new java.security.PrivilegedAction < > ( ) { public Void run ( ) { values.setAccessible ( true ) ; return null ; } } )
     val Expression : Parser<MatchProcessor> by oneOrMore(
         varInit or methodRef or arrayRef or castExp or varExp or literalExp or
-            compoundExp or arrayLiteral or newExp or newArray or elvisExp or labelExp or
+            compoundExp or arrayLiteral or newExp or newArray or elvisExp or labelExp or assertExp or
             OPERATOR or OTHER or DOT or ASSIGN or RETURN or THROW or GOTO or COMMA) map {
         MatchProcessor{ ctx ->
             ctx.logMatch("Expression", null)
@@ -397,8 +407,9 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
         }
     }
 
-    val MethodDef by zeroOrMore(annotationRef) * MODIFIERS * optional(typeParams) * typeSpec * methodName * paramDefs * throwsClause * (SEMI or O_BRACE) map {
-        (annotations, _, typeParams, typespec, name, params, throws, term) ->
+    val MethodDef by zeroOrMore(annotationRef) * MODIFIERS * optional(typeParams) * typeSpec * methodName * paramDefs *
+        -optional(O_BRACKET * C_BRACKET) * throwsClause * optional(-DEFAULT * parser(::Expression)) * (SEMI or O_BRACE) map {
+        (annotations, _, typeParams, typespec, name, params, throws, def, term) ->
         MatchProcessor { ctx ->
             ctx.logMatch("MethodDef", name)
             annotations.forEach { it.block(ctx) }
@@ -407,6 +418,7 @@ class JavaParser : Grammar<Any>(), LanguageParser, Shareable {
             ctx.addSymbol(name, ParseSymbolType.METHOD, "", type.name, createScope = true)
             typeParams?.block?.invoke(ctx)
             params.block(ctx)
+            def?.block?.invoke(ctx)
             if (term.type == SEMI) ctx.endScope(term)
         }
     }

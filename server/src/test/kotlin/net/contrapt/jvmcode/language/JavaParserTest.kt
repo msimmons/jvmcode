@@ -63,13 +63,17 @@ class JavaParserTest {
     }
 
     @Test
-    fun methodDef() {
+    fun testMethodDef() {
         val parser = JavaParser()
         val expressions = listOf(
             "private void String();",
             "int[] String() {",
             "public synchronized Class<T> Class(int i, Class<T> j);",
-            "public <T> void method(Class<T> clazz, T[] values) {"
+            "public <T> void method(Class<T> clazz, T[] values) {",
+            "String since() default \"\";",
+            "int count()[];",
+            "List <Method> getDeclaredPublicMethods (String name, Class<?>... parameterTypes) {",
+            "default TimeZone getTimeZone(Date date) {"
         )
         expressions.forEach {
             testParser(parser.tokenizer, parser.MethodDef, it)
@@ -154,10 +158,7 @@ class JavaParserTest {
 
     @Test
     fun testExpressions() {
-        //TODO   assert d != 1 : "Unity denominator" ;
-        //    assert cmpFracHalf == 0 ;
         //java.security.AccessController.doPrivileged ( new java.security.PrivilegedAction < > ( ) { public Void run ( ) { values.setAccessible ( true ) ; return null ; } } )
-        //   List < Method > getDeclaredPublicMethods ( String name , Class < ? > . . . parameterTypes ) { Method [ ] methods = privateGetDeclaredMethods ( true ) ;
         val expressions = listOf(
             "new String(\"string\")",
             "x = foo.something() ? 8 + 3 : 15",
@@ -181,7 +182,10 @@ class JavaParserTest {
             "{{1,2,3},{4,5,6},{'a','b','c'}}",
             "{'a','b','c','d','e','f'}",
             "return new String[] {1,2,3}",
-            "b.length().trim().subtring(1, 4)"
+            "b.length().trim().subtring(1, 4)",
+            "assert d != 1 : \"Unity denominator\"",
+            //"java.security.AccessController.doPrivileged(new java.security.PrivilegedAction<>() {",
+            "assert cmpFracHalf == 0"
         )
         val parser = JavaParser()
         expressions.forEach {
