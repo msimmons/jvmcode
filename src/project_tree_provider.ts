@@ -4,7 +4,7 @@ import { ProjectController } from './project_controller';
 
 export class ProjectTreeProvider implements TreeDataProvider<TreeNode> {
 
-    public viewId = 'jvmcode.project-tree-2';
+    public viewId = 'jvmcode.project-tree';
     
     private controller: ProjectController
     private onDidChangeEmitter = new EventEmitter<TreeNode>()

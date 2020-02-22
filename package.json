@@ -79,7 +79,7 @@
     "views": {
       "jvmcode-container": [
         {
-          "id": "jvmcode.project-tree-2",
+          "id": "jvmcode.project-tree",
           "name": "Project",
           "when": "jvmcode.context.isJvmProject"
         },
