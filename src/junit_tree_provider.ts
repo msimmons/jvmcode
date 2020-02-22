@@ -1,15 +1,16 @@
 import { TreeDataProvider, TreeItem, TreeItemCollapsibleState, EventEmitter, ThemeIcon } from 'vscode'
 import { TreeNode } from './models'
 import { ProjectController } from './project_controller';
+import { JUnitController } from './junit_controller';
 
-export class ProjectTreeProvider implements TreeDataProvider<TreeNode> {
+export class JUnitTreeProvider implements TreeDataProvider<TreeNode> {
 
-    public viewId = 'jvmcode.project-tree-2';
+    public viewId = 'jvmcode.junit-tree';
     
-    private controller: ProjectController
+    private controller: JUnitController
     private onDidChangeEmitter = new EventEmitter<TreeNode>()
 
-    constructor(controller: ProjectController) {
+    constructor(controller: JUnitController) {
         this.controller = controller
     }
 

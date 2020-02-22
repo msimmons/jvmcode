@@ -7,13 +7,9 @@ import { JarContentProvider } from './jar_content_provider';
 import { ProjectService } from './project_service';
 import { JarEntryNode, dependencyLabel, PathRootNode, DependencyRootNode, TreeNode, DependencySourceNode, DependencyNode, JarPackageNode, NodeType, SourceDirNode, ClassDirNode, CompilationContext, FileContext } from './models';
 import { projectService, projectController } from './extension';
-import { existsSync, readdirSync, statSync } from 'fs';
+import * as fs from 'fs';
 import * as PathHelper from 'path'
 import { ConfigService } from './config_service';
-import { url } from 'inspector';
-import { URL } from 'url';
-import { encode } from 'punycode';
-import { performance } from 'perf_hooks';
 
 /**
 * Responsible for managing various views related to a project
@@ -117,8 +113,8 @@ export class ProjectController {
         }
     }
     
-    public async getClassdata() : Promise<ClassData[]> {
-        return await this.service.getClassdata()
+    public async getClassData() : Promise<ClassData[]> {
+        return await this.service.getClassData()
     }
     
     /**
@@ -223,13 +219,13 @@ export class ProjectController {
     */
     public openClass(classData: ClassData) {
         let file = this.class2source(classData)
-        console.log(file)
         if (file) {
             vscode.workspace.openTextDocument(vscode.Uri.file(file)).then((doc) => {
                 vscode.window.showTextDocument(doc)
             })
         }
         else {
+            console.log('No source file found')
             console.log(classData)
         }
     }
@@ -247,6 +243,19 @@ export class ProjectController {
             })
         })
     }
+
+    private filterItems(items: vscode.QuickPickItem[], event: string, inDollar: boolean) {
+        if (!items) return []
+        let filterString = event.toLocaleLowerCase().replace('*', '').replace('$','').trim()
+        return items.filter(i => {
+            if (!inDollar && i.label.includes('$')) {
+                return false
+            }
+            else {
+                return i.label.toLocaleLowerCase().includes(filterString) || i.description.toLocaleLowerCase().includes(filterString)
+            }
+        })
+    }
     
     /**
     * Let user find a class from the universe of classes for this project; starts with project classes only and
@@ -254,11 +263,14 @@ export class ProjectController {
     */
     public findClass() {
         let jarEntries = this.getJarEntryNodes()
-        let classData = this.getClassdata()
+        let classData = this.getClassData()
         let quickPick = vscode.window.createQuickPick()
         quickPick.matchOnDescription = true
-        let classItems = undefined
-        let jarItems = undefined
+        let classItems : vscode.QuickPickItem[] = undefined
+        let noDollarItems : vscode.QuickPickItem[] = undefined
+        let jarItems : vscode.QuickPickItem[] = undefined
+        let inDollar = false
+        let inAsterisk = false
         quickPick.onDidAccept(selection => {
             quickPick.dispose()
             if (quickPick.selectedItems.length) {
@@ -266,32 +278,30 @@ export class ProjectController {
             }
         })
         quickPick.onDidChangeValue(event => {
-            if (event.length > 0 && quickPick.activeItems.length === 0) {
-                if (!jarItems) {
-                    quickPick.busy = true
-                    jarEntries.then((result) => {
-                        jarItems = result.map((r) => {
-                            let detail = dependencyLabel(r.dependency)
-                            return { label: r.name, description: r.package.name , detail: detail, entry: r } as vscode.QuickPickItem
-                        })
-                        quickPick.items = quickPick.items.concat(jarItems.filter((ji) => {
-                            return ji.label.toLowerCase().includes(event.toLowerCase() || ji.description.toLowerCase().includes(event.toLocaleLowerCase()))
-                        }))
-                        quickPick.busy = false
-                    }).catch((reason) => {
-                        console.error(reason)
-                        jarItems = []
-                        quickPick.busy = false
-                    })
-                }
-                quickPick.items = quickPick.items.concat(jarItems.filter((ji) => {
-                    return ji.label.toLowerCase().includes(event.toLowerCase() || ji.description.toLowerCase().includes(event.toLocaleLowerCase()))
-                }))
-            }
-            else if (event.length === 0) {
-                quickPick.items = classItems
+            let hasDollar = event.includes('$')
+            let hasAsterisk = event.includes('*')
+            let hasZero = quickPick.activeItems.length === 0
+            let changeItems = (hasDollar != inDollar) || (hasAsterisk != inAsterisk) || hasZero
+            inDollar = hasDollar
+            inAsterisk = hasAsterisk
+            if (changeItems) {
+                let filtered = (inAsterisk || hasZero) ? this.filterItems(jarItems, event, inDollar) : []
+                quickPick.items = (inDollar ? classItems : noDollarItems).concat(filtered)
             }
         })
+        quickPick.busy = true
+        quickPick.show()
+        // Wait for Jar entries
+        jarEntries.then((result) => {
+            jarItems = result.map((r) => {
+                let detail = dependencyLabel(r.dependency)
+                return { label: r.name, description: r.package.name , detail: detail, entry: r } as vscode.QuickPickItem
+            })
+        }).catch((reason) => {
+            console.error(reason)
+            jarItems = []
+        })
+        // Wait for classdata
         classData.then((data) => {
             classItems = data.map((d) => {
                 let path = d.path.replace(vscode.workspace.workspaceFolders[0].uri.path+'/', '')
@@ -299,11 +309,10 @@ export class ProjectController {
                 let pkg = d.name.substring(0, d.name.lastIndexOf('.'))
                 return { label: name, description: pkg, detail: path, entry: d } as vscode.QuickPickItem
             })
-            quickPick.items = classItems
+            noDollarItems = classItems.filter(i => !i.label.includes('$'))
+            quickPick.items = noDollarItems
             quickPick.busy = false
         })
-        quickPick.busy = true
-        quickPick.show()
     }
     
     /**
@@ -377,6 +386,17 @@ export class ProjectController {
         })
         return paths
     }
+
+    /**
+     * Get the current class paths
+     */
+    public getClassPaths() : string[] {
+        let paths = []
+        this.pathRootNode.data.forEach((d) => {
+            paths = paths.concat(d.classDirs)
+        })
+        return paths
+    }
     
     /**
     * Save any user data in the current project
@@ -431,43 +451,119 @@ export class ProjectController {
             return context
         }
         else {
-            vscode.window.showErrorMessage(`Could not find output directory for ${filePath}`)
+            //vscode.window.showErrorMessage(`Could not find output directory for ${filePath}`)
+            console.debug(`Could not find output directory for ${filePath}`)
             return undefined
         }
+    }
+
+    /**
+     * Return the path for the given filename using the currently configured source paths
+     */
+    public filename2Path(filename: string) : string {
+        let paths = []
+        this.getSourcePaths().forEach(p => {
+            paths = paths.concat(this.findFiles(p, filename))
+        })
+        return paths.length > 0 ? paths[0] : undefined
     }
     
     /**
     * Return the FQCN of the current file
     */
-    public getFQCN() : string {
+    public getCurrentFqcn() : string {
         let curFile = vscode.window.activeTextEditor.document.fileName
-        curFile = curFile.substring(0, curFile.lastIndexOf('.'))
-        let path = this.getSourcePaths().find((p) => { return curFile.startsWith(p)})
-        if (!path) return `No FQCN found for ${curFile} in ${this.getSourcePaths()}`
-        path = (path.endsWith('/')) ? path : path + '/'
-        return curFile.replace(path, '').replace(/\//g, '.')
+        let fqcn = this.path2Fqcn(curFile)
+        if (!fqcn) return `Unable to determine FQCN for ${curFile} in ${this.getSourcePaths()}`
+        return fqcn
     }
-    
-    public file2fqcn(filename: string) : string {
-        let path = this.getSourcePaths().find((p) => { return filename.startsWith(p)})
-        if (!path) return `No FQCN found for ${filename} in ${this.getSourcePaths()}`
-        path = (path.endsWith('/')) ? path : path + '/'
-        return filename.replace(path, '').replace(/\//g, '.')
+
+    /**
+     * Get the local source path for the given fqcn
+     * 
+     * @param fqcn 
+     */
+    public async fqcn2Path(fqcn: string) : Promise<string> {
+        let classData = await this.getClassData()
+        let data = classData.find(cd => {
+            return cd.name === fqcn
+        })
+        return data ? this.class2source(data) : undefined
     }
-    
-    private getFiles(dir: string) : string[] {
-        let files = []
-        if (!existsSync(dir)) return files
-        readdirSync(dir).forEach((entry) => {
+
+    /**
+     * Get the fqcn for the local source path
+     * TODO move this to language controller and use parsed data and location
+     * @param filename 
+     */
+    public path2Fqcn(filename: string) : string {
+        let basename = PathHelper.basename(filename)
+        let classname = basename.substring(0, basename.lastIndexOf('.'))
+        let dirname = PathHelper.dirname(filename)
+        let srcPath = this.getSourcePaths().find((p) => { return dirname.startsWith(p)})
+        if (!srcPath) return undefined
+        srcPath = (srcPath.endsWith('/')) ? srcPath : srcPath + '/'
+        let pkgName = dirname.replace(srcPath, '').replace(/\//g, '.')
+        return `${pkgName}.${classname}`
+    }
+
+    /**
+     * Find all the packages in the configured class directories
+     */
+    public getPackages() : string[] {
+        let pkgs = new Set<string>()
+        this.getClassPaths().forEach(p => {
+            this.findDirectories(p, false).forEach(d => {
+                p = (p.endsWith('/')) ? p : p + '/'
+                pkgs.add(d.replace(p, '').replace(/\//g, '.'))
+            })
+        })
+        return Array.from(pkgs)
+    }
+
+    /**
+     * Find all directories recursively starting at the given directory
+     * Optionally, only return non-empty directories
+     */
+    private findDirectories(dir: string, empty: boolean = true) : string[] {
+        let dirs = []
+        if (!fs.existsSync(dir)) return dirs
+        let entryCount = 0
+        fs.readdirSync(dir).forEach((entry) => {
             let file = PathHelper.join(dir, entry)
-            if (statSync(file).isDirectory()) {
-                files = files.concat(this.getFiles(file))
-            } else {
+            if (fs.statSync(file).isDirectory()) {
+                dirs = dirs.concat(this.findDirectories(file))
+                if (empty || entryCount > 0) dirs.push(file)
+            }
+            else {
+                entryCount++
+            }
+        })
+        return dirs
+    }
+    
+    /**
+     * Find all files recursively starting in the given directory optionally matching the given filename
+     */
+    private findFiles(dir: string, filename?: string) : string[] {
+        let files = []
+        if (!fs.existsSync(dir)) return files
+        fs.readdirSync(dir).forEach((entry) => {
+            let file = PathHelper.join(dir, entry)
+            if (fs.statSync(file).isDirectory()) {
+                files = files.concat(this.findFiles(file, filename))
+            } else if (!filename || entry === filename) {
                 files.push(file)
             }
         })
         return files
     }
+
+    /**
+     * Given a FQCN for project class, return a Uri
+     * @param classData 
+     */
+    
     
     /**
     * Find the corresponding source file for the given class data
@@ -475,10 +571,11 @@ export class ProjectController {
     private class2source(classData: ClassData) : string {
         let parts = classData.name.split('.')
         let pkgPath = parts.slice(0, parts.length-1).join('/')
-        let dir =this.getSourcePaths().find((p) => {
+        let dir = this.getSourcePaths().find((p) => {
             let file = PathHelper.join(p, pkgPath, classData.srcFile)
-            return existsSync(file)
+            return fs.existsSync(file)
         })
-        return PathHelper.join(dir, pkgPath, classData.srcFile)
+        if (dir) return PathHelper.join(dir, pkgPath, classData.srcFile)
+        else return undefined
     }
 }

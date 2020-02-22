@@ -1138,7 +1138,7 @@
     "id" : 43,
     "name" : "IllegalArgumentException",
     "type" : "IllegalArgumentException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 5238,
       "end" : 5261
@@ -1336,7 +1336,7 @@
     "id" : 52,
     "name" : "Encoder",
     "type" : "Encoder",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 5547,
       "end" : 5553
@@ -2590,7 +2590,7 @@
     "id" : 109,
     "name" : "Encoder",
     "type" : "Encoder",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 8914,
       "end" : 8920
@@ -2656,7 +2656,7 @@
     "id" : 112,
     "name" : "Encoder",
     "type" : "Encoder",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 8997,
       "end" : 9003
@@ -2722,7 +2722,7 @@
     "id" : 115,
     "name" : "Encoder",
     "type" : "Encoder",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 9071,
       "end" : 9077
@@ -4306,7 +4306,7 @@
     "id" : 187,
     "name" : "IllegalArgumentException",
     "type" : "IllegalArgumentException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 11440,
       "end" : 11463
@@ -4636,7 +4636,7 @@
     "id" : 202,
     "name" : "String",
     "type" : "String",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 12541,
       "end" : 12546
@@ -6176,7 +6176,7 @@
     "id" : 272,
     "name" : "EncOutputStream",
     "type" : "EncOutputStream",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 14774,
       "end" : 14788
@@ -6462,7 +6462,7 @@
     "id" : 285,
     "name" : "Encoder",
     "type" : "Encoder",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 15570,
       "end" : 15576
@@ -11720,7 +11720,7 @@
     "id" : 524,
     "name" : "Decoder",
     "type" : "Decoder",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 20438,
       "end" : 20444
@@ -11786,7 +11786,7 @@
     "id" : 527,
     "name" : "Decoder",
     "type" : "Decoder",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 20512,
       "end" : 20518
@@ -11852,7 +11852,7 @@
     "id" : 530,
     "name" : "Decoder",
     "type" : "Decoder",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 20585,
       "end" : 20591
@@ -12952,7 +12952,7 @@
     "id" : 580,
     "name" : "IllegalArgumentException",
     "type" : "IllegalArgumentException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 23574,
       "end" : 23597
@@ -14602,7 +14602,7 @@
     "id" : 655,
     "name" : "DecInputStream",
     "type" : "DecInputStream",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 26348,
       "end" : 26361
@@ -15306,7 +15306,7 @@
     "id" : 687,
     "name" : "IllegalArgumentException",
     "type" : "IllegalArgumentException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 26789,
       "end" : 26812
@@ -18386,7 +18386,7 @@
     "id" : 827,
     "name" : "IllegalArgumentException",
     "type" : "IllegalArgumentException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 29648,
       "end" : 29671
@@ -18474,7 +18474,7 @@
     "id" : 831,
     "name" : "IllegalArgumentException",
     "type" : "IllegalArgumentException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 29986,
       "end" : 30009
@@ -19420,7 +19420,7 @@
     "id" : 874,
     "name" : "IllegalArgumentException",
     "type" : "IllegalArgumentException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 30917,
       "end" : 30940
@@ -19618,7 +19618,7 @@
     "id" : 883,
     "name" : "IllegalArgumentException",
     "type" : "IllegalArgumentException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 31282,
       "end" : 31305
@@ -22170,7 +22170,7 @@
     "id" : 999,
     "name" : "IOException",
     "type" : "IOException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 33133,
       "end" : 33143
@@ -22346,7 +22346,7 @@
     "id" : 1007,
     "name" : "ArrayIndexOutOfBoundsException",
     "type" : "ArrayIndexOutOfBoundsException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 33252,
       "end" : 33281
@@ -27230,7 +27230,7 @@
     "id" : 1229,
     "name" : "IOException",
     "type" : "IOException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 37343,
       "end" : 37353
@@ -28044,7 +28044,7 @@
     "id" : 1266,
     "name" : "IOException",
     "type" : "IOException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 38464,
       "end" : 38474
@@ -28748,7 +28748,7 @@
     "id" : 1298,
     "name" : "IOException",
     "type" : "IOException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 39129,
       "end" : 39139
@@ -28990,7 +28990,7 @@
     "id" : 1309,
     "name" : "IndexOutOfBoundsException",
     "type" : "IndexOutOfBoundsException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 39337,
       "end" : 39361
@@ -30002,7 +30002,7 @@
     "id" : 1355,
     "name" : "IOException",
     "type" : "IOException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 40151,
       "end" : 40161
@@ -30882,7 +30882,7 @@
     "id" : 1395,
     "name" : "IOException",
     "type" : "IOException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 41290,
       "end" : 41300
@@ -31132,9 +31132,9 @@
     "wild" : false,
     "static" : false
   } ],
-  "parseTime" : 127,
+  "parseTime" : 270,
   "unmatched" : [ ],
   "languageId" : "java",
   "name" : "vsc-java",
-  "file" : "/home/mark/work/jvmcode/server/out/test/resources/Test4.javasource"
+  "file" : "/home/mark/work/jvmcode/server/build/resources/test/Test4.javasource"
 }

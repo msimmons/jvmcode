@@ -2,20 +2,22 @@
 
 import * as vscode from 'vscode'
 import { JvmServer } from './jvm_server'
-import { JarEntryNode, TreeNode } from './models';
-import { ProjectService } from './project_service';
-import { ProjectController } from './project_controller';
-import { StatsController } from './stats_controller';
-import { LanguageService } from './language_service';
-import { LanguageController } from './language_controller';
+import { JarEntryNode, TreeNode } from './models'
+import { ProjectService } from './project_service'
+import { ProjectController } from './project_controller'
+import { StatsController } from './stats_controller'
+import { LanguageService } from './language_service'
+import { LanguageController } from './language_controller'
+import { JUnitController } from './junit_controller'
 import { ClassData } from 'server-models'
-import { ConfigService } from './config_service';
+import { ConfigService } from './config_service'
 
 export let server: JvmServer
 export let projectService: ProjectService
 export let projectController: ProjectController
 export let languageService: LanguageService
 export let languageController: LanguageController
+let junitController: JUnitController
 let statsController: StatsController
 export let extensionContext: vscode.ExtensionContext // Allows test to access the context?
 
@@ -33,6 +35,8 @@ export function activate(context: vscode.ExtensionContext) {
         languageController = new LanguageController(languageService, projectController)
         context.subscriptions.push(languageController)
         languageController.start()
+        junitController = new JUnitController(projectController)
+        junitController.start()
         statsController = new StatsController(server)
         statsController.start()
     }
@@ -122,7 +126,7 @@ export function activate(context: vscode.ExtensionContext) {
      */
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.fqcn', () : string => {
         projectController.start()
-        return projectController.getFQCN()
+        return projectController.getCurrentFqcn()
     }))
 
     /**
@@ -130,7 +134,7 @@ export function activate(context: vscode.ExtensionContext) {
      */
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.exec-class', async () => {
         projectController.start()
-        let classData = await projectController.getClassdata()
+        let classData = await projectController.getClassData()
         let classes = classData.filter(cd => cd.methods.find(m => m.isMain)).map(c => c.name)
         vscode.window.showQuickPick(classes).then((mainClass) => {
             if (!mainClass) return
@@ -204,5 +208,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 // this method is called when your extension is deactivated
 export async function deactivate() {
+    languageController.dispose()
+    junitController.dispose()
     await server.shutdown()
 }

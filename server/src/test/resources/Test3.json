@@ -962,7 +962,7 @@
     "id" : 25,
     "name" : "ThreadLocal",
     "type" : "ThreadLocal",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 1135,
       "end" : 1145
@@ -1072,7 +1072,7 @@
     "id" : 30,
     "name" : "ThreadLocal",
     "type" : "ThreadLocal",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 1241,
       "end" : 1251
@@ -1754,7 +1754,7 @@
     "id" : 61,
     "name" : "SoftReference",
     "type" : "SoftReference",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 1599,
       "end" : 1611
@@ -3360,7 +3360,7 @@
     "id" : 134,
     "name" : "Error",
     "type" : "Error",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 2797,
       "end" : 2801
@@ -6374,7 +6374,7 @@
     "id" : 271,
     "name" : "Error",
     "type" : "Error",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 5276,
       "end" : 5280
@@ -7386,7 +7386,7 @@
     "id" : 317,
     "name" : "StringDecoder",
     "type" : "StringDecoder",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 5909,
       "end" : 5921
@@ -7562,7 +7562,7 @@
     "id" : 325,
     "name" : "UnsupportedEncodingException",
     "type" : "UnsupportedEncodingException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 6042,
       "end" : 6069
@@ -10114,7 +10114,7 @@
     "id" : 441,
     "name" : "Error",
     "type" : "Error",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 8715,
       "end" : 8719
@@ -13876,7 +13876,7 @@
     "id" : 612,
     "name" : "Error",
     "type" : "Error",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 11665,
       "end" : 11669
@@ -14888,7 +14888,7 @@
     "id" : 658,
     "name" : "StringEncoder",
     "type" : "StringEncoder",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 12298,
       "end" : 12310
@@ -15064,7 +15064,7 @@
     "id" : 666,
     "name" : "UnsupportedEncodingException",
     "type" : "UnsupportedEncodingException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 12431,
       "end" : 12458
@@ -17616,7 +17616,7 @@
     "id" : 782,
     "name" : "Error",
     "type" : "Error",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 13846,
       "end" : 13850
@@ -18614,9 +18614,9 @@
     "wild" : false,
     "static" : false
   } ],
-  "parseTime" : 38,
+  "parseTime" : 125,
   "unmatched" : [ ],
   "languageId" : "java",
   "name" : "vsc-java",
-  "file" : "/home/mark/work/jvmcode/server/out/test/resources/Test3.javasource"
+  "file" : "/home/mark/work/jvmcode/server/build/resources/test/Test3.javasource"
 }

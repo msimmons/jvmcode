@@ -2,12 +2,13 @@
   "name": "jvmcode",
   "displayName": "JVMCode",
   "description": "JVM Services",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "publisher": "contrapt",
   "license": "Apache 2.0",
   "engines": {
     "vscode": "^1.42.0"
   },
+  "icon": "resources/jvm.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/msimmons/jvmcode"
@@ -66,11 +67,25 @@
         "title": "JVM: Remove User Item"
       }
     ],
-    "views": {
-      "explorer": [
+    "viewsContainers": {
+      "activitybar": [
         {
-          "id": "jvmcode.project-tree",
-          "name": "JVM Project",
+          "id": "jvmcode-container",
+          "title": "JVM",
+          "icon": "./resources/jvm.mono.svg"
+        }
+      ]
+    },
+    "views": {
+      "jvmcode-container": [
+        {
+          "id": "jvmcode.project-tree-2",
+          "name": "Project",
+          "when": "jvmcode.context.isJvmProject"
+        },
+        {
+          "id": "jvmcode.junit-tree",
+          "name": "Tests",
           "when": "jvmcode.context.isJvmProject"
         }
       ]
@@ -173,6 +188,11 @@
             "scala:scala"
           ],
           "description": "Helps map source file extension to the a directory containing the given keyword: 'ext:keyword' (this is a hack)"
+        },
+        "jvmcode.testResultsDir": {
+          "type": "string",
+          "default": "**/build/test-results",
+          "description": "Directory to watch for test results relative to workspace"
         }
       }
     }
@@ -193,6 +213,8 @@
     "tslint": "^5.16.0"
   },
   "dependencies": {
+    "fast-xml-parser": "^3.16.0",
+    "he": "^1.2.0",
     "jszip": "^3.2.2",
     "node-uuid": "^1.4.8",
     "vertx3-eventbus-client": "^3.8.5"

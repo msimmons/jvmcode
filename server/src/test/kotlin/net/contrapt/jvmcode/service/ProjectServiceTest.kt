@@ -132,7 +132,8 @@ class ProjectServiceTest {
         path.classDirs.add("/home/mark/work/jvmcode/server/build/classes/kotlin/main")
         service.addUserPath(path)
         val cd = service.getClassData()
-        cd.data.forEach { println(Json.encodePrettily(it)) }
+        val classcount = cd.data.size
+        service.getClassData().data.size shouldBe classcount
     }
 
 }
