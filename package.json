@@ -8,6 +8,7 @@
   "engines": {
     "vscode": "^1.42.0"
   },
+  "icon": "./resources/jvm.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/msimmons/jvmcode"
@@ -66,11 +67,25 @@
         "title": "JVM: Remove User Item"
       }
     ],
-    "views": {
-      "explorer": [
+    "viewsContainers": {
+      "activitybar": [
         {
-          "id": "jvmcode.project-tree",
-          "name": "JVM Project",
+          "id": "jvmcode-container",
+          "title": "JVM",
+          "icon": "./resources/jvm.mono.svg"
+        }
+      ]
+    },
+    "views": {
+      "jvmcode-container": [
+        {
+          "id": "jvmcode.project-tree-2",
+          "name": "Project",
+          "when": "jvmcode.context.isJvmProject"
+        },
+        {
+          "id": "jvmcode.junit-tree",
+          "name": "Tests",
           "when": "jvmcode.context.isJvmProject"
         }
       ]

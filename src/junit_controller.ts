@@ -5,9 +5,10 @@ import * as PathHelper from 'path'
 import * as fs from 'fs'
 import * as xml from 'fast-xml-parser'
 import * as he from 'he'
-import { JUnitSuite, JUnitReport, JUnitCase, JUnitFailure } from './models';
+import { JUnitSuite, JUnitReport, JUnitCase, JUnitFailure, TreeNode } from './models';
 import { ProjectController } from './project_controller';
 import { ConfigService } from './config_service';
+import { JUnitTreeProvider } from './junit_tree_provider';
 
 /**
  * Responsible for managing JUnit integrations, watching for changes in test reports, maybe recognizing test methods
@@ -21,6 +22,7 @@ export class JUnitController implements vscode.Disposable {
     private resultsMap = new Map<string, JUnitReport>()
     private disposables : vscode.Disposable[] =  []
     private testStatusItem : vscode.StatusBarItem
+    private junitTree: JUnitTreeProvider
 
     public constructor(projectController: ProjectController) {
         this.projectController = projectController
@@ -49,6 +51,9 @@ export class JUnitController implements vscode.Disposable {
         this.disposables.push(vscode.commands.registerCommand('jvmcode.show-test-results', async () => {
             this.showTestResults()
         }))
+
+        this.junitTree = new JUnitTreeProvider(this)
+        vscode.window.registerTreeDataProvider(this.junitTree.viewId, this.junitTree)
     }
 
     private updateStatus() {
@@ -200,6 +205,14 @@ export class JUnitController implements vscode.Disposable {
             }
         })
 
+    }
+
+    getRootNodes(): TreeNode[] | Thenable<TreeNode[]> {
+        return []
+    }
+
+    getChildren(element: TreeNode): TreeNode[] | Thenable<TreeNode[]> {
+        return []
     }
 
     dispose() {
