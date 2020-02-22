@@ -78,7 +78,7 @@ export class LanguageController implements vscode.Disposable {
         let allSelector = { language: request.languageId } as vscode.DocumentSelector
         this.disposables.push(vscode.languages.registerCodeActionsProvider(fileSelector, new provider.JvmActionProvider())) // Action types?
         this.disposables.push(vscode.languages.registerCodeLensProvider(fileSelector, new provider.JvmCodeLensProvider()))
-        this.disposables.push(vscode.languages.registerCompletionItemProvider(fileSelector, new provider.JvmCompletionProvider())) // Trigger chars?
+        this.disposables.push(vscode.languages.registerCompletionItemProvider(fileSelector, new provider.JvmCompletionProvider(this, this.projectController))) // Trigger chars?
         this.disposables.push(vscode.languages.registerDefinitionProvider(allSelector, new provider.JvmDefinitionProvider(this)))
         this.disposables.push(vscode.languages.registerHoverProvider(allSelector, new provider.JvmHoverProvider(this)))
         this.disposables.push(vscode.languages.registerImplementationProvider(allSelector, new provider.JvmImplementationProvider()))
@@ -96,6 +96,10 @@ export class LanguageController implements vscode.Disposable {
      */
     async requestCompile(languageId: string, uri: vscode.Uri) {
         let context = this.projectController.getFileContext(uri)
+        if (!context) {
+            console.debug(`Skip compile of ${languageId} ${uri.path}`)
+            return
+        }
         let classpath = this.projectController.getClasspath()
         // TODO Find dependent files also
         let request = {languageId: languageId, files: [context.path], outputDir: context.outputDir, classpath: classpath, sourcepath: context.sourceDir, name: 'vsc-java'} as CompileRequest

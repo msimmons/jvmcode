@@ -1,5 +1,15 @@
-import { DependencySourceData, DependencyData, JarPackageData, JarEntryData, PathData, ClassEntryData, ResourceEntryData} from "server-models"
+import { DependencySourceData, DependencyData, JarPackageData, JarEntryData, PathData, JvmConfig } from "server-models"
 import { workspace, Uri } from "vscode"
+
+export class LocalConfig implements JvmConfig {
+    excludes: string[]
+    extensions: string[]
+    jmodIncludes: string[]
+    outputDirMap: string[]
+    srcLocation: string
+    // Local
+    testResultsDir: string
+}
 
 export enum NodeType {
     PATH_ROOT,
@@ -238,4 +248,36 @@ export class CompilationContext {
     sourcepath : string
     generatedSrcDir : string
     options: string[]
+}
+
+export interface JUnitFailure {
+    stack: string
+    message: string
+    type: string
+}
+
+export interface JUnitCase {
+    name: string
+    classname: string
+    time: number
+    failure?: JUnitFailure[]
+}
+
+export interface JUnitSuite {
+    name: string
+    tests: number
+    skipped: number
+    failures: number
+    errors: number
+    timestamp: string
+    hostname: string
+    time: number
+    properties: string
+    testcase: JUnitCase[]
+    systemOut: string
+    systemErr: string
+}
+
+export interface JUnitReport {
+    testsuite: JUnitSuite[]
 }

@@ -1072,7 +1072,7 @@
     "id" : 43,
     "name" : "SoftReference",
     "type" : "SoftReference",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 663,
       "end" : 675
@@ -2524,7 +2524,7 @@
     "id" : 109,
     "name" : "Foo",
     "type" : "Foo",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 1525,
       "end" : 1527
@@ -4152,7 +4152,7 @@
     "id" : 183,
     "name" : "ThreadLocal",
     "type" : "ThreadLocal",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 2881,
       "end" : 2891
@@ -4218,7 +4218,7 @@
     "id" : 186,
     "name" : "StringCoding.Result",
     "type" : "StringCoding.Result",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 2977,
       "end" : 2995
@@ -5172,9 +5172,9 @@
     "wild" : false,
     "static" : false
   } ],
-  "parseTime" : 39,
+  "parseTime" : 87,
   "unmatched" : [ ],
   "languageId" : "java",
   "name" : "vsc-java",
-  "file" : "/home/mark/work/jvmcode/server/out/test/resources/Test2.javasource"
+  "file" : "/home/mark/work/jvmcode/server/build/resources/test/Test2.javasource"
 }

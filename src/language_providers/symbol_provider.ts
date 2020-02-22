@@ -30,7 +30,7 @@ export class JvmSymbolProvider implements vscode.DocumentSymbolProvider, vscode.
                 resolve(undefined)
                 return
             }
-            let info = result.symbols.filter(s => s.parent == -1).map(s =>{
+            let info = result.symbols.filter(s => s.parent == -1 && !["IMPORT", "PACKAGE"].includes(s.symbolType)).map(s =>{
                 let docSymbol = this.createDocSymbol(document, s)
                 if (s.children) docSymbol.children = this.symbolTree(document, s, result.symbols)
                 return docSymbol
@@ -70,8 +70,6 @@ export class JvmSymbolProvider implements vscode.DocumentSymbolProvider, vscode.
 
     private getSymbolKind(symbol: ParseSymbol) : vscode.SymbolKind {
         switch(symbol.symbolType) {
-            case "PACKAGE": return vscode.SymbolKind.Package
-            case "IMPORT": return vscode.SymbolKind.Module
             case "CLASS": return vscode.SymbolKind.Class
             case "INTERFACE": return vscode.SymbolKind.Interface
             case "ENUM": return vscode.SymbolKind.Enum

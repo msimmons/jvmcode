@@ -1710,7 +1710,7 @@
     "id" : 63,
     "name" : "StringIndexOutOfBoundsException",
     "type" : "StringIndexOutOfBoundsException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 6696,
       "end" : 6726
@@ -1842,7 +1842,7 @@
     "id" : 69,
     "name" : "StringIndexOutOfBoundsException",
     "type" : "StringIndexOutOfBoundsException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 6828,
       "end" : 6858
@@ -2150,7 +2150,7 @@
     "id" : 83,
     "name" : "StringIndexOutOfBoundsException",
     "type" : "StringIndexOutOfBoundsException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 7133,
       "end" : 7163
@@ -2590,7 +2590,7 @@
     "id" : 103,
     "name" : "StringIndexOutOfBoundsException",
     "type" : "StringIndexOutOfBoundsException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 8481,
       "end" : 8511
@@ -2722,7 +2722,7 @@
     "id" : 109,
     "name" : "StringIndexOutOfBoundsException",
     "type" : "StringIndexOutOfBoundsException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 8613,
       "end" : 8643
@@ -3030,7 +3030,7 @@
     "id" : 123,
     "name" : "StringIndexOutOfBoundsException",
     "type" : "StringIndexOutOfBoundsException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 8928,
       "end" : 8958
@@ -3712,7 +3712,7 @@
     "id" : 154,
     "name" : "IllegalArgumentException",
     "type" : "IllegalArgumentException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 9353,
       "end" : 9376
@@ -6022,7 +6022,7 @@
     "id" : 259,
     "name" : "StringIndexOutOfBoundsException",
     "type" : "StringIndexOutOfBoundsException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 13454,
       "end" : 13484
@@ -6110,7 +6110,7 @@
     "id" : 263,
     "name" : "StringIndexOutOfBoundsException",
     "type" : "StringIndexOutOfBoundsException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 13541,
       "end" : 13571
@@ -6264,7 +6264,7 @@
     "id" : 270,
     "name" : "StringIndexOutOfBoundsException",
     "type" : "StringIndexOutOfBoundsException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 13648,
       "end" : 13678
@@ -6594,7 +6594,7 @@
     "id" : 285,
     "name" : "NullPointerException",
     "type" : "NullPointerException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 15123,
       "end" : 15142
@@ -7122,7 +7122,7 @@
     "id" : 309,
     "name" : "NullPointerException",
     "type" : "NullPointerException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 16625,
       "end" : 16644
@@ -9498,7 +9498,7 @@
     "id" : 417,
     "name" : "StringIndexOutOfBoundsException",
     "type" : "StringIndexOutOfBoundsException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 24083,
       "end" : 24113
@@ -9784,7 +9784,7 @@
     "id" : 430,
     "name" : "StringIndexOutOfBoundsException",
     "type" : "StringIndexOutOfBoundsException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 25322,
       "end" : 25352
@@ -10224,7 +10224,7 @@
     "id" : 450,
     "name" : "StringIndexOutOfBoundsException",
     "type" : "StringIndexOutOfBoundsException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 26653,
       "end" : 26683
@@ -10642,7 +10642,7 @@
     "id" : 469,
     "name" : "IndexOutOfBoundsException",
     "type" : "IndexOutOfBoundsException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 27889,
       "end" : 27913
@@ -11038,7 +11038,7 @@
     "id" : 487,
     "name" : "IndexOutOfBoundsException",
     "type" : "IndexOutOfBoundsException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 29121,
       "end" : 29145
@@ -11764,7 +11764,7 @@
     "id" : 520,
     "name" : "StringIndexOutOfBoundsException",
     "type" : "StringIndexOutOfBoundsException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 31087,
       "end" : 31117
@@ -11896,7 +11896,7 @@
     "id" : 526,
     "name" : "StringIndexOutOfBoundsException",
     "type" : "StringIndexOutOfBoundsException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 31199,
       "end" : 31229
@@ -12006,7 +12006,7 @@
     "id" : 531,
     "name" : "StringIndexOutOfBoundsException",
     "type" : "StringIndexOutOfBoundsException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 31305,
       "end" : 31335
@@ -12534,7 +12534,7 @@
     "id" : 555,
     "name" : "StringIndexOutOfBoundsException",
     "type" : "StringIndexOutOfBoundsException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 33463,
       "end" : 33493
@@ -12666,7 +12666,7 @@
     "id" : 561,
     "name" : "StringIndexOutOfBoundsException",
     "type" : "StringIndexOutOfBoundsException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 33575,
       "end" : 33605
@@ -12776,7 +12776,7 @@
     "id" : 566,
     "name" : "StringIndexOutOfBoundsException",
     "type" : "StringIndexOutOfBoundsException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 33681,
       "end" : 33711
@@ -13502,7 +13502,7 @@
     "id" : 599,
     "name" : "NullPointerException",
     "type" : "NullPointerException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 34863,
       "end" : 34882
@@ -13788,7 +13788,7 @@
     "id" : 612,
     "name" : "NullPointerException",
     "type" : "NullPointerException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 35756,
       "end" : 35775
@@ -18276,7 +18276,7 @@
     "id" : 816,
     "name" : "CaseInsensitiveComparator",
     "type" : "CaseInsensitiveComparator",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 45208,
       "end" : 45232
@@ -33896,7 +33896,7 @@
     "id" : 1526,
     "name" : "StringIndexOutOfBoundsException",
     "type" : "StringIndexOutOfBoundsException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 75407,
       "end" : 75437
@@ -34094,7 +34094,7 @@
     "id" : 1535,
     "name" : "StringIndexOutOfBoundsException",
     "type" : "StringIndexOutOfBoundsException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 75558,
       "end" : 75588
@@ -34182,7 +34182,7 @@
     "id" : 1539,
     "name" : "String",
     "type" : "String",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 75655,
       "end" : 75660
@@ -34446,7 +34446,7 @@
     "id" : 1551,
     "name" : "StringIndexOutOfBoundsException",
     "type" : "StringIndexOutOfBoundsException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 76753,
       "end" : 76783
@@ -34578,7 +34578,7 @@
     "id" : 1557,
     "name" : "StringIndexOutOfBoundsException",
     "type" : "StringIndexOutOfBoundsException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 76869,
       "end" : 76899
@@ -34754,7 +34754,7 @@
     "id" : 1565,
     "name" : "StringIndexOutOfBoundsException",
     "type" : "StringIndexOutOfBoundsException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 77014,
       "end" : 77044
@@ -34908,7 +34908,7 @@
     "id" : 1572,
     "name" : "String",
     "type" : "String",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 77157,
       "end" : 77162
@@ -35788,7 +35788,7 @@
     "id" : 1612,
     "name" : "String",
     "type" : "String",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 79542,
       "end" : 79547
@@ -37042,7 +37042,7 @@
     "id" : 1669,
     "name" : "String",
     "type" : "String",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 81612,
       "end" : 81617
@@ -39396,7 +39396,7 @@
     "id" : 1776,
     "name" : "ArrayList",
     "type" : "ArrayList",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 92097,
       "end" : 92105
@@ -41354,7 +41354,7 @@
     "id" : 1865,
     "name" : "StringJoiner",
     "type" : "StringJoiner",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 95875,
       "end" : 95886
@@ -41926,7 +41926,7 @@
     "id" : 1891,
     "name" : "StringJoiner",
     "type" : "StringJoiner",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 97762,
       "end" : 97773
@@ -42300,7 +42300,7 @@
     "id" : 1908,
     "name" : "NullPointerException",
     "type" : "NullPointerException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 100289,
       "end" : 100308
@@ -46480,7 +46480,7 @@
     "id" : 2098,
     "name" : "String",
     "type" : "String",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 103734,
       "end" : 103739
@@ -46810,7 +46810,7 @@
     "id" : 2113,
     "name" : "NullPointerException",
     "type" : "NullPointerException",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 106727,
       "end" : 106746
@@ -51188,7 +51188,7 @@
     "id" : 2312,
     "name" : "String",
     "type" : "String",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 110239,
       "end" : 110244
@@ -52750,7 +52750,7 @@
     "id" : 2383,
     "name" : "Formatter",
     "type" : "Formatter",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 115794,
       "end" : 115802
@@ -53036,7 +53036,7 @@
     "id" : 2396,
     "name" : "Formatter",
     "type" : "Formatter",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 117619,
       "end" : 117627
@@ -53410,7 +53410,7 @@
     "id" : 2413,
     "name" : "String",
     "type" : "String",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 118611,
       "end" : 118616
@@ -53630,7 +53630,7 @@
     "id" : 2423,
     "name" : "String",
     "type" : "String",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 119662,
       "end" : 119667
@@ -53894,7 +53894,7 @@
     "id" : 2435,
     "name" : "String",
     "type" : "String",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 120365,
       "end" : 120370
@@ -54070,7 +54070,7 @@
     "id" : 2443,
     "name" : "String",
     "type" : "String",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 120688,
       "end" : 120693
@@ -54378,7 +54378,7 @@
     "id" : 2457,
     "name" : "String",
     "type" : "String",
-    "symbolType" : "SYMREF",
+    "symbolType" : "TYPEREF",
     "location" : {
       "start" : 121466,
       "end" : 121471
@@ -55068,9 +55068,9 @@
     "wild" : false,
     "static" : false
   } ],
-  "parseTime" : 569,
+  "parseTime" : 328,
   "unmatched" : [ ],
   "languageId" : "java",
   "name" : "vsc-java",
-  "file" : "/home/mark/work/jvmcode/server/out/test/resources/Test1.javasource"
+  "file" : "/home/mark/work/jvmcode/server/build/resources/test/Test1.javasource"
 }
