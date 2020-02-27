@@ -95,6 +95,10 @@ export class LanguageController implements vscode.Disposable {
      * Request compilation and put the diagnostics in the right place
      */
     async requestCompile(languageId: string, uri: vscode.Uri) {
+        if (uri.scheme != "file") {
+            console.debug(`Skip compile of non-file schema ${uri}`)
+            return
+        }
         let context = this.projectController.getFileContext(uri)
         if (!context) {
             console.debug(`Skip compile of ${languageId} ${uri.path}`)
