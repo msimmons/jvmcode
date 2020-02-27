@@ -18,7 +18,7 @@ class JavaCompiler : LanguageCompiler, Shareable {
 
     override fun compile(request: CompileRequest): CompileResult {
         val reply = JavaCompileResult()
-        val diagnostics = compile(request.files.first(), request.outputDir, request.classpath, request.sourcepath)
+        val diagnostics = compile(request.files, request.outputDir, request.classpath, request.sourcepath)
         diagnostics.forEach {d ->
             if (d.source?.name == null) logger.warn("Compiler Message: ${d.getMessage(Locale.getDefault())}")
             else reply.diagnostics.add(JavaDiagnostic.from(d))
@@ -26,10 +26,10 @@ class JavaCompiler : LanguageCompiler, Shareable {
         return reply
     }
 
-    private fun compile(fileName: String, outputDir: String, classpath: String, sourcepath: String) : List<Diagnostic<out JavaFileObject>>  {
+    private fun compile(fileNames: Collection<String>, outputDir: String, classpath: String, sourcepath: String) : List<Diagnostic<out JavaFileObject>>  {
         val collector = DiagnosticCollector<JavaFileObject>()
         val fileManager = compiler.getStandardFileManager(collector, null, null)
-        val compilationUnits = fileManager.getJavaFileObjects(fileName)
+        val compilationUnits = fileManager.getJavaFileObjects(*fileNames.toTypedArray())
         val options = listOf("-d", outputDir, "-cp", classpath, "-sourcepath", sourcepath, "-deprecation", "-Xlint")
         val compileTask = compiler.getTask(null, fileManager, collector, options, null, compilationUnits)
         compileTask.call()

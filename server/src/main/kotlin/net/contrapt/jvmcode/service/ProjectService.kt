@@ -303,15 +303,29 @@ class ProjectService(
                 val cached = classMap.get(it.path)
                 if (cached?.lastModified ?: 0 < it.lastModified()) {
                     refreshCount++
-                    val data = ClassData.create(ClassFile(DataInputStream(it.inputStream())))
-                    data.lastModified = it.lastModified()
-                    data.path = it.path
+                    val data = ClassData.create(ClassFile(DataInputStream(it.inputStream())), it.path, it.lastModified())
+                    resolveSourceFile(data)
+                    symbolRepo.addClassData(data)
                     addClassMap(it.path, data)
                 }
             }
         }
         val end = System.currentTimeMillis()
-        logger.debug("indexClassData: $fileCount files, $refreshCount refreshed, ${end-start}ms")
+        logger.info("indexClassData: $fileCount files, $refreshCount refreshed, ${end-start}ms")
+    }
+
+    /**
+     * Find the full path of the source file for the given [ClassData]
+     */
+    private fun resolveSourceFile(data: ClassData) {
+        val pkgDir = data.name.substringBeforeLast('.').replace('.', File.separatorChar)
+        val path = (externalPaths.flatMap { it.sourceDirs } + userPath.sourceDirs)
+            .map { "$it${File.separatorChar}$pkgDir${File.separatorChar}${data.srcFile}" }
+            .firstOrNull {
+                File(it).exists()
+        }
+        logger.info("Found $path")
+        if (path != null) data.srcFile = path
     }
 
     /**
@@ -350,7 +364,7 @@ class ProjectService(
         val jarFile = JarFile(file)
         val jarEntry = jarFile.getJarEntry(entry.path)
         val cf = ClassFile(DataInputStream(jarFile.getInputStream(jarEntry)))
-        entry.resolve(ClassData.create(cf))
+        entry.resolve(ClassData.create(cf, entry.path, 0L))
     }
 
     /**

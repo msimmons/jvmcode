@@ -5,24 +5,26 @@ import net.contrapt.jvmcode.model.ClassData
 import net.contrapt.jvmcode.model.ClassEntryData
 import net.contrapt.jvmcode.model.JarEntryData
 import net.contrapt.jvmcode.model.ParseResult
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 /**
- * Cache various relationships between symbols, files and class data and parse results
+ * Cache various relationships between symbols, files, class data and parse results
+ *
+ * jarEntry, classData by simpleName (symbol resolution)
  */
 class SymbolRepository {
 
     val logger = LoggerFactory.getLogger(javaClass)
 
-    class DataHolder(
-        var parseData: ParseResult?,
-        var classData: ClassData?
-    )
-
     private val jarEntryByFqcn = mutableMapOf<String, ClassEntryData>()
     private val jarEntriesByName = mutableMapOf<String, MutableList<ClassEntryData>>()
-    private val dataByFqcn = mutableMapOf<String, DataHolder>()
     private val jarEntryByPath = mutableMapOf<String, ClassEntryData>()
-    private val dataByPath = mutableMapOf<String, DataHolder>()
+
+    private val classDataLock = ReentrantLock()
+    private val classDataByPath = mutableMapOf<String, ClassData>()
+    private val classDataBySource = mutableMapOf<String, ClassData>()
+    private val dependentClassData = mutableMapOf<String, MutableSet<ClassData>>() // classData name -> dependent names
 
     fun getJarEntryByFile(file: String) : ClassEntryData? {
         val key = if (!file.startsWith("/")) "/$file" else file
@@ -48,6 +50,31 @@ class SymbolRepository {
         jarEntryByFqcn.put(jarEntry.fqcn, jarEntry)
         val entries = jarEntriesByName.getOrPut(jarEntry.name, {mutableListOf()})
         entries.add(jarEntry)
+    }
+
+    /**
+     * Add a [ClassData] to repository and all appropriate indices
+     */
+    fun addClassData(classData: ClassData) {
+        classDataLock.withLock {
+            classDataByPath.put(classData.path, classData)
+            if (classData.srcFile != null) classDataBySource.put(classData.srcFile!!, classData)
+            classData.references.forEach {
+                if (it != classData.name) dependentClassData.getOrPut(it, {mutableSetOf()}).add(classData)
+            }
+        }
+    }
+
+    fun findClassDataByPath(path: String) : ClassData? {
+        return classDataByPath[path]
+    }
+
+    fun findDependentsBySource(path: String) : Collection<String> {
+        val data = classDataBySource[path]
+        if (data == null) return listOf()
+        val dependents = dependentClassData[data.name]
+        if (dependents == null) return listOf()
+        return dependents.mapNotNull { it.srcFile }
     }
 
 }

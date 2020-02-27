@@ -27,16 +27,20 @@ export class ProjectController {
     private depedencyRootNode: DependencyRootNode
     private classpath: string
     private entryNodeMap: Map<string, JarEntryNode[]> = new Map()// Lazy cache of FQCN to entryNode
+    private classDir: string
     
     public constructor(context: vscode.ExtensionContext, service: ProjectService) {
         this.context = context
         this.service = service
+        this.classDir = `${context.storagePath}/classes`
         this.registerProjectListener()
         this.restoreUserData()
     }
     
     public async start() {
         if (this.isStarted) return
+        fs.mkdirSync(this.classDir)
+        console.log(`outputDir = ${this.classDir}`)
         this.dependencyTree = new ProjectTreeProvider(this)
         vscode.window.registerTreeDataProvider(this.dependencyTree.viewId, this.dependencyTree)
         this.contentProvider = new JarContentProvider()
@@ -442,19 +446,21 @@ export class ProjectController {
             })
             return sourceDir
         })
-        let entry = config.outputDirMap.find((od) => { return od.startsWith(`${fileExt}:`) })
+        //let entry = config.outputDirMap.find((od) => { return od.startsWith(`${fileExt}:`) })
         context.path = filePath
         context.sourceDir = sourceDir
-        if (pathData && entry) {
-            let keyword = entry.split(':')[1]
-            context.outputDir = pathData.classDirs.find((d) => { return d.includes(keyword) })
-            return context
-        }
-        else {
-            //vscode.window.showErrorMessage(`Could not find output directory for ${filePath}`)
-            console.debug(`Could not find output directory for ${filePath}`)
-            return undefined
-        }
+        context.outputDir = this.classDir
+        return context
+        // if (pathData && entry) {
+        //     let keyword = entry.split(':')[1]
+        //     context.outputDir = pathData.classDirs.find((d) => { return d.includes(keyword) })
+        //     return context
+        // }
+        // else {
+        //     //vscode.window.showErrorMessage(`Could not find output directory for ${filePath}`)
+        //     console.debug(`Could not find output directory for ${filePath}`)
+        //     return undefined
+        // }
     }
 
     /**

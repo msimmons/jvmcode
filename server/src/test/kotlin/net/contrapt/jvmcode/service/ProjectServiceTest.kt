@@ -130,6 +130,7 @@ class ProjectServiceTest {
         val service = ProjectService(JvmConfig(setOf(), setOf(), setOf()), javaHome11, symbolRepository)
         val path = UserPath()
         path.classDirs.add("/home/mark/work/jvmcode/server/build/classes/kotlin/main")
+        path.sourceDirs.add("/home/mark/work/jvmcode/server/src/main/kotlin")
         service.addUserPath(path)
         val cd = service.getClassData()
         val classcount = cd.data.size

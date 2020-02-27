@@ -8,7 +8,9 @@ import javassist.bytecode.*
  */
 class ClassData(
         val name: String,
-        val srcFile: String?,
+        val path: String,
+        var lastModified: Long,
+        var srcFile: String?,
         val implements: Collection<String>,
         val extends: String?,
         val references: Collection<String>,
@@ -22,22 +24,20 @@ class ClassData(
         @get:JsonProperty(value = "isInterface")
         val isInterface: Boolean
 ) : Comparable<ClassData> {
-    var path: String? = null
-    var lastModified: Long = 0
 
     companion object {
 
-        fun create(classFile: ClassFile) : ClassData {
+        fun create(classFile: ClassFile, path: String, lastModified: Long) : ClassData {
             val implements = classFile.interfaces.map { it }
             val extends = classFile.superclass
-            val references = classFile.constPool.classNames
+            val references = classFile.constPool.classNames.map { it.replace('/', '.')}
             val name = classFile.constPool.className
             val srcFile = classFile.sourceFile
             val annotations = getAnnotations(classFile.attributes)
             val fields = getFields(classFile.fields)
             val methods = getMethods(classFile.methods)
             // TODO do we need to consider InnerClassesAttribute
-            return ClassData(name, srcFile, implements, extends, references, annotations, fields, methods, classFile.isAbstract, classFile.isFinal, classFile.isInterface)
+            return ClassData(name, path, lastModified, srcFile, implements, extends, references, annotations, fields, methods, classFile.isAbstract, classFile.isFinal, classFile.isInterface)
         }
 
         private fun getAnnotations(atts: List<AttributeInfo>) : List<String> {
@@ -102,7 +102,7 @@ class ClassData(
     }
 
     override fun compareTo(other: ClassData): Int {
-        return name.compareTo(other.name)
+        return path.compareTo(other.path)
     }
 
 }

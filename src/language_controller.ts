@@ -105,18 +105,20 @@ export class LanguageController implements vscode.Disposable {
             return
         }
         let classpath = this.projectController.getClasspath()
-        // TODO Find dependent files also
         let request = {languageId: languageId, files: [context.path], outputDir: context.outputDir, classpath: classpath, sourcepath: context.sourceDir, name: 'vsc-java'} as CompileRequest
-        let result = await this.languageService.requestCompile(request)
-        let problems = this.problemCollections.get(result.name)
-        problems.clear()
-        result.diagnostics.forEach(d => {
-            let uri = vscode.Uri.file(d.file)
-            let existing = problems.get(uri)
-            let range = new vscode.Range(d.line-1, d.column-1, d.line-1, d.column-1)
-            let severity = d.severity === 'ERROR' ? vscode.DiagnosticSeverity.Error : vscode.DiagnosticSeverity.Warning 
-            let diagnostic = new vscode.Diagnostic(range, d.message, severity)
-            problems.set(uri, existing.concat(diagnostic))
+        vscode.window.withProgress({location: vscode.ProgressLocation.Window}, async (progress) => {
+            progress.report({message: 'Compiling...'})
+            let result = await this.languageService.requestCompile(request)
+            let problems = this.problemCollections.get(result.name)
+            problems.clear()
+            result.diagnostics.forEach(d => {
+                let uri = vscode.Uri.file(d.file)
+                let existing = problems.get(uri)
+                let range = new vscode.Range(d.line-1, d.column-1, d.line-1, d.column-1)
+                let severity = d.severity === 'ERROR' ? vscode.DiagnosticSeverity.Error : vscode.DiagnosticSeverity.Warning 
+                let diagnostic = new vscode.Diagnostic(range, d.message, severity)
+                problems.set(uri, existing.concat(diagnostic))
+            })
         })
     }
 
