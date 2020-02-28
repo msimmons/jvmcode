@@ -39,9 +39,11 @@ export class PathRootNode implements TreeNode {
     pathNodes: PathNode[]
     isTerminal = false
     isOpenable = false
+    context = undefined
     constructor(data: PathData[]) {
         this.data = data
         this.pathNodes = data.map((cp) => {return new PathNode(cp)})
+        this.context = 'path-data'
     }
     public treeLabel() : string {
         return 'Paths'
@@ -57,9 +59,11 @@ export class DependencyRootNode implements TreeNode {
     sourceNodes: DependencySourceNode[]
     isTerminal = false
     isOpenable = false
+    context = undefined
     constructor(data: DependencySourceData[]) {
         this.data = data
         this.sourceNodes = data.filter((ds) => {return ds.dependencies.length > 0}).map((ds) => {return new DependencySourceNode(ds)})
+        this.context = 'dependency-data'
     }
     public treeLabel() : string {
         return 'Dependencies'
@@ -80,9 +84,9 @@ export class PathNode implements TreeNode {
     constructor(data: PathData) {
         this.data = data
         let isUser = (data.source.toLowerCase() === 'user')
-        this.context = isUser ? 'user-path' : undefined
-        this.classDirs = data.classDirs.map((cd) => { return new ClassDirNode(cd, isUser)})
-        this.sourceDirs = data.sourceDirs.map((sd) => { return new SourceDirNode(sd, isUser)})
+        this.context = isUser ? 'user-item' : undefined
+        this.classDirs = [new ClassDirNode(data.classDir, isUser)]
+        this.sourceDirs = [new SourceDirNode(data.sourceDir, isUser)]
     }
     public treeLabel() : string {
         return `${this.data.source} (${this.data.name}:${this.data.module})`

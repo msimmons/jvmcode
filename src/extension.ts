@@ -91,19 +91,11 @@ export function activate(context: vscode.ExtensionContext) {
     }))
 
     /**
-     * Allows the user to manually enter a class directory
+     * Allows the user to manually enter path infor (source -> class directories)
      */
-    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.add-classdir', () => {
+    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.add-user-path', () => {
         projectController.start()
-        projectController.addClassDir()
-    }))
-
-    /**
-     * Allows the user to manually enter a source directory
-     */
-    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.add-sourcedir', () => {
-        projectController.start()
-        projectController.addSourceDir()
+        projectController.addUserPath()
     }))
 
     /**

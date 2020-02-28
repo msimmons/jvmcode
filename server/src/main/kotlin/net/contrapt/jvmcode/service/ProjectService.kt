@@ -1,7 +1,6 @@
 package net.contrapt.jvmcode.service
 
 import io.vertx.core.*
-import io.vertx.core.impl.launcher.commands.Watcher
 import io.vertx.core.logging.LoggerFactory
 import javassist.bytecode.ClassFile
 import net.contrapt.jvmcode.model.*
@@ -10,12 +9,10 @@ import java.io.DataInputStream
 import java.io.File
 import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
-import java.util.concurrent.locks.Lock
+import java.util.*
 import java.util.concurrent.locks.ReentrantLock
-import java.util.concurrent.locks.ReentrantReadWriteLock
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
-import javax.xml.transform.Source
 import kotlin.concurrent.withLock
 
 class ProjectService(
@@ -31,7 +28,7 @@ class ProjectService(
     private val userSource: UserDependencySource
     private val userSourceLock = ReentrantLock()
     // Classpath data added by user
-    private val userPath = UserPath()
+    private val userPaths = mutableSetOf<UserPath>()
     private val userPathLock = ReentrantLock()
 
     // All the external dependencies being tracked
@@ -90,7 +87,7 @@ class ProjectService(
     fun getJvmProject(config: JvmConfig = this.config) : JvmProject {
         this.config = config
         val sorted = listOf(jdkSource, userSource) + externalSource
-        return JvmProject(sorted, externalPaths + userPath, getClasspath())
+        return JvmProject(sorted, externalPaths + userPaths, getClasspath())
     }
 
     private fun removeJarData(fileName: String) {
@@ -138,21 +135,21 @@ class ProjectService(
      */
     fun addUserPath(pathData: PathData) {
         userPathLock.withLock {
-            pathData.classDirs.forEach { userPath.classDirs.add(it) }
-            pathData.sourceDirs.forEach { userPath.sourceDirs.add(it) }
+            userPaths.add(UserPath(pathData.sourceDir, pathData.classDir, pathData.name))
         }
-        indexClassData(pathData.classDirs)
+        indexClassData(listOf(pathData.classDir))
     }
 
     /**
      * Remove a user path component
      */
-    fun removeUserPath(path: String) {
-        userPathLock.withLock {
-            userPath.classDirs.remove(path)
-            userPath.sourceDirs.remove(path)
+    fun removeUserPath(name: String) {
+        val removed = userPathLock.withLock {
+            userPaths.removeIf { it.name == name }
         }
-        // Remove class data?
+        if (removed) {
+            // Remove class data?
+        }
     }
 
     /**
@@ -170,16 +167,14 @@ class ProjectService(
         }
         request.paths.forEach {
             userPathLock.withLock {
-                userPath.classDirs.clear()
-                userPath.sourceDirs.clear()
-                userPath.classDirs.addAll(it.classDirs)
-                userPath.sourceDirs.addAll(it.sourceDirs)
+                userPaths.clear()
+                userPaths.add(UserPath(it.sourceDir, it.classDir, it.name))
             }
         }
         userSource.dependencies.forEach {
             indexDependency(it)
         }
-        indexClassData(userPath.classDirs)
+        indexClassData(userPaths.map { it.classDir }.toSet())
     }
 
     /**
@@ -200,7 +195,7 @@ class ProjectService(
                 }
             }
         }
-        val paths = request.paths.flatMap { it.classDirs }
+        val paths = request.paths.map { it.classDir }
         indexClassData(paths)
     }
 
@@ -319,12 +314,11 @@ class ProjectService(
      */
     private fun resolveSourceFile(data: ClassData) {
         val pkgDir = data.name.substringBeforeLast('.').replace('.', File.separatorChar)
-        val path = (externalPaths.flatMap { it.sourceDirs } + userPath.sourceDirs)
+        val path = (externalPaths.map { it.sourceDir } + userPaths.map { it.sourceDir })
             .map { "$it${File.separatorChar}$pkgDir${File.separatorChar}${data.srcFile}" }
             .firstOrNull {
                 File(it).exists()
         }
-        logger.info("Found $path")
         if (path != null) data.srcFile = path
     }
 
@@ -332,7 +326,7 @@ class ProjectService(
      * Get [ClassData] for all project classes
      */
     fun getClassData() : ClassDataHolder {
-        val paths = userPath.classDirs + externalPaths.flatMap { it.classDirs }
+        val paths = (userPaths.map{ it.classDir } + externalPaths.map { it.classDir }).toSet()
         indexClassData(paths)
         return ClassDataHolder(classMap.values.sorted())
     }
@@ -371,8 +365,8 @@ class ProjectService(
      * Return the full classpath implied by the current dependencies (minus jdk dependencies)
      */
     fun getClasspath() : String {
-        val components = userPath.classDirs +
-                externalPaths.flatMap { it.classDirs } +
+        val components = (userPaths.map { it.classDir } +
+                externalPaths.map { it.classDir }).toSet() +
                 userSource.dependencies.map { it.fileName } +
                 externalSource.asSequence().flatMap { it.dependencies.asSequence().map { it.fileName } }
         return components.joinToString(File.pathSeparator) { it }
