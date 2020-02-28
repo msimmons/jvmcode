@@ -35,7 +35,7 @@ suite("Extension Tests", () => {
 
     test("Classes", async () => {
         let root = myExtension.extensionContext.extensionPath
-        await myExtension.projectService.addPath({source: '', name: '', module: '', sourceDirs: [], classDirs: [`${root}/server/build/classes/kotlin/main`]})
+        await myExtension.projectService.addPath({source: '', name: '', module: '', sourceDir: '', classDir: `${root}/server/build/classes/kotlin/main`})
         let classes = await myExtension.projectController.getClassData()
         assert(classes.length > 40)
     })

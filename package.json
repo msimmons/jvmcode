@@ -43,12 +43,8 @@
         "title": "JVM: Add Dependency"
       },
       {
-        "command": "jvmcode.add-classdir",
-        "title": "JVM: Add Class Directory"
-      },
-      {
-        "command": "jvmcode.add-sourcedir",
-        "title": "JVM: Add Source Directory"
+        "command": "jvmcode.add-user-path",
+        "title": "JVM: Add Source/Class Directory"
       },
       {
         "command": "jvmcode.find-class",
@@ -79,7 +75,7 @@
     "views": {
       "jvmcode-container": [
         {
-          "id": "jvmcode.project-tree-2",
+          "id": "jvmcode.project-tree",
           "name": "Project",
           "when": "jvmcode.context.isJvmProject"
         },
@@ -99,17 +95,12 @@
         },
         {
           "command": "jvmcode.add-dependency",
-          "when": "viewItem == 'user-source'",
+          "when": "viewItem == 'dependency-data'",
           "group": "JVM"
         },
         {
-          "command": "jvmcode.add-sourcedir",
-          "when": "viewItem == 'user-path'",
-          "group": "JVM"
-        },
-        {
-          "command": "jvmcode.add-classdir",
-          "when": "viewItem == 'user-path'",
+          "command": "jvmcode.add-user-path",
+          "when": "viewItem == 'path-data'",
           "group": "JVM"
         }
       ]

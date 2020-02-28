@@ -95,24 +95,30 @@ export class LanguageController implements vscode.Disposable {
      * Request compilation and put the diagnostics in the right place
      */
     async requestCompile(languageId: string, uri: vscode.Uri) {
+        if (uri.scheme != "file") {
+            console.debug(`Skip compile of non-file schema ${uri}`)
+            return
+        }
         let context = this.projectController.getFileContext(uri)
         if (!context) {
             console.debug(`Skip compile of ${languageId} ${uri.path}`)
             return
         }
         let classpath = this.projectController.getClasspath()
-        // TODO Find dependent files also
         let request = {languageId: languageId, files: [context.path], outputDir: context.outputDir, classpath: classpath, sourcepath: context.sourceDir, name: 'vsc-java'} as CompileRequest
-        let result = await this.languageService.requestCompile(request)
-        let problems = this.problemCollections.get(result.name)
-        problems.clear()
-        result.diagnostics.forEach(d => {
-            let uri = vscode.Uri.file(d.file)
-            let existing = problems.get(uri)
-            let range = new vscode.Range(d.line-1, d.column-1, d.line-1, d.column-1)
-            let severity = d.severity === 'ERROR' ? vscode.DiagnosticSeverity.Error : vscode.DiagnosticSeverity.Warning 
-            let diagnostic = new vscode.Diagnostic(range, d.message, severity)
-            problems.set(uri, existing.concat(diagnostic))
+        vscode.window.withProgress({location: vscode.ProgressLocation.Window}, async (progress) => {
+            progress.report({message: 'Compiling...'})
+            let result = await this.languageService.requestCompile(request)
+            let problems = this.problemCollections.get(result.name)
+            problems.clear()
+            result.diagnostics.forEach(d => {
+                let uri = vscode.Uri.file(d.file)
+                let existing = problems.get(uri)
+                let range = new vscode.Range(d.line-1, d.column-1, d.line-1, d.column-1)
+                let severity = d.severity === 'ERROR' ? vscode.DiagnosticSeverity.Error : vscode.DiagnosticSeverity.Warning 
+                let diagnostic = new vscode.Diagnostic(range, d.message, severity)
+                problems.set(uri, existing.concat(diagnostic))
+            })
         })
     }
 

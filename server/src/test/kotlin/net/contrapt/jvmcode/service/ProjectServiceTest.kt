@@ -118,7 +118,7 @@ class ProjectServiceTest {
         classpath should haveSubstring("postgresql-42.1.4.jar:")
         classpath should endWith("jd-gui-1.4.0.jar")
         // Add a class directory
-        service.addUserPath(UserPath().apply { classDirs.add("/home/mark/classes") })
+        service.addUserPath(UserPath("/home/mark/source", "/home/mark/classes", "name"))
         classpath = service.getClasspath()
         classpath should startWith("/home/mark/classes:")
         classpath should endWith("jd-gui-1.4.0.jar")
@@ -128,8 +128,7 @@ class ProjectServiceTest {
     fun getClassDataTest() {
         assumeTrue(File(javaHome11).exists())
         val service = ProjectService(JvmConfig(setOf(), setOf(), setOf()), javaHome11, symbolRepository)
-        val path = UserPath()
-        path.classDirs.add("/home/mark/work/jvmcode/server/build/classes/kotlin/main")
+        val path = UserPath("/home/mark/work/jvmcode/server/src/main/kotlin","/home/mark/work/jvmcode/server/build/classes/kotlin/main", "name")
         service.addUserPath(path)
         val cd = service.getClassData()
         val classcount = cd.data.size

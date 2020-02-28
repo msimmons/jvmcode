@@ -12,12 +12,14 @@ class ClassDataTest {
     fun testStdlib() {
         val path = javaClass.classLoader?.getResource("kotlin-stdlib-1.3.50.jar")?.path ?: ""
         val file = JarFile(path)
-        val entry = file.entries().asSequence().find {
-            it.name.endsWith("StringsKt.class")
+        val entries = file.entries().asSequence().filter {
+            it.name.endsWith("StringsKt.class") || it.name.endsWith("PropertyReference.class")
         }
-        val classFile = ClassFile(DataInputStream(file.getInputStream(entry)))
-        val classData = ClassData.create(classFile)
-        val json = Json.encodePrettily(classData)
-        println(json)
+        entries.forEach {
+            val classFile = ClassFile(DataInputStream(file.getInputStream(it)))
+            val classData = ClassData.create(classFile, it.name, 0L)
+            val json = Json.encodePrettily(classData)
+            println(json)
+        }
     }
 }

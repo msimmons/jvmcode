@@ -6,7 +6,7 @@ class Path(
         override val source: String,
         override val name: String,
         override val module: String,
-        override val sourceDirs: Set<String>,
-        override val classDirs: Set<String>
+        override val sourceDir: String,
+        override val classDir: String
 ) : PathData {
 }

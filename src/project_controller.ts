@@ -5,7 +5,7 @@ import { JarEntryData, JvmProject, ClassData, ClassEntryData, SourceEntryData } 
 import { ProjectTreeProvider } from './project_tree_provider';
 import { JarContentProvider } from './jar_content_provider';
 import { ProjectService } from './project_service';
-import { JarEntryNode, dependencyLabel, PathRootNode, DependencyRootNode, TreeNode, DependencySourceNode, DependencyNode, JarPackageNode, NodeType, SourceDirNode, ClassDirNode, CompilationContext, FileContext } from './models';
+import { JarEntryNode, dependencyLabel, PathRootNode, DependencyRootNode, TreeNode, DependencySourceNode, DependencyNode, JarPackageNode, NodeType, SourceDirNode, ClassDirNode, CompilationContext, FileContext, PathNode } from './models';
 import { projectService, projectController } from './extension';
 import * as fs from 'fs';
 import * as PathHelper from 'path'
@@ -327,26 +327,20 @@ export class ProjectController {
             })
         })
     }
-    
+
     /**
-    * Add a user class directory
-    */
-    public addClassDir() {
-        let classOptions = {placeHolder: 'Class Directory', defaultUri: vscode.workspace.workspaceFolders[0].uri, canSelectMany: false, canSelectFolders: true, canSelectFiles: false}
-        vscode.window.showOpenDialog(classOptions).then((cd) => {
-            if (!cd) return
-            projectService.addPath({source:'user', module: 'user', name: 'user', classDirs: [cd[0]['path']], sourceDirs: []})
-        })
-    }
-    
-    /**
-    * Add a user source directory
-    */
-    public addSourceDir() {
+     * Add a user path
+     */
+    public addUserPath() {
         let sourceOptions = {placeHolder: 'Source Directory', defaultUri: vscode.workspace.workspaceFolders[0].uri, canSelectMany: false, canSelectFolders: true, canSelectFiles: false}
-        vscode.window.showOpenDialog(sourceOptions).then((cd) => {
-            if (!cd) return
-            projectService.addPath({source:'user', module: 'user', name: 'user', classDirs: [], sourceDirs: [cd[0]['path']]})
+        vscode.window.showOpenDialog(sourceOptions).then((srcDir) => {
+            if (!srcDir) return
+            let classOptions = {placeHolder: 'Class Directory', defaultUri: vscode.workspace.workspaceFolders[0].uri, canSelectMany: false, canSelectFolders: true, canSelectFiles: false}
+            vscode.window.showOpenDialog(classOptions).then((classDir) => {
+                if (!classDir) return
+                let name = srcDir[0]['path'].replace(vscode.workspace.workspaceFolders[0].uri.path+'/', '')
+                projectService.addPath({source:'user', module: 'user', name: name, classDir: classDir[0]['path'], sourceDir: srcDir[0]['path']})
+            })
         })
     }
     
@@ -355,17 +349,14 @@ export class ProjectController {
     */
     public removeUserItem(item: TreeNode) {
         switch (item.type) {
-            case NodeType.CLASS_DIR:
-            projectService.removePath((item as ClassDirNode).path)
-            break
-            case NodeType.SOURCE_DIR:
-            projectService.removePath((item as SourceDirNode).path)
-            break
+            case NodeType.PATH:
+                projectService.removePath((item as PathNode).data.name)
+                break
             case NodeType.DEPENDENCY:
-            projectService.removeDependency((item as DependencyNode).data.fileName)
-            break
+                projectService.removeDependency((item as DependencyNode).data.fileName)
+                break
             default:
-            break
+                break
         }
     }
     
@@ -382,7 +373,7 @@ export class ProjectController {
     public getSourcePaths() : string[] {
         let paths = []
         this.pathRootNode.data.forEach((d) => {
-            paths = paths.concat(d.sourceDirs)
+            paths = paths.concat(d.sourceDir)
         })
         return paths
     }
@@ -393,7 +384,7 @@ export class ProjectController {
     public getClassPaths() : string[] {
         let paths = []
         this.pathRootNode.data.forEach((d) => {
-            paths = paths.concat(d.classDirs)
+            paths = paths.concat(d.classDir)
         })
         return paths
     }
@@ -432,27 +423,18 @@ export class ProjectController {
     */
     public getFileContext(file: vscode.Uri) : FileContext {
         let context = new FileContext()
-        let config = ConfigService.getConfig()
         let filePath = file.path
-        let fileExt = PathHelper.extname(filePath).replace('.', '')
-        let sourceDir = undefined
         let pathData = this.pathRootNode.data.find((pd) => {
-            sourceDir = pd.sourceDirs.find((d) => {
-                return filePath.startsWith(d)
-            })
-            return sourceDir
+            return filePath.startsWith(pd.sourceDir)
         })
-        let entry = config.outputDirMap.find((od) => { return od.startsWith(`${fileExt}:`) })
-        context.path = filePath
-        context.sourceDir = sourceDir
-        if (pathData && entry) {
-            let keyword = entry.split(':')[1]
-            context.outputDir = pathData.classDirs.find((d) => { return d.includes(keyword) })
-            return context
+        if (pathData) {
+            context.path = filePath
+            context.sourceDir = pathData.sourceDir
+            context.outputDir = pathData.classDir
         }
         else {
             //vscode.window.showErrorMessage(`Could not find output directory for ${filePath}`)
-            console.debug(`Could not find output directory for ${filePath}`)
+            console.debug(`Could not find path data for ${filePath}`)
             return undefined
         }
     }
