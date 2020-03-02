@@ -2,6 +2,7 @@ package net.contrapt.jvmcode.model
 
 import io.vertx.core.json.Json
 import javassist.bytecode.ClassFile
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty
 import java.io.DataInputStream
@@ -31,6 +32,7 @@ class ClassDataTest {
     }
 
     @Test
+    @Disabled
     fun testLocalClass() {
         val path = "/home/mark/work/jvmcode/server/build/classes/kotlin/main/net/contrapt/jvmcode/model/ClassData\$Companion.class"
         val classFile = ClassFile(DataInputStream(File(path).inputStream()))
