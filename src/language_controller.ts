@@ -5,6 +5,9 @@ import { LanguageService } from './language_service'
 import { CompileRequest, LanguageRequest, ParseRequest, ParseResult } from 'server-models'
 import { ProjectController } from './project_controller';
 import * as provider from './language_providers'
+import { TreeNode, LanguageNode } from './models';
+import { LanguageTreeProvider } from './language_tree_provider';
+import { languageController } from './extension';
 
 /**
  * Responsible for managing JVM language services
@@ -16,7 +19,8 @@ export class LanguageController implements vscode.Disposable {
     private problemCollections = new Map<string, vscode.DiagnosticCollection>()
     private disposables : vscode.Disposable[] =  []
     private parseResults = new Map<string, Promise<ParseResult>>()
-    private parseRequests = new Map<string, Promise<ParseResult>>()
+    private rootNodes: Array<LanguageNode> = []
+    private languageTree: LanguageTreeProvider
 
     public constructor(languageService: LanguageService, projectController: ProjectController) {
         this.languageService = languageService
@@ -25,6 +29,8 @@ export class LanguageController implements vscode.Disposable {
     }
 
     public start() {
+        this.languageTree = new LanguageTreeProvider(languageController)
+        vscode.window.registerTreeDataProvider(this.languageTree.viewId, this.languageTree)
         // Temporarily trigger the language verticle to send request
         this.languageService.startLanguage()
     }
@@ -49,6 +55,8 @@ export class LanguageController implements vscode.Disposable {
         this.problemCollections.set(request.name, vscode.languages.createDiagnosticCollection(request.name))
         // Register all the providers
         this.registerProviders(request)
+        this.rootNodes.push(new LanguageNode(request))
+        this.languageTree.update()
     }
 
     onDidChange(request: LanguageRequest) {
@@ -78,7 +86,8 @@ export class LanguageController implements vscode.Disposable {
         let allSelector = { language: request.languageId } as vscode.DocumentSelector
         this.disposables.push(vscode.languages.registerCodeActionsProvider(fileSelector, new provider.JvmActionProvider())) // Action types?
         this.disposables.push(vscode.languages.registerCodeLensProvider(fileSelector, new provider.JvmCodeLensProvider()))
-        this.disposables.push(vscode.languages.registerCompletionItemProvider(fileSelector, new provider.JvmCompletionProvider(this, this.projectController))) // Trigger chars?
+        let completionProvider = new provider.JvmCompletionProvider(request, this, this.projectController)
+        this.disposables.push(vscode.languages.registerCompletionItemProvider(fileSelector, completionProvider, ...request.triggerChars))
         this.disposables.push(vscode.languages.registerDefinitionProvider(allSelector, new provider.JvmDefinitionProvider(this)))
         this.disposables.push(vscode.languages.registerHoverProvider(allSelector, new provider.JvmHoverProvider(this)))
         this.disposables.push(vscode.languages.registerImplementationProvider(allSelector, new provider.JvmImplementationProvider()))
@@ -89,6 +98,23 @@ export class LanguageController implements vscode.Disposable {
         this.disposables.push(vscode.languages.registerDocumentSymbolProvider(allSelector, symbolProvider)) // metadata?
         this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(symbolProvider))
         this.disposables.push(vscode.languages.registerTypeDefinitionProvider(allSelector, new provider.JvmTypeDefinitionProvider()))
+    }
+
+    /**
+     * Clear all problems for the given name
+     * @param name the [LanguageRequest.name]
+     */
+    public clearProblems(name: string) {
+        let problems = this.problemCollections.get(name)
+        if (problems) problems.clear()
+    }
+
+    public getRootNodes() : LanguageNode[] {
+        return this.rootNodes
+    }
+
+    public getChildren(element: TreeNode) : TreeNode[] {
+        return element.children()
     }
 
     /**

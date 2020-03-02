@@ -6,6 +6,8 @@ data class MethodData(
         val name: String,
         val type: String,
         val params: List<FieldData>,
+        val locals: List<FieldData>,
+        val annotations: List<AnnotationData>,
         @get:JsonProperty(value = "isConstructor")
         val isConstructor: Boolean,
         @get:JsonProperty(value = "isMethod")

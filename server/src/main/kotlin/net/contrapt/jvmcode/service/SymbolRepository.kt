@@ -23,7 +23,7 @@ class SymbolRepository {
 
     private val classDataLock = ReentrantLock()
     private val classDataByPath = mutableMapOf<String, ClassData>()
-    private val classDataBySource = mutableMapOf<String, ClassData>()
+    private val classDataBySource = mutableMapOf<String, MutableSet<ClassData>>()
     private val dependentClassData = mutableMapOf<String, MutableSet<ClassData>>() // classData name -> dependent names
 
     fun getJarEntryByFile(file: String) : ClassEntryData? {
@@ -58,7 +58,7 @@ class SymbolRepository {
     fun addClassData(classData: ClassData) {
         classDataLock.withLock {
             classDataByPath.put(classData.path, classData)
-            if (classData.srcFile != null) classDataBySource.put(classData.srcFile!!, classData)
+            if (classData.srcFile != null) classDataBySource.getOrPut(classData.srcFile!!, {mutableSetOf()}).add(classData)
             classData.references.forEach {
                 if (it != classData.name) dependentClassData.getOrPut(it, {mutableSetOf()}).add(classData)
             }
@@ -72,9 +72,8 @@ class SymbolRepository {
     fun findDependentsBySource(path: String) : Collection<String> {
         val data = classDataBySource[path]
         if (data == null) return listOf()
-        val dependents = dependentClassData[data.name]
-        if (dependents == null) return listOf()
-        return dependents.mapNotNull { it.srcFile }
+        val dependents = data.flatMap { dependentClassData[it.name] ?: mutableSetOf()}
+        return dependents.mapNotNull { it.srcFile }.filter { it != path  }.toSet()
     }
 
 }

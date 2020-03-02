@@ -1,4 +1,5 @@
 import { DependencySourceData, DependencyData, JarPackageData, JarEntryData, PathData, JvmConfig } from "server-models"
+import { LanguageRequest } from 'server-models'
 import { workspace, Uri } from "vscode"
 
 export class LocalConfig implements JvmConfig {
@@ -21,7 +22,8 @@ export enum NodeType {
     CLASS,
     RESOURCE,
     SOURCE_DIR,
-    CLASS_DIR
+    CLASS_DIR,
+    LANGUAGE
 }
 
 export interface TreeNode {
@@ -31,6 +33,23 @@ export interface TreeNode {
     isOpenable: boolean
     children() : TreeNode[]
     context? : string
+}
+
+export class LanguageNode implements TreeNode {
+    type: NodeType = NodeType.LANGUAGE
+    isTerminal: boolean = true
+    isOpenable: boolean = false
+    context?: string = 'language-node'
+    request: LanguageRequest
+    constructor(request: LanguageRequest) {
+        this.request = request
+    }
+    treeLabel(): string {
+        return `${this.request.name} (${this.request.languageId})`
+    }
+    children(): TreeNode[] {
+        return []
+    }
 }
 
 export class PathRootNode implements TreeNode {

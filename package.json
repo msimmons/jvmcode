@@ -61,6 +61,11 @@
       {
         "command": "jvmcode.remove-user-item",
         "title": "JVM: Remove User Item"
+      },
+      {
+        "command": "jvmcode.clear-problems",
+        "title": "JVM: Clear Problems"
+
       }
     ],
     "viewsContainers": {
@@ -75,7 +80,7 @@
     "views": {
       "jvmcode-container": [
         {
-          "id": "jvmcode.project-tree",
+          "id": "jvmcode.project-tree-v2",
           "name": "Project",
           "when": "jvmcode.context.isJvmProject"
         },
@@ -83,7 +88,12 @@
           "id": "jvmcode.junit-tree",
           "name": "Tests",
           "when": "jvmcode.context.isJvmProject"
-        }
+        },
+        {
+          "id": "jvmcode.language-tree",
+          "name": "Language",
+          "when": "jvmcode.context.isJvmProject"
+        }        
       ]
     },
     "menus": {
@@ -101,6 +111,11 @@
         {
           "command": "jvmcode.add-user-path",
           "when": "viewItem == 'path-data'",
+          "group": "JVM"
+        },
+        {
+          "command": "jvmcode.clear-problems",
+          "when": "viewItem == 'language-node'",
           "group": "JVM"
         }
       ]

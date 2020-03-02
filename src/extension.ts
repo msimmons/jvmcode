@@ -2,7 +2,7 @@
 
 import * as vscode from 'vscode'
 import { JvmServer } from './jvm_server'
-import { JarEntryNode, TreeNode } from './models'
+import { JarEntryNode, TreeNode, LanguageNode } from './models'
 import { ProjectService } from './project_service'
 import { ProjectController } from './project_controller'
 import { StatsController } from './stats_controller'
@@ -102,6 +102,7 @@ export function activate(context: vscode.ExtensionContext) {
      * Allows removal of a user specified path or dependency (from the project view)
      */
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.remove-user-item', (event) => {
+        if (!event) return
         projectController.removeUserItem(event as TreeNode)
     }))
 
@@ -119,6 +120,14 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.fqcn', () : string => {
         projectController.start()
         return projectController.getCurrentFqcn()
+    }))
+
+    /**
+     * Clear diagnostics for the given languageId
+     */
+    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.clear-problems', (event) => {
+        if (!event) return
+        languageController.clearProblems((event as LanguageNode).request.name)
     }))
 
     /**

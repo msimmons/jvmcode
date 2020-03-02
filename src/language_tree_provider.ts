@@ -1,15 +1,15 @@
 import { TreeDataProvider, TreeItem, TreeItemCollapsibleState, EventEmitter, ThemeIcon } from 'vscode'
 import { TreeNode } from './models'
-import { ProjectController } from './project_controller';
+import { LanguageController } from './language_controller';
 
-export class ProjectTreeProvider implements TreeDataProvider<TreeNode> {
+export class LanguageTreeProvider implements TreeDataProvider<TreeNode> {
 
-    public viewId = 'jvmcode.project-tree-v2';
+    public viewId = 'jvmcode.language-tree';
     
-    private controller: ProjectController
+    private controller: LanguageController
     private onDidChangeEmitter = new EventEmitter<TreeNode>()
 
-    constructor(controller: ProjectController) {
+    constructor(controller: LanguageController) {
         this.controller = controller
     }
 
@@ -28,9 +28,6 @@ export class ProjectTreeProvider implements TreeDataProvider<TreeNode> {
         if ( element.isTerminal ) {
             item.iconPath = ThemeIcon.File
             item.collapsibleState = TreeItemCollapsibleState.None
-        }
-        if ( element.isOpenable ) {
-            item.command = {title: 'Open Entry', command: 'jvmcode.jar-entry', arguments: [element]}
         }
         return item
     }

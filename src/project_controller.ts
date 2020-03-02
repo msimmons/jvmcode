@@ -422,15 +422,16 @@ export class ProjectController {
     * Finding the output dir is a hack because gradle sucks at this!
     */
     public getFileContext(file: vscode.Uri) : FileContext {
-        let context = new FileContext()
         let filePath = file.path
         let pathData = this.pathRootNode.data.find((pd) => {
             return filePath.startsWith(pd.sourceDir)
         })
         if (pathData) {
+            let context = new FileContext()
             context.path = filePath
             context.sourceDir = pathData.sourceDir
             context.outputDir = pathData.classDir
+            return context
         }
         else {
             //vscode.window.showErrorMessage(`Could not find output directory for ${filePath}`)
