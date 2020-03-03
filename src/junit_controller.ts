@@ -5,7 +5,7 @@ import * as PathHelper from 'path'
 import * as fs from 'fs'
 import * as xml from 'fast-xml-parser'
 import * as he from 'he'
-import { JUnitSuite, JUnitReport, JUnitCase, JUnitFailure, TreeNode } from './models';
+import { JUnitSuite, JUnitReport, JUnitCase, JUnitFailure, TreeNode, SuiteNode } from './models';
 import { ProjectController } from './project_controller';
 import { ConfigService } from './config_service';
 import { JUnitTreeProvider } from './junit_tree_provider';
@@ -23,14 +23,16 @@ export class JUnitController implements vscode.Disposable {
     private disposables : vscode.Disposable[] =  []
     private testStatusItem : vscode.StatusBarItem
     private junitTree: JUnitTreeProvider
+    private suiteNodes: SuiteNode[] = []
 
     public constructor(projectController: ProjectController) {
         this.projectController = projectController
     }
 
-    public start() {
+    public async start() {
         let dir = ConfigService.getConfig().testResultsDir
         let pattern = vscode.workspace.workspaceFolders[0].uri.path+`/${dir}/**/*.xml`
+        // Watch for changes
         let watcher = vscode.workspace.createFileSystemWatcher(pattern, false, false, false)
         this.disposables.push(watcher)
         watcher.onDidChange(this.onDidChange())
@@ -40,6 +42,9 @@ export class JUnitController implements vscode.Disposable {
         let dirWatcher = vscode.workspace.createFileSystemWatcher(vscode.workspace.workspaceFolders[0].uri.path+`/${dir}/*`, true, true, false)
         this.disposables.push(dirWatcher)
         dirWatcher.onDidDelete(this.onDidDeleteDir())
+
+        this.junitTree = new JUnitTreeProvider(this)
+        this.disposables.push(vscode.window.registerTreeDataProvider(this.junitTree.viewId, this.junitTree))
 
         this.testStatusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0)
         this.testStatusItem.tooltip = 'Test Results'
@@ -51,13 +56,21 @@ export class JUnitController implements vscode.Disposable {
         this.disposables.push(vscode.commands.registerCommand('jvmcode.show-test-results', async () => {
             this.showTestResults()
         }))
+    }
 
-        this.junitTree = new JUnitTreeProvider(this)
-        vscode.window.registerTreeDataProvider(this.junitTree.viewId, this.junitTree)
+    private async findTestResults(dir) {
+        let pattern = new vscode.RelativePattern(dir, '**/*.xml')
+        vscode.workspace.findFiles(`**/${dir}/**/*.xml`).then(async uris => {
+            uris.forEach(async uri => {
+                console.log(uri)
+                await this.createProblems(uri)
+            })
+        })
     }
 
     private updateStatus() {
         this.testStatusItem.text = `$(beaker) ${this.problemMap.size}`
+        this.junitTree.update()
     }
 
     onDidCreate() {
@@ -118,6 +131,9 @@ export class JUnitController implements vscode.Disposable {
                 this.resultsMap.set(uri.path, json)
                 json.testsuite.forEach(ts => {
                     this.processTestSuite(uri, ts, problems, localPackages)
+                    this.suiteNodes = this.suiteNodes.filter(sn => sn.suite.name != ts.name)
+                    this.suiteNodes = this.suiteNodes.concat(new SuiteNode(ts)).sort((a,b)=>a.suite.name.localeCompare(b.suite.name))
+                    this.junitTree.update()
                 })
             }
         })
@@ -208,11 +224,11 @@ export class JUnitController implements vscode.Disposable {
     }
 
     getRootNodes(): TreeNode[] | Thenable<TreeNode[]> {
-        return []
+        return this.suiteNodes
     }
 
     getChildren(element: TreeNode): TreeNode[] | Thenable<TreeNode[]> {
-        return []
+        return element.children()
     }
 
     dispose() {

@@ -1,6 +1,7 @@
 import { DependencySourceData, DependencyData, JarPackageData, JarEntryData, PathData, JvmConfig } from "server-models"
 import { LanguageRequest } from 'server-models'
 import { workspace, Uri } from "vscode"
+import { iconService } from "./extension"
 
 export class LocalConfig implements JvmConfig {
     excludes: string[]
@@ -23,7 +24,10 @@ export enum NodeType {
     RESOURCE,
     SOURCE_DIR,
     CLASS_DIR,
-    LANGUAGE
+    LANGUAGE,
+    TEST_SUITE,
+    TEST_CASE,
+    TEST_ERROR
 }
 
 export interface TreeNode {
@@ -33,6 +37,7 @@ export interface TreeNode {
     isOpenable: boolean
     children() : TreeNode[]
     context? : string
+    icon? : string
 }
 
 export class LanguageNode implements TreeNode {
@@ -46,6 +51,67 @@ export class LanguageNode implements TreeNode {
     }
     treeLabel(): string {
         return `${this.request.name} (${this.request.languageId})`
+    }
+    children(): TreeNode[] {
+        return []
+    }
+}
+
+export class SuiteNode implements TreeNode {
+    type: NodeType = NodeType.TEST_SUITE
+    isTerminal: boolean = false
+    isOpenable: boolean = true
+    context?: string = 'suite-node'
+    icon?: string = undefined
+    suite: JUnitSuite
+    failures = 0
+    cases: CaseNode[]
+    constructor(suite: JUnitSuite) {
+        this.suite = suite
+        this.cases = suite.testcase.map(tc => new CaseNode(tc))
+        this.failures = suite.testcase.filter(tc => tc.failure != undefined).length
+    }
+    treeLabel(): string {
+        return `${this.suite.name} (${this.failures ? "$(error)" : "$(check)"})`
+    }
+    children(): TreeNode[] {
+        return this.cases
+    }
+}
+
+export class CaseNode implements TreeNode {
+    type: NodeType = NodeType.TEST_CASE
+    isTerminal: boolean = false
+    isOpenable: boolean = true
+    context?: string = 'case-node'
+    data: JUnitCase
+    icon?: string = undefined
+    failures: FailureNode[]
+    constructor(data: JUnitCase) {
+        this.data = data
+        this.isTerminal = data.failure === undefined
+        this.icon = data.failure ? iconService.getIconPath('error_outline-24px.svg') : iconService.getIconPath('check-24px.svg')
+        this.failures = data.failure ? data.failure.map(f => new FailureNode(f)) : []
+    }
+    treeLabel(): string {
+        return `${this.data.name} (${this.data.failure ? this.data.failure.length : 0})`
+    }
+    children(): TreeNode[] {
+        return this.failures
+    }
+}
+
+export class FailureNode implements TreeNode {
+    type: NodeType = NodeType.TEST_CASE
+    isTerminal: boolean = true
+    isOpenable: boolean = true
+    context?: string = 'failure-node'
+    data: JUnitFailure
+    constructor(data: JUnitFailure) {
+        this.data = data
+    }
+    treeLabel(): string {
+        return `${this.data.message} (${this.data.type})`
     }
     children(): TreeNode[] {
         return []

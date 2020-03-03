@@ -25,13 +25,13 @@ export class JUnitTreeProvider implements TreeDataProvider<TreeNode> {
     public getTreeItem(element: TreeNode) : TreeItem {
         let item = new TreeItem(element.treeLabel(), TreeItemCollapsibleState.Collapsed)
         item.contextValue = element.context
-        item.iconPath = ThemeIcon.Folder
+        item.iconPath = element.icon ? element.icon : ThemeIcon.Folder
         if ( element.isTerminal ) {
-            item.iconPath = ThemeIcon.File
+            item.iconPath = element.icon ? element.icon : ThemeIcon.File
             item.collapsibleState = TreeItemCollapsibleState.None
         }
         if ( element.isOpenable ) {
-            item.command = {title: 'Open Entry', command: 'jvmcode.jar-entry', arguments: [element]}
+            // Add a menu item to open the test .xml file
         }
         return item
     }

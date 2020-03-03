@@ -11,6 +11,7 @@ import { LanguageController } from './language_controller'
 import { JUnitController } from './junit_controller'
 import { ClassData } from 'server-models'
 import { ConfigService } from './config_service'
+import { IconService } from './icon_service';
 
 export let server: JvmServer
 export let projectService: ProjectService
@@ -20,9 +21,11 @@ export let languageController: LanguageController
 let junitController: JUnitController
 let statsController: StatsController
 export let extensionContext: vscode.ExtensionContext // Allows test to access the context?
+export let iconService: IconService
 
 export function activate(context: vscode.ExtensionContext) {
     extensionContext = context
+    iconService = new IconService(context)
 
     // Start and manage the JVM vertx server -- one server per workspace
     if (!server) {
