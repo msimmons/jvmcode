@@ -19,7 +19,7 @@ export class ProjectController {
     private USER_SOURCE = 'USER_DEPENDENCIES'
     private USER_PATHS = 'USER_PATHS'
     private context: vscode.ExtensionContext
-    private service: ProjectService
+    public service: ProjectService
     private dependencyTree: ProjectTreeProvider
     private contentProvider: JarContentProvider
     private isStarted = false
@@ -51,8 +51,8 @@ export class ProjectController {
     * the server
     */
     private registerProjectListener() {
-        this.service.registerProjectListener((jvmProject: JvmProject) => {
-            this.start()
+        this.service.registerProjectListener(async (jvmProject: JvmProject) => {
+            await this.start()
             this.depedencyRootNode = new DependencyRootNode(jvmProject.dependencySources)
             this.pathRootNode = new PathRootNode(jvmProject.paths)
             this.classpath = jvmProject.classpath
@@ -100,6 +100,7 @@ export class ProjectController {
     * Return all the package nodes for the given dependency; this resolves all the entries in the jar file as well
     */
     public async getPackageNodes(dependency: DependencyNode) : Promise<JarPackageNode[]> {
+        await this.start()
         if (dependency.packages) return dependency.packages
         try {
             let packages = await this.service.getPackages(dependency.data)
@@ -114,6 +115,7 @@ export class ProjectController {
     }
     
     public async getClassData() : Promise<ClassData[]> {
+        await this.start()
         return await this.service.getClassData()
     }
     
@@ -122,6 +124,7 @@ export class ProjectController {
     * dependency
     */
     public async getJarEntryNodes() : Promise<JarEntryNode[]> {
+        await this.start()
         let packages : JarPackageNode[][] = []
         for (var node of this.depedencyRootNode.sourceNodes) {
             for (var dep of node.dependencies) {
@@ -233,7 +236,8 @@ export class ProjectController {
     /**
     * Open the contents of a jar entry in a text editor
     */
-    public openJarEntry(entryNode: JarEntryNode) {
+    public async openJarEntry(entryNode: JarEntryNode) {
+        await this.start()
         vscode.window.withProgress({ location: vscode.ProgressLocation.Window, title: entryNode.name}, (progess) => {
             return this.resolveJarEntryNode(entryNode).then((reply) => {
                 entryNode.data = reply
@@ -244,6 +248,13 @@ export class ProjectController {
         })
     }
 
+    /**
+     * Supports finding classes and limiting the number of items in the quick pick based on user input
+     * 
+     * @param items 
+     * @param event 
+     * @param inDollar 
+     */
     private filterItems(items: vscode.QuickPickItem[], event: string, inDollar: boolean) {
         if (!items) return []
         let filterString = event.toLocaleLowerCase().replace('*', '').replace('$','').trim()
@@ -261,7 +272,8 @@ export class ProjectController {
     * Let user find a class from the universe of classes for this project; starts with project classes only and
     * adds external dependeny classes as needed (to limit size of list which could be quite large)
     */
-    public findClass() {
+    public async findClass() {
+        await this.start()
         let jarEntries = this.getJarEntryNodes()
         let classData = this.getClassData()
         let quickPick = vscode.window.createQuickPick()
@@ -318,7 +330,8 @@ export class ProjectController {
     /**
     * Add a user dependency
     */
-    public addDependency() {
+    public async addDependency() {
+        await this.start()
         vscode.window.showOpenDialog({filters: {'Dependency': ['jar']}, canSelectMany: false}).then((jarFile) => {
             if (!jarFile || jarFile.length === 0) return
             vscode.window.showOpenDialog({filters: {'Source': ['jar', 'zip']}, canSelectMany: false}).then((srcFile) => {
@@ -331,7 +344,8 @@ export class ProjectController {
     /**
      * Add a user path
      */
-    public addUserPath() {
+    public async addUserPath() {
+        await this.start()
         let sourceOptions = {placeHolder: 'Source Directory', defaultUri: vscode.workspace.workspaceFolders[0].uri, canSelectMany: false, canSelectFolders: true, canSelectFiles: false}
         vscode.window.showOpenDialog(sourceOptions).then((srcDir) => {
             if (!srcDir) return
@@ -347,7 +361,8 @@ export class ProjectController {
     /**
     * Remove the given user item
     */
-    public removeUserItem(item: TreeNode) {
+    public async removeUserItem(item: TreeNode) {
+        await this.start()
         switch (item.type) {
             case NodeType.PATH:
                 projectService.removePath((item as PathNode).data.name)

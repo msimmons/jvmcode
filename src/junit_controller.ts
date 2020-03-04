@@ -24,12 +24,17 @@ export class JUnitController implements vscode.Disposable {
     private testStatusItem : vscode.StatusBarItem
     private junitTree: JUnitTreeProvider
     private suiteNodes: SuiteNode[] = []
+    private isStarted = false
 
     public constructor(projectController: ProjectController) {
         this.projectController = projectController
+        projectController.service.registerProjectListener(async (jvmProject) => {
+            this.start()
+        })
     }
 
     public async start() {
+        if (this.isStarted) return
         let dir = ConfigService.getConfig().testResultsDir
         let pattern = vscode.workspace.workspaceFolders[0].uri.path+`/${dir}/**/*.xml`
         // Watch for changes
@@ -53,9 +58,12 @@ export class JUnitController implements vscode.Disposable {
         this.testStatusItem.show()
         this.disposables.push(this.testStatusItem)
 
+        this.findTestResults(dir)
+
         this.disposables.push(vscode.commands.registerCommand('jvmcode.show-test-results', async () => {
             this.showTestResults()
         }))
+        this.isStarted = true
     }
 
     private async findTestResults(dir) {

@@ -64,15 +64,14 @@ export class SuiteNode implements TreeNode {
     context?: string = 'suite-node'
     icon?: string = undefined
     suite: JUnitSuite
-    failures = 0
     cases: CaseNode[]
     constructor(suite: JUnitSuite) {
         this.suite = suite
         this.cases = suite.testcase.map(tc => new CaseNode(tc))
-        this.failures = suite.testcase.filter(tc => tc.failure != undefined).length
+        this.icon = suite.testcase.filter(tc => tc.failure != undefined).length ? iconService.getIconPath('error_outline-24px.svg') : iconService.getIconPath('check-24px.svg')
     }
     treeLabel(): string {
-        return `${this.suite.name} (${this.failures ? "$(error)" : "$(check)"})`
+        return `${this.suite.name}`
     }
     children(): TreeNode[] {
         return this.cases

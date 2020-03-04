@@ -28,44 +28,69 @@
     "commands": [
       {
         "command": "jvmcode.start",
-        "title": "JVM: Start Server"
+        "title": "Start Server",
+        "category": "JVM"
       },
       {
         "command": "jvmcode.log-level",
-        "title": "JVM: Set Log Level"
+        "title": "Set Log Level",
+        "category": "JVM"
       },
       {
         "command": "jvmcode.stop",
-        "title": "JVM: Stop Server"
+        "title": "Stop Server",
+        "category": "JVM"
       },
       {
         "command": "jvmcode.add-dependency",
-        "title": "JVM: Add Dependency"
+        "title": "Add Dependency",
+        "category": "JVM",
+        "icon": {
+          "dark":"resources/add-24px.svg",
+          "light": "resources/add-24px.svg"
+        }
       },
       {
         "command": "jvmcode.add-user-path",
-        "title": "JVM: Add Source/Class Directory"
+        "title": "Add Path",
+        "category": "JVM",
+        "icon": {
+          "dark":"resources/add-24px.svg",
+          "light": "resources/add-24px.svg"
+        }
       },
       {
         "command": "jvmcode.find-class",
-        "title": "JVM: Find Class"
+        "title": "Find Class",
+        "category": "JVM"
       },
       {
         "command": "jvmcode.exec-class",
-        "title": "JVM: Execute Class"
+        "title": "Execute Class",
+        "category": "JVM"
       },
       {
         "command": "jvmcode.exec-custom",
-        "title": "JVM: Execute Custom"
+        "title": "Execute Custom",
+        "category": "JVM"
       },
       {
         "command": "jvmcode.remove-user-item",
-        "title": "JVM: Remove User Item"
+        "title": "Remove Item",
+        "category": "JVM",
+        "icon": {
+          "dark":"resources/remove-24px.svg",
+          "light": "resources/remove-24px.svg"
+        }
       },
       {
         "command": "jvmcode.clear-problems",
-        "title": "JVM: Clear Problems"
-
+        "title": "Clear Problems",
+        "category": "JVM",
+        "icon": {
+          "dark":"resources/delete_outline-24px.svg",
+          "light": "resources/delete_outline-24px.svg"
+        }
       }
     ],
     "viewsContainers": {
@@ -86,12 +111,12 @@
         },
         {
           "id": "jvmcode.junit-tree",
-          "name": "Tests",
+          "name": "Test Results",
           "when": "jvmcode.context.isJvmProject"
         },
         {
           "id": "jvmcode.language-tree",
-          "name": "Language",
+          "name": "Languages",
           "when": "jvmcode.context.isJvmProject"
         }        
       ]
@@ -101,22 +126,22 @@
         {
           "command": "jvmcode.remove-user-item",
           "when": "viewItem == 'user-item'",
-          "group": "JVM"
+          "group": "inline@1"
         },
         {
           "command": "jvmcode.add-dependency",
           "when": "viewItem == 'dependency-data'",
-          "group": "JVM"
+          "group": "inline@1"
         },
         {
           "command": "jvmcode.add-user-path",
           "when": "viewItem == 'path-data'",
-          "group": "JVM"
+          "group": "inline@1"
         },
         {
           "command": "jvmcode.clear-problems",
           "when": "viewItem == 'language-node'",
-          "group": "JVM"
+          "group": "inline@1"
         }
       ]
     },

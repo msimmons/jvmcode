@@ -9,7 +9,6 @@ import { StatsController } from './stats_controller'
 import { LanguageService } from './language_service'
 import { LanguageController } from './language_controller'
 import { JUnitController } from './junit_controller'
-import { ClassData } from 'server-models'
 import { ConfigService } from './config_service'
 import { IconService } from './icon_service';
 
@@ -33,13 +32,13 @@ export function activate(context: vscode.ExtensionContext) {
         server.start()
         projectService = new ProjectService(server)
         projectController = new ProjectController(context, projectService)
-        // We don't start the project controller unless we get a request or there are user items
+        junitController = new JUnitController(projectController)
+        context.subscriptions.push(junitController)
+        // We don't start the project controller or junit controller unless we get a request or there are user items
         languageService = new LanguageService(server)
         languageController = new LanguageController(languageService, projectController)
         context.subscriptions.push(languageController)
         languageController.start()
-        junitController = new JUnitController(projectController)
-        junitController.start()
         statsController = new StatsController(server)
         statsController.start()
     }
@@ -74,7 +73,6 @@ export function activate(context: vscode.ExtensionContext) {
      * Allow the user to find any class in the projects current dependencies
      */
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.find-class', async () => {
-        await projectController.start() // TODO This won't work correctly first time -- async timing
         projectController.findClass()
     }))
 
@@ -89,7 +87,6 @@ export function activate(context: vscode.ExtensionContext) {
      * Allows the user to manually enter a jar dependency
      */
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.add-dependency', () => {
-        projectController.start()
         projectController.addDependency()
     }))
 
@@ -97,7 +94,6 @@ export function activate(context: vscode.ExtensionContext) {
      * Allows the user to manually enter path infor (source -> class directories)
      */
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.add-user-path', () => {
-        projectController.start()
         projectController.addUserPath()
     }))
 
@@ -113,7 +109,6 @@ export function activate(context: vscode.ExtensionContext) {
      * Return the classpath as a string (mostly for use in tasks)
      */
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.classpath', () : string => {
-        projectController.start()
         return projectController.getClasspath()
     }))
 
@@ -121,7 +116,6 @@ export function activate(context: vscode.ExtensionContext) {
      * Return the fqcn of the current file (for use in tasks)
      */
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.fqcn', () : string => {
-        projectController.start()
         return projectController.getCurrentFqcn()
     }))
 
@@ -137,7 +131,6 @@ export function activate(context: vscode.ExtensionContext) {
      * Allow the user to execute the given main application class
      */
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.exec-class', async () => {
-        projectController.start()
         let classData = await projectController.getClassData()
         let classes = classData.filter(cd => cd.methods.find(m => m.isMain)).map(c => c.name)
         vscode.window.showQuickPick(classes).then((mainClass) => {
