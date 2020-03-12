@@ -27,9 +27,9 @@ export class ProjectTreeProvider implements TreeDataProvider<TreeNode> {
         item.contextValue = element.context
         item.tooltip = element.tooltip
         item.description = element.tooltip
-        item.iconPath = ThemeIcon.Folder
+        item.iconPath = element.icon ? element.icon : ThemeIcon.Folder
         if ( element.isTerminal ) {
-            item.iconPath = ThemeIcon.File
+            item.iconPath = element.icon ? element.icon : ThemeIcon.File
             item.collapsibleState = TreeItemCollapsibleState.None
         }
         return item

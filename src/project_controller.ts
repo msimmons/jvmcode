@@ -383,9 +383,9 @@ export class ProjectController {
     */
     public async addDependency() {
         await this.start()
-        vscode.window.showOpenDialog({filters: {'Dependency': ['jar']}, canSelectMany: false}).then((jarFile) => {
+        vscode.window.showOpenDialog({openLabel: 'Choose Jar File',filters: {'Dependency': ['jar']}, canSelectMany: false}).then((jarFile) => {
             if (!jarFile || jarFile.length === 0) return
-            vscode.window.showOpenDialog({filters: {'Source': ['jar', 'zip']}, canSelectMany: false}).then((srcFile) => {
+            vscode.window.showOpenDialog({openLabel: 'Optional Source Jar', filters: {'Source': ['jar', 'zip']}, canSelectMany: false}).then((srcFile) => {
                 let srcPath = (!srcFile || srcFile.length === 0) ? undefined : srcFile[0]['path']
                 projectService.addDependency(jarFile[0]['path'], srcPath)
             })
@@ -397,10 +397,10 @@ export class ProjectController {
      */
     public async addUserPath() {
         await this.start()
-        let sourceOptions = {placeHolder: 'Source Directory', defaultUri: vscode.workspace.workspaceFolders[0].uri, canSelectMany: false, canSelectFolders: true, canSelectFiles: false}
+        let sourceOptions: vscode.OpenDialogOptions = {openLabel: 'Choose Source Directory', defaultUri: vscode.workspace.workspaceFolders[0].uri, canSelectMany: false, canSelectFolders: true, canSelectFiles: false}
         vscode.window.showOpenDialog(sourceOptions).then((srcDir) => {
             if (!srcDir) return
-            let classOptions = {placeHolder: 'Class Directory', defaultUri: vscode.workspace.workspaceFolders[0].uri, canSelectMany: false, canSelectFolders: true, canSelectFiles: false}
+            let classOptions: vscode.OpenDialogOptions = {openLabel: 'Choose Class Directory', defaultUri: vscode.workspace.workspaceFolders[0].uri, canSelectMany: false, canSelectFolders: true, canSelectFiles: false}
             vscode.window.showOpenDialog(classOptions).then((classDir) => {
                 if (!classDir) return
                 let name = srcDir[0]['path'].replace(vscode.workspace.workspaceFolders[0].uri.path+'/', '')

@@ -1,7 +1,14 @@
 # JVMCode
-JVM Code will supply all non-language specific info.  Essentially all things realted to .class files
+JVM Code will supply all non-language specific info.  Essentially all things related to .class files and .jar files
 
 ## TODO
+
+- Adding a path or dependency dialogs are not clear (no explanation)
+- Better icons for source file and class file
+- What to do about $ classes
+- Add stats to the JVM view?
+- Remove unecessary commands from the command pallete
+- All the language providers!
 
 - Dependency Management
   - _Default JDK dependencies_

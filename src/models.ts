@@ -49,12 +49,14 @@ export class LanguageNode implements TreeNode {
     isTerminal: boolean = true
     isOpenable: boolean = false
     context?: string = 'language-node'
+    tooltip = undefined
     request: LanguageRequest
     constructor(request: LanguageRequest) {
         this.request = request
+        this.tooltip = request.languageId
     }
     treeLabel(): string {
-        return `${this.request.name} (${this.request.languageId})`
+        return this.request.name
     }
     children(): TreeNode[] {
         return []
@@ -77,7 +79,7 @@ export class SuiteNode implements TreeNode {
         this.tooltip = `Tests: ${suite.tests} Failures: ${suite.failures} Skipped: ${suite.skipped} at ${suite.timestamp}`
     }
     treeLabel(): string {
-        return `${this.suite.name}`
+        return this.suite.name
     }
     children(): TreeNode[] {
         return this.cases
@@ -91,15 +93,17 @@ export class CaseNode implements TreeNode {
     context?: string = 'case-node'
     data: JUnitCase
     icon?: string = undefined
+    tooltip = undefined
     failures: FailureNode[]
     constructor(data: JUnitCase) {
         this.data = data
         this.isTerminal = data.failure === undefined
         this.icon = data.failure ? iconService.getIconPath('error_outline-24px.svg') : iconService.getIconPath('check-24px.svg')
         this.failures = data.failure ? data.failure.map(f => new FailureNode(f)) : []
+        this.tooltip = data.failure ? `${data.failure.length} failures` : undefined
     }
     treeLabel(): string {
-        return `${this.data.name} (${this.data.failure ? this.data.failure.length : 0})`
+        return this.data.name
     }
     children(): TreeNode[] {
         return this.failures
@@ -111,12 +115,14 @@ export class FailureNode implements TreeNode {
     isTerminal: boolean = true
     isOpenable: boolean = true
     context?: string = 'failure-node'
+    tooltip = undefined
     data: JUnitFailure
     constructor(data: JUnitFailure) {
         this.data = data
+        this.tooltip = data.type
     }
     treeLabel(): string {
-        return `${this.data.message} (${this.data.type})`
+        return this.data.message
     }
     children(): TreeNode[] {
         return []
@@ -130,13 +136,15 @@ export class PathRootNode implements TreeNode {
     isTerminal = false
     isOpenable = false
     context = undefined
+    tooltip = undefined
     constructor(data: PathData[]) {
         this.data = data
         this.pathNodes = data.map((cp) => {return new PathNode(cp)})
         this.context = 'path-data'
+        this.tooltip = `${data.length} paths`
     }
     public treeLabel() : string {
-        return `Paths (${this.pathNodes.length})`
+        return 'Paths'
     }
     public children() : TreeNode[] {
         return this.pathNodes
@@ -150,13 +158,16 @@ export class DependencyRootNode implements TreeNode {
     isTerminal = false
     isOpenable = false
     context = undefined
+    tooltip = undefined
     constructor(data: DependencySourceData[]) {
         this.data = data
-        this.sourceNodes = data.filter((ds) => {return ds.dependencies.length > 0}).map((ds) => {return new DependencySourceNode(ds)})
+        let nodes = data.filter((ds) => {return ds.dependencies.length > 0}).map((ds) => {return new DependencySourceNode(ds)})
+        this.sourceNodes = nodes
         this.context = 'dependency-data'
+        this.tooltip = `${nodes.length} sources`
     }
     public treeLabel() : string {
-        return `Dependencies (${this.sourceNodes.length})`
+        return 'Dependencies Sources'
     }
     public children() : TreeNode[] {
         return this.sourceNodes
@@ -169,11 +180,13 @@ export class ClassDataRootNode implements TreeNode {
     isTerminal = false
     isOpenable = false
     context = undefined
+    tooltip = undefined
     constructor(data: ClassData[]) {
         this.classDataNodes = data.map((cd) => {return new ClassDataNode(cd)})
+        this.tooltip = `${data.length} classes`
     }
     public treeLabel() : string {
-        return `Local Classes (${this.classDataNodes.length})`
+        return 'Local Classes'
     }
     public children() : TreeNode[] {
         return this.classDataNodes
@@ -218,15 +231,17 @@ export class PathNode implements TreeNode {
     isTerminal = false
     isOpenable = false
     context = undefined
+    tooltip = undefined
     constructor(data: PathData) {
         this.data = data
         let isUser = (data.source.toLowerCase() === 'user')
         this.context = isUser ? 'user-item' : undefined
         this.classDirs = [new ClassDirNode(data.classDir, isUser)]
         this.sourceDirs = [new SourceDirNode(data.sourceDir, isUser)]
+        this.tooltip = `${data.name}:${data.module}`
     }
     public treeLabel() : string {
-        return `${this.data.source} (${this.data.name}:${this.data.module})`
+        return this.data.source
     }
     public children() : TreeNode[] {
         return this.sourceDirs.concat(this.classDirs)
@@ -239,12 +254,16 @@ export class SourceDirNode implements TreeNode {
     isTerminal = true
     isOpenable = false
     context?: string
+    icon: string
+    tooltip: string
     constructor(path: string, isUser: boolean) {
         this.path = path
         this.context = isUser ? 'user-item' : undefined
+        this.icon = iconService.getIconPath('file_text.svg')
+        this.tooltip = 'Source'
     }
     public treeLabel() : string {
-        return 'Source: ' + this.path.replace(workspace.workspaceFolders[0].uri.path+'/', '')
+        return this.path.replace(workspace.workspaceFolders[0].uri.path+'/', '')
     }
     public children() : TreeNode[] {
         return []
@@ -257,12 +276,16 @@ export class ClassDirNode implements TreeNode {
     isTerminal = true
     isOpenable = false
     context: string
+    icon: string
+    tooltip: string
     constructor(path: string, isUser: boolean) {
         this.path = path
         this.context = isUser ? 'user-item' : undefined
+        this.icon = iconService.getIconPath('file_binary.svg')
+        this.tooltip = 'Class'
     }
     public treeLabel() : string {
-        return 'Class: ' + this.path.replace(workspace.workspaceFolders[0].uri.path+'/', '')
+        return this.path.replace(workspace.workspaceFolders[0].uri.path+'/', '')
     }
     public children() : TreeNode[] {
         return []
@@ -276,6 +299,7 @@ export class DependencySourceNode implements TreeNode {
     isTerminal = false
     isOpenable = false
     context = undefined
+    tooltip: string
     constructor(data: DependencySourceData) { 
         this.data = data 
         let isUser = data.source.toLocaleLowerCase() === 'user'
@@ -283,7 +307,8 @@ export class DependencySourceNode implements TreeNode {
         this.dependencies = data.dependencies.map((d) => { return new DependencyNode(d, isUser) })
     }
     public treeLabel() : string {
-        return `${this.data.description} (${this.dependencies.length})`
+        this.tooltip = `${this.dependencies.length} dependencies`
+        return this.data.description
     }
     public children() : TreeNode[] {
         return this.dependencies
@@ -331,6 +356,7 @@ export class JarPackageNode implements TreeNode {
     entries: JarEntryNode[]
     isTerminal = false
     isOpenable = false
+    tooltip: string
     constructor(dependency: DependencyNode, data: JarPackageData) { 
         this.data = data
         this.dependency = dependency.data
@@ -338,9 +364,10 @@ export class JarPackageNode implements TreeNode {
         this.entries = data.entries.map((entry) => {
             return new JarEntryNode(this, entry)
         })
+        this.tooltip = `${data.entries.length} entries`
     }
     public treeLabel() : string { 
-        return `${this.name} (${this.entries.length})`
+        return this.name
     }
     public children() : TreeNode[] {
         return this.entries
