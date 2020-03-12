@@ -151,7 +151,7 @@ export class LanguageController implements vscode.Disposable {
     /**
      * Request parse and deal with the results
      */
-    async requestParse(doc: vscode.TextDocument) : Promise<ParseResult> {
+    private async requestParse(doc: vscode.TextDocument) : Promise<ParseResult> {
         let key = doc.uri.toString()
         if (!doc.isDirty && this.parseResults.has(key)) return this.parseResults.get(key)
         let text = doc.getText()

@@ -14,7 +14,6 @@ import io.vertx.ext.web.handler.StaticHandler
 import io.vertx.ext.web.handler.sockjs.BridgeEvent
 import io.vertx.ext.web.handler.sockjs.BridgeOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
-import io.vertx.ext.web.handler.sockjs.SockJSHandlerOptions
 import net.contrapt.jvmcode.handler.*
 import net.contrapt.jvmcode.service.ParseService
 import net.contrapt.jvmcode.model.JvmConfig
@@ -214,6 +213,11 @@ class RouterVerticle(val startupToken: String, var config: JvmConfig, symbolRepo
 
         /**
          * Return all the class data for this project
+         */
+        vertx.eventBus().consumer<JsonObject>("jvmcode.all-classdata", AllClassDataHandler(vertx, projectService))
+
+        /**
+         * Return class data for the given path
          */
         vertx.eventBus().consumer<JsonObject>("jvmcode.classdata", ClassDataHandler(vertx, projectService))
 

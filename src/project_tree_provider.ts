@@ -1,6 +1,7 @@
 import { TreeDataProvider, TreeItem, TreeItemCollapsibleState, EventEmitter, ThemeIcon } from 'vscode'
 import { TreeNode } from './models'
 import { ProjectController } from './project_controller';
+import { utimesSync } from 'fs';
 
 export class ProjectTreeProvider implements TreeDataProvider<TreeNode> {
 
@@ -24,13 +25,12 @@ export class ProjectTreeProvider implements TreeDataProvider<TreeNode> {
     public getTreeItem(element: TreeNode) : TreeItem {
         let item = new TreeItem(element.treeLabel(), TreeItemCollapsibleState.Collapsed)
         item.contextValue = element.context
+        item.tooltip = element.tooltip
+        item.description = element.tooltip
         item.iconPath = ThemeIcon.Folder
         if ( element.isTerminal ) {
             item.iconPath = ThemeIcon.File
             item.collapsibleState = TreeItemCollapsibleState.None
-        }
-        if ( element.isOpenable ) {
-            item.command = {title: 'Open Entry', command: 'jvmcode.jar-entry', arguments: [element]}
         }
         return item
     }

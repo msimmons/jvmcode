@@ -21,7 +21,6 @@ export class JUnitController implements vscode.Disposable {
     private problemMap = new Map<string, vscode.DiagnosticCollection>()
     private resultsMap = new Map<string, JUnitReport>()
     private disposables : vscode.Disposable[] =  []
-    private testStatusItem : vscode.StatusBarItem
     private junitTree: JUnitTreeProvider
     private suiteNodes: SuiteNode[] = []
     private isStarted = false
@@ -50,34 +49,24 @@ export class JUnitController implements vscode.Disposable {
 
         this.junitTree = new JUnitTreeProvider(this)
         this.disposables.push(vscode.window.registerTreeDataProvider(this.junitTree.viewId, this.junitTree))
-
-        this.testStatusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0)
-        this.testStatusItem.tooltip = 'Test Results'
-        this.testStatusItem.command = 'jvmcode.show-test-results'
-        this.updateStatus()
-        this.testStatusItem.show()
-        this.disposables.push(this.testStatusItem)
-
         this.findTestResults(dir)
 
-        this.disposables.push(vscode.commands.registerCommand('jvmcode.show-test-results', async () => {
-            this.showTestResults()
+        this.disposables.push(vscode.commands.registerCommand('jvmcode.show-test-results', async (event) => {
+            if (!event) return
+            this.openTestResults(event as SuiteNode)
         }))
         this.isStarted = true
     }
 
     private async findTestResults(dir) {
-        let pattern = new vscode.RelativePattern(dir, '**/*.xml')
         vscode.workspace.findFiles(`**/${dir}/**/*.xml`).then(async uris => {
             uris.forEach(async uri => {
-                console.log(uri)
                 await this.createProblems(uri)
             })
         })
     }
 
-    private updateStatus() {
-        this.testStatusItem.text = `$(beaker) ${this.problemMap.size}`
+    private updateData() {
         this.junitTree.update()
     }
 
@@ -121,7 +110,7 @@ export class JUnitController implements vscode.Disposable {
     }
 
     private async doUpdateProblems(uri: vscode.Uri, fqcn: string, problems: vscode.DiagnosticCollection) {
-        this.updateStatus()
+        this.updateData()
         problems.clear()
         let localPackages = this.projectController.getPackages()
         fs.readFile(uri.path, (err, data) => {
@@ -138,6 +127,7 @@ export class JUnitController implements vscode.Disposable {
                 }) as JUnitReport
                 this.resultsMap.set(uri.path, json)
                 json.testsuite.forEach(ts => {
+                    ts.filename = uri.path
                     this.processTestSuite(uri, ts, problems, localPackages)
                     this.suiteNodes = this.suiteNodes.filter(sn => sn.suite.name != ts.name)
                     this.suiteNodes = this.suiteNodes.concat(new SuiteNode(ts)).sort((a,b)=>a.suite.name.localeCompare(b.suite.name))
@@ -171,15 +161,11 @@ export class JUnitController implements vscode.Disposable {
     }
     
     private async processTestSuite(xmlUri: vscode.Uri, suite: JUnitSuite, problems: vscode.DiagnosticCollection, packages: string[]) {
-        let suitePath = await this.projectController.fqcn2Path(suite.name)
-        let suiteUri = suitePath ? vscode.Uri.file(suitePath) : xmlUri
+        let suiteUri = await this.projectController.fqcn2Uri(suite.name)
+        suiteUri = suiteUri ? suiteUri : xmlUri
         suite.testcase.forEach(async tc => {
             let diagnostics = await this.processTestCase(tc, packages)
             if (diagnostics.length > 0) {
-                let xmlDiag = new vscode.Diagnostic(new vscode.Range(0,0,0,0), "XML Test Results", vscode.DiagnosticSeverity.Information)
-                let xmlLocation = new vscode.Location(xmlUri, new vscode.Position(0, 0))
-                xmlDiag.relatedInformation = [new vscode.DiagnosticRelatedInformation(xmlLocation, `Tests: ${suite.tests} Failures: ${suite.failures} Skipped: ${suite.skipped} Errors: ${suite.errors}`)]
-                diagnostics.push(xmlDiag)
                 problems.set(suiteUri, diagnostics)
             }
         })
@@ -221,14 +207,9 @@ export class JUnitController implements vscode.Disposable {
         return problem
     }
 
-    private async showTestResults() {
-        let items = Array.from(this.resultsMap.keys())
-        vscode.window.showQuickPick(items).then(item => {
-            if (item) {
-                vscode.workspace.openTextDocument({language: "json", content: JSON.stringify(this.resultsMap.get(item))})
-            }
-        })
-
+    public async openTestResults(node: SuiteNode) {
+        let uri = vscode.Uri.file(node.suite.filename)
+        vscode.workspace.openTextDocument(uri).then(doc => vscode.window.showTextDocument(doc))
     }
 
     getRootNodes(): TreeNode[] | Thenable<TreeNode[]> {

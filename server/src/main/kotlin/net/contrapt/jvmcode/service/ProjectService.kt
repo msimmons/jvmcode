@@ -87,7 +87,7 @@ class ProjectService(
     fun getJvmProject(config: JvmConfig = this.config) : JvmProject {
         this.config = config
         val sorted = listOf(jdkSource, userSource) + externalSource
-        return JvmProject(sorted, externalPaths + userPaths, getClasspath())
+        return JvmProject(sorted, externalPaths + userPaths, classMap.values, getClasspath())
     }
 
     private fun removeJarData(fileName: String) {
@@ -288,6 +288,21 @@ class ProjectService(
         }
     }
 
+    private fun indexClassData(path: String) : ClassData? {
+        val file = File(path)
+        logger.info("Got file $file")
+        if (!file.exists()) return null
+        val cached = classMap.get(path)
+        if (cached?.lastModified ?: 0 < file.lastModified()) {
+            val data = ClassData.create(ClassFile(DataInputStream(file.inputStream())), file.path, file.lastModified())
+            resolveSourceFile(data)
+            symbolRepo.addClassData(data)
+            addClassMap(path, data)
+            return data
+        }
+        else return cached
+    }
+
     private fun indexClassData(paths: Collection<String>) {
         val start = System.currentTimeMillis()
         var fileCount = 0
@@ -329,6 +344,13 @@ class ProjectService(
         val paths = (userPaths.map{ it.classDir } + externalPaths.map { it.classDir }).toSet()
         indexClassData(paths)
         return ClassDataHolder(classMap.values.sorted())
+    }
+
+    /**
+     * Get [ClassData] for the given path
+     */
+    fun getClassData(path: String) : ClassData? {
+        return indexClassData(path)
     }
 
     /**

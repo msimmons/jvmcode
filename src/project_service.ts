@@ -100,8 +100,16 @@ export class ProjectService {
      * Return all of this project's classdata
      */
     public async getClassData() : Promise<ClassData[]> {
-        let result = await server.send('jvmcode.classdata', {})
+        let result = await server.send('jvmcode.all-classdata', {})
         return result.body.data
+    }
+    
+    /**
+     * Return classdata for the given path
+     */
+    public async getClassDataForPath(path: string) : Promise<ClassData> {
+        let result = await server.send('jvmcode.classdata', {path: path})
+        return result.body
     }
 
     /**

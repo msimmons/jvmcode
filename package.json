@@ -88,8 +88,44 @@
         "title": "Clear Problems",
         "category": "JVM",
         "icon": {
-          "dark":"resources/delete_outline-24px.svg",
-          "light": "resources/delete_outline-24px.svg"
+          "dark":"resources/clear_all-24px.svg",
+          "light": "resources/clear_all-24px.svg"
+        }
+      },
+      {
+        "command": "jvmcode.open-source",
+        "title": "Open Source",
+        "category": "JVM",
+        "icon": {
+          "dark":"resources/file_text.svg",
+          "light": "resources/file_text.svg"
+        }
+      },
+      {
+        "command": "jvmcode.open-class",
+        "title": "Open Class",
+        "category": "JVM",
+        "icon": {
+          "dark":"resources/file_binary.svg",
+          "light": "resources/file_binary.svg"
+        }
+      },
+      {
+        "command": "jvmcode.open-local-class",
+        "title": "Open Local Class",
+        "category": "JVM",
+        "icon": {
+          "dark":"resources/file_binary.svg",
+          "light": "resources/file_binary.svg"
+        }
+      },
+      {
+        "command": "jvmcode.show-test-results",
+        "title": "Open Test Result",
+        "category": "JVM",
+        "icon": {
+          "dark":"resources/file_text.svg",
+          "light": "resources/file_text.svg"
         }
       }
     ],
@@ -142,7 +178,32 @@
           "command": "jvmcode.clear-problems",
           "when": "viewItem == 'language-node'",
           "group": "inline@1"
-        }
+        },
+        {
+          "command": "jvmcode.open-source",
+          "when": "viewItem == 'class-item'",
+          "group": "inline@1"
+        },
+        {
+          "command": "jvmcode.open-source",
+          "when": "viewItem == 'resource-item'",
+          "group": "inline@1"
+        },
+        {
+          "command": "jvmcode.open-class",
+          "when": "viewItem == 'class-item'",
+          "group": "inline@2"
+        },
+        {
+          "command": "jvmcode.open-local-class",
+          "when": "viewItem == 'local-class'",
+          "group": "inline@1"
+        },
+        {
+          "command": "jvmcode.show-test-results",
+          "when": "viewItem == 'suite-node'",
+          "group": "inline@1"
+        }      
       ]
     },
     "configuration": {

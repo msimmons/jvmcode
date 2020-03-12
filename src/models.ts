@@ -1,4 +1,5 @@
-import { DependencySourceData, DependencyData, JarPackageData, JarEntryData, PathData, JvmConfig } from "server-models"
+import * as vscode from 'vscode'
+import { DependencySourceData, DependencyData, ClassData, JarPackageData, JarEntryData, PathData, JvmConfig } from "server-models"
 import { LanguageRequest } from 'server-models'
 import { workspace, Uri } from "vscode"
 import { iconService } from "./extension"
@@ -16,8 +17,10 @@ export class LocalConfig implements JvmConfig {
 export enum NodeType {
     PATH_ROOT,
     DEPENDENCY_ROOT,
+    CLASSDATA_ROOT,
     PATH,
     SOURCE,
+    CLASSDATA,
     DEPENDENCY,
     PACKAGE,
     CLASS,
@@ -38,6 +41,7 @@ export interface TreeNode {
     children() : TreeNode[]
     context? : string
     icon? : string
+    tooltip?: string
 }
 
 export class LanguageNode implements TreeNode {
@@ -63,12 +67,14 @@ export class SuiteNode implements TreeNode {
     isOpenable: boolean = true
     context?: string = 'suite-node'
     icon?: string = undefined
+    tooltip?: string = undefined
     suite: JUnitSuite
     cases: CaseNode[]
     constructor(suite: JUnitSuite) {
         this.suite = suite
         this.cases = suite.testcase.map(tc => new CaseNode(tc))
         this.icon = suite.testcase.filter(tc => tc.failure != undefined).length ? iconService.getIconPath('error_outline-24px.svg') : iconService.getIconPath('check-24px.svg')
+        this.tooltip = `Tests: ${suite.tests} Failures: ${suite.failures} Skipped: ${suite.skipped} at ${suite.timestamp}`
     }
     treeLabel(): string {
         return `${this.suite.name}`
@@ -130,7 +136,7 @@ export class PathRootNode implements TreeNode {
         this.context = 'path-data'
     }
     public treeLabel() : string {
-        return 'Paths'
+        return `Paths (${this.pathNodes.length})`
     }
     public children() : TreeNode[] {
         return this.pathNodes
@@ -150,10 +156,57 @@ export class DependencyRootNode implements TreeNode {
         this.context = 'dependency-data'
     }
     public treeLabel() : string {
-        return 'Dependencies'
+        return `Dependencies (${this.sourceNodes.length})`
     }
     public children() : TreeNode[] {
         return this.sourceNodes
+    }
+}
+
+export class ClassDataRootNode implements TreeNode {
+    type = NodeType.CLASSDATA_ROOT
+    classDataNodes: ClassDataNode[]
+    isTerminal = false
+    isOpenable = false
+    context = undefined
+    constructor(data: ClassData[]) {
+        this.classDataNodes = data.map((cd) => {return new ClassDataNode(cd)})
+    }
+    public treeLabel() : string {
+        return `Local Classes (${this.classDataNodes.length})`
+    }
+    public children() : TreeNode[] {
+        return this.classDataNodes
+    }
+    public update(cd: ClassData) {
+        let ndx = this.classDataNodes.findIndex(d => d.data.path === cd.path)
+        if (ndx < 0) {
+            this.classDataNodes.push(new ClassDataNode(cd))
+        }
+        else {
+            this.classDataNodes[ndx] = new ClassDataNode(cd)
+        }
+    }
+}
+
+export class ClassDataNode implements TreeNode {
+    data: ClassData
+    type = NodeType.CLASSDATA
+    isTerminal = true
+    isOpenable = true
+    context = 'local-class'
+    name: string
+    tooltip = undefined
+    constructor(data: ClassData) {
+        this.data = data
+        this.name = data.name.substring(this.data.name.lastIndexOf('.')+1)
+        this.tooltip = data.path.replace(vscode.workspace.workspaceFolders[0].uri.path, '')
+    }
+    public treeLabel() : string {
+        return this.name
+    }
+    public children() : TreeNode[] {
+        return []
     }
 }
 
@@ -230,7 +283,7 @@ export class DependencySourceNode implements TreeNode {
         this.dependencies = data.dependencies.map((d) => { return new DependencyNode(d, isUser) })
     }
     public treeLabel() : string {
-        return this.data.description
+        return `${this.data.description} (${this.dependencies.length})`
     }
     public children() : TreeNode[] {
         return this.dependencies
@@ -287,7 +340,7 @@ export class JarPackageNode implements TreeNode {
         })
     }
     public treeLabel() : string { 
-        return this.name
+        return `${this.name} (${this.entries.length})`
     }
     public children() : TreeNode[] {
         return this.entries
@@ -302,12 +355,14 @@ export class JarEntryNode implements TreeNode {
     type: NodeType
     isTerminal = true
     isOpenable = true
+    context = undefined
     constructor(pkgNode: JarPackageNode, data: JarEntryData) { 
         this.data = data
         this.package = pkgNode.data
         this.dependency = pkgNode.dependency
         this.name = data.name
         this.type = data.type === 'CLASS' ? NodeType.CLASS : NodeType.RESOURCE
+        this.context = data.type === 'CLASS' ? 'class-item' : 'resource-item'
     }
     public treeLabel() : string { 
         return this.name
@@ -352,6 +407,7 @@ export interface JUnitCase {
 }
 
 export interface JUnitSuite {
+    filename: string
     name: string
     tests: number
     skipped: number

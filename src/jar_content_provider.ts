@@ -13,7 +13,7 @@ export class JarContentProvider implements vscode.TextDocumentContentProvider {
     /**
      * Uri is of the form jvmcode-jar://groupId.artifactId.version/path#jarFile
      */
-	public scheme = 'jvmcode-jar';
+    public scheme = 'jvmcode-jar';
 
 	private onDidChangeEmitter = new vscode.EventEmitter<vscode.Uri>();
     private subscriptions: vscode.Disposable;
@@ -30,13 +30,21 @@ export class JarContentProvider implements vscode.TextDocumentContentProvider {
         this.onDidChangeEmitter.dispose();
         this.clearResults();
     }
+
+    /**
+     * The uri without the jarFile
+     * @param uri 
+     */
+    private getUriKey(uri: vscode.Uri) : string {
+        return uri.toString()
+    }
     
     /**
      * Add a mapping of path to classdata
      */
     addClassData(uri: vscode.Uri, classData: ClassData) {
         let text = JSON.stringify(classData, undefined, 3)
-        this.classDataMap.set(uri.toString(), text)
+        this.classDataMap.set(this.getUriKey(uri), text)
     }
 
     /**
@@ -82,7 +90,7 @@ export class JarContentProvider implements vscode.TextDocumentContentProvider {
                         let entry = zip.file(path)
                         if (!entry) resolve(`No entry found in ${jarFile} for ${path}`)
                         entry.async("string").then((text) =>{
-                            this.classDataMap[uri.toString()] = text
+                            this.classDataMap[this.getUriKey(uri)] = text
                             resolve(text)
                         }).catch(reason => {
                             resolve(`Error in entry.async for ${entry.name} in ${jarFile}\n   ${reason}`)
@@ -99,7 +107,7 @@ export class JarContentProvider implements vscode.TextDocumentContentProvider {
      * Get the [ClassData] for the given class file uri and format it for a buffer
      */
     private getClassContent(uri: vscode.Uri) : Promise<string> {
-        let key = uri.toString()
+        let key = this.getUriKey(uri)
         return new Promise((resolve, reject) => {
             resolve(this.classDataMap.has(key) ? this.classDataMap.get(key) : `No ClassData available for ${key}`)
         })

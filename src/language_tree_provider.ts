@@ -24,6 +24,7 @@ export class LanguageTreeProvider implements TreeDataProvider<TreeNode> {
     public getTreeItem(element: TreeNode) : TreeItem {
         let item = new TreeItem(element.treeLabel(), TreeItemCollapsibleState.Collapsed)
         item.contextValue = element.context
+        item.tooltip = element.tooltip
         item.iconPath = ThemeIcon.Folder
         if ( element.isTerminal ) {
             item.iconPath = ThemeIcon.File

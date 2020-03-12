@@ -2,7 +2,7 @@
 
 import * as vscode from 'vscode'
 import { JvmServer } from './jvm_server'
-import { JarEntryNode, TreeNode, LanguageNode } from './models'
+import { JarEntryNode, TreeNode, LanguageNode, ClassDataNode } from './models'
 import { ProjectService } from './project_service'
 import { ProjectController } from './project_controller'
 import { StatsController } from './stats_controller'
@@ -79,8 +79,25 @@ export function activate(context: vscode.ExtensionContext) {
     /**
      * Command to get the content of a jar entry and show it in an editor
      */
-    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.jar-entry', (entryNode: JarEntryNode) => {
+    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.open-source', (entryNode: JarEntryNode) => {
+        if (!entryNode) return
         projectController.openJarEntry(entryNode)
+    }))
+
+    /**
+     * Command to get the ClassData of a jar entry and show it in an editor
+     */
+    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.open-class', (entryNode: JarEntryNode) => {
+        if (!entryNode) return
+        projectController.openJarEntry(entryNode, true)
+    }))
+
+    /**
+     * Command to open ClassData of a local class and show it in an editor
+     */
+    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.open-local-class', (classNode: ClassDataNode) => {
+        if (!classNode) return
+        projectController.openClassNode(classNode)
     }))
 
     /**
