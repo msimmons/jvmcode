@@ -3,7 +3,7 @@ JVM Code will supply all non-language specific info.  Essentially all things rel
 
 ## TODO
 
-- Adding a path or dependency dialogs are not clear (no explanation)
+- _Adding a path or dependency dialogs are not clear (no explanation)_
 - Better icons for source file and class file
 - What to do about $ classes
 - Add stats to the JVM view?

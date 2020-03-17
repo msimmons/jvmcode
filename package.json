@@ -46,7 +46,7 @@
         "title": "Add Dependency",
         "category": "JVM",
         "icon": {
-          "dark":"resources/add-24px.svg",
+          "dark": "resources/add-24px.svg",
           "light": "resources/add-24px.svg"
         }
       },
@@ -55,7 +55,7 @@
         "title": "Add Path",
         "category": "JVM",
         "icon": {
-          "dark":"resources/add-24px.svg",
+          "dark": "resources/add-24px.svg",
           "light": "resources/add-24px.svg"
         }
       },
@@ -79,7 +79,7 @@
         "title": "Remove Item",
         "category": "JVM",
         "icon": {
-          "dark":"resources/remove-24px.svg",
+          "dark": "resources/remove-24px.svg",
           "light": "resources/remove-24px.svg"
         }
       },
@@ -88,7 +88,7 @@
         "title": "Clear Problems",
         "category": "JVM",
         "icon": {
-          "dark":"resources/clear_all-24px.svg",
+          "dark": "resources/clear_all-24px.svg",
           "light": "resources/clear_all-24px.svg"
         }
       },
@@ -97,7 +97,7 @@
         "title": "Open Source",
         "category": "JVM",
         "icon": {
-          "dark":"resources/file_text.svg",
+          "dark": "resources/file_text.svg",
           "light": "resources/file_text.svg"
         }
       },
@@ -106,7 +106,7 @@
         "title": "Open Class",
         "category": "JVM",
         "icon": {
-          "dark":"resources/file_binary.svg",
+          "dark": "resources/file_binary.svg",
           "light": "resources/file_binary.svg"
         }
       },
@@ -115,7 +115,7 @@
         "title": "Open Local Class",
         "category": "JVM",
         "icon": {
-          "dark":"resources/file_binary.svg",
+          "dark": "resources/file_binary.svg",
           "light": "resources/file_binary.svg"
         }
       },
@@ -124,7 +124,7 @@
         "title": "Open Test Result",
         "category": "JVM",
         "icon": {
-          "dark":"resources/file_text.svg",
+          "dark": "resources/file_text.svg",
           "light": "resources/file_text.svg"
         }
       }
@@ -154,7 +154,7 @@
           "id": "jvmcode.language-tree",
           "name": "Languages",
           "when": "jvmcode.context.isJvmProject"
-        }        
+        }
       ]
     },
     "menus": {
@@ -203,7 +203,7 @@
           "command": "jvmcode.show-test-results",
           "when": "viewItem == 'suite-node'",
           "group": "inline@1"
-        }      
+        }
       ]
     },
     "configuration": {
