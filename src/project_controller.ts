@@ -7,10 +7,9 @@ import { JarContentProvider } from './jar_content_provider'
 import { ClassContentProvider } from './class_content_provider'
 import { ProjectService } from './project_service';
 import { JarEntryNode, dependencyLabel, PathRootNode, DependencyRootNode, TreeNode, DependencySourceNode, DependencyNode, JarPackageNode, NodeType, SourceDirNode, ClassDirNode, CompilationContext, FileContext, PathNode, ClassDataRootNode, ClassDataNode } from './models';
-import { projectService, projectController } from './extension';
+import { projectController } from './extension';
 import * as fs from 'fs';
 import * as PathHelper from 'path'
-import { ConfigService } from './config_service';
 
 /**
 * Responsible for managing various views related to a project
@@ -90,7 +89,7 @@ export class ProjectController {
      * Handle class file creation and modification
      */
     private classFileHandler = async (uri: vscode.Uri) => {
-        let data = await projectService.getClassDataForPath(uri.path)
+        let data = await this.service.getClassDataForPath(uri.path)
         console.log(`class file handler ${data.name}`)
         this.classDataRootNode.update(data)
         this.updateProject()
@@ -387,7 +386,7 @@ export class ProjectController {
             if (!jarFile || jarFile.length === 0) return
             vscode.window.showOpenDialog({openLabel: 'Optional Source Jar', filters: {'Source': ['jar', 'zip']}, canSelectMany: false}).then((srcFile) => {
                 let srcPath = (!srcFile || srcFile.length === 0) ? undefined : srcFile[0]['path']
-                projectService.addDependency(jarFile[0]['path'], srcPath)
+                this.service.addDependency(jarFile[0]['path'], srcPath)
             })
         })
     }
@@ -404,7 +403,7 @@ export class ProjectController {
             vscode.window.showOpenDialog(classOptions).then((classDir) => {
                 if (!classDir) return
                 let name = srcDir[0]['path'].replace(vscode.workspace.workspaceFolders[0].uri.path+'/', '')
-                projectService.addPath({source:'user', module: 'user', name: name, classDir: classDir[0]['path'], sourceDir: srcDir[0]['path']})
+                this.service.addPath({source:'user', module: 'user', name: name, classDir: classDir[0]['path'], sourceDir: srcDir[0]['path']})
             })
         })
     }
@@ -416,10 +415,10 @@ export class ProjectController {
         await this.start()
         switch (item.type) {
             case NodeType.PATH:
-                projectService.removePath((item as PathNode).data.name)
+                this.service.removePath((item as PathNode).data.name)
                 break
             case NodeType.DEPENDENCY:
-                projectService.removeDependency((item as DependencyNode).data.fileName)
+                this.service.removeDependency((item as DependencyNode).data.fileName)
                 break
             default:
                 break
@@ -479,7 +478,7 @@ export class ProjectController {
             let paths = (userPaths) ? [userPaths] : []
             await this.start()
             let project = {dependencySources: dependencySources, paths: paths, source: 'USER'}
-            await projectService.updateUserProject(project)
+            await this.service.updateUserProject(project)
         }
     }
     
