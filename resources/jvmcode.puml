@@ -2,16 +2,16 @@
 autonumber
 hide footbox
 
-participant "Extension" as vscode order 10
-participant "Server" as jvm order 20
-participant "Project" as project order 30
-participant "Language" as lang order 50
+participant "JVM Extension" as jvmcode order 10
+participant "JVM Server" as jvm order 60
+participant "Project Ext" as project order 30
+participant "Language Ext" as lang order 50
 
 == Get Dependencies and Paths ==
-vscode -> project: RefreshRequest
-project -> vscode: RefreshResult
-project -> jvm: ProjectUpdateRequest
-jvm -> vscode: JvmProject
+project -> project: RefreshRequest
+project -> project: RefreshResult
+project -> jvmcode: ProjectUpdateRequest
+jvmcode -> jvmcode: JvmProject
 
 == Ensure Compiled ==
 == Index Class Files ==
@@ -20,20 +20,20 @@ jvm -> vscode: JvmProject
 
 
 
-lang -> vscode: LanguageRequest
-note right of vscode
+lang -> jvmcode: LanguageRequest
+note right of jvmcode
    Watch language files
 end note
 
-vscode -> lang: lang.RequestCompile
-lang -> vscode: Diagnostics
+jvmcode -> lang: lang.RequestCompile
+lang -> jvmcode: Diagnostics
 
-vscode -> lang: lang.RequestParse
+jvmcode -> lang: lang.RequestParse
 lang -> jvm: Symbols (revolve types, store symbols)
-jvm -> vscode: Symbols?
+jvm -> jvmcode: Symbols?
 
-vscode -> vscode: triggerCompletion
-vscode -> lang: completeForLocation
+jvmcode -> jvmcode: triggerCompletion
+jvmcode -> lang: completeForLocation
 lang -> jvm: getSymbolOrScopeAtCursor
 jvm -> lang: symbol, scope, completions
 note right of jvm
@@ -42,7 +42,7 @@ note right of jvm
   - For other 1) symbols in scope (including imports) 2) universe of classes 3) narrow down to appropriate type
   - Pass it thru lang for formatting, additional annotations etc?
 end note
-lang -> vscode: completions
+lang -> jvmcode: completions
 
 @enduml
 
