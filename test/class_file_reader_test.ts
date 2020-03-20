@@ -4,7 +4,7 @@ class TestClass {
 
     async testit() {
         let cdr = new ClassFileReader()
-        let result = await cdr.load('server/build/classes/kotlin/main/net/contrapt/jvmcode/model/ClassData.class')
+        let result = await cdr.load('server/build/classes/kotlin/main/net/contrapt/jvmcode/Application$Companion.class')
         console.log(JSON.stringify(result, undefined, 3))
     }
 }

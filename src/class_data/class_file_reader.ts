@@ -1,7 +1,7 @@
 import * as fs from 'fs'
 import { ConstantPool } from './constant_pool'
-import { readMemberInfo, readU16, readU32, MemberType, readAttributeInfo, InfoType, AttributeInfo, AttributeType } from './class_file_info'
-import { MethodData, FieldData, ClassData } from './class_data'
+import { readMemberInfo, readU16, readU32, MemberType, readAttributeInfo, InfoType, AttributeInfo, AttributeType, MemberInfo } from './class_file_info'
+import { MethodData, FieldData, ClassData, LineEntry } from './class_data'
 
 export class ClassFileReader {
 
@@ -36,26 +36,14 @@ export class ClassFileReader {
                 let fCount = readU16(context)
                 for (i = 0; i < fCount; i++) {
                     let field = readMemberInfo(context, constantPool, MemberType.FIELD)
-                    let signature = this.getAttributeName(field.attributes.find(a => a.type === AttributeType.Signature), constantPool)
-                    let descriptor = this.getName(field.descriptor, constantPool)
-                    let type = signature ? signature : descriptor
-                    let name = this.getName(field.name, constantPool)
-                    let annotations = this.processAnnotations(field.attributes, constantPool)
-                    classData.fields.push(new FieldData(name, type, false, 0, annotations))
+                    classData.fields.push(this.getFieldData(field, constantPool))
                 }
                 // Method Info
                 classData.methods = []
                 let mCount = readU16(context)
                 for (i = 0; i < mCount; i++) {
                     let method = readMemberInfo(context, constantPool, MemberType.METHOD)
-                    let signature = this.getAttributeName(method.attributes.find(a => a.type === AttributeType.Signature), constantPool)
-                    let descriptor = this.getName(method.descriptor, constantPool)
-                    let type = signature ? signature : descriptor
-                    let name = this.getName(method.name, constantPool)
-                    let code = method.attributes.find(a => a.type === AttributeType.Code)
-                    let locals = this.getLocalVariables(code, constantPool)
-                    let annotations = this.processAnnotations(method.attributes, constantPool)
-                    classData.methods.push(new MethodData(name, type, locals, annotations))
+                    classData.methods.push(this.getMethodData(method, constantPool))
                 }
                 // Attributes
                 let attributes: AttributeInfo[] = []
@@ -121,26 +109,77 @@ export class ClassFileReader {
     }
 
     /**
-     * Return parameter info 
+     * Create a field from the given member info
      */
-    private getLocalVariables(info: AttributeInfo, pool: ConstantPool): FieldData[] {
-        let attributes = info ? info.attributes : undefined
+    private getFieldData(field: MemberInfo, pool: ConstantPool) : FieldData {
+        let signature = this.getAttributeName(field.attributes.find(a => a.type === AttributeType.Signature), pool)
+        let descriptor = this.getName(field.descriptor, pool)
+        let type = signature ? signature : descriptor
+        let name = this.getName(field.name, pool)
+        let annotations = this.processAnnotations(field.attributes, pool)
+        return new FieldData(name, type, false, -1, 0, annotations)
+    }
+
+    /**
+     * Create a method from the given member info
+     * @param info 
+     * @param pool 
+     */
+    private getMethodData(method: MemberInfo, pool: ConstantPool) : MethodData {
+        let signature = this.getAttributeName(method.attributes.find(a => a.type === AttributeType.Signature), pool)
+        let descriptor = this.getName(method.descriptor, pool)
+        let type = signature ? signature : descriptor
+        let name = this.getName(method.name, pool)
+        console.log(name)
+        let code = method.attributes.find(a => a.type === AttributeType.Code)
+        let locals = this.getLocalVariables(code, pool)
+        let annotations = this.processAnnotations(method.attributes, pool)
+        return new MethodData(name, type, locals, annotations)
+    }
+
+    /**
+     * Return parameter and local variable info 
+     */
+    private getLocalVariables(code: AttributeInfo, pool: ConstantPool): FieldData[] {
+        let attributes = code ? code.attributes : undefined
         let locals = attributes ? attributes.find(a => [AttributeType.LocalVariableTable, AttributeType.LocalVariableTypeTable].includes(a.type)) : undefined
+        let lineTable = attributes ? attributes.find(a => a.type === AttributeType.LineNumberTable) : undefined
+        let lineEntries = this.getLineEntries(lineTable)
+        console.log(lineEntries)
         let data = locals ? locals.info : undefined
         let params = []
         let off = 0
         let tableSize = data ? data.readUInt16BE(off) : 0
         for (var i = 0; i < tableSize; i++) {
             let startPc = data.readUInt16BE(off += 2)
-            let length = data.readUInt16BE(off += 2)
+            let lineEntry = lineEntries.find(l => l.pc === startPc)
+            let line = lineEntry ? lineEntry.line : lineEntries.length > 0 ? lineEntries[0].line : -1
+            data.readUInt16BE(off += 2) // length
             let name = this.getName(data.readUInt16BE(off += 2), pool)
+            console.log(`${name} ${startPc}`)
             let descriptor = this.getName(data.readUInt16BE(off += 2), pool)
             let index = data.readUInt16BE(off += 2)
             let type = descriptor
             let annotations = this.processAnnotations(attributes, pool)
-            params.push(new FieldData(name, type, startPc == 0, index, annotations))
+            params.push(new FieldData(name, type, startPc == 0, index, line, annotations))
         }
         return params
+    }
+
+    /**
+     * Return a line number for the given program counter and line number table
+     */
+    private getLineEntries(table: AttributeInfo) : LineEntry[] {
+        let data = table ? table.info : undefined
+        let off = 0
+        let size = data ? data.readUInt16BE(off) : 0
+        let entries = []
+        for (var i=0; i<size; i++) {
+            let pc = data.readUInt16BE(off += 2)
+            let line = data.readUInt16BE(off += 2)
+            entries.push({pc: pc, line: line})
+        }
+        return entries
     }
 
     /**
@@ -190,7 +229,7 @@ export class ClassFileReader {
         let tag = data.readUInt8(offset += 2)
         let tagChar = Buffer.from([(tag & 0xff)]).toString('ascii')
         offset += 1
-        // Here's where you would start deal with getting the annotation value pairs
+        // TODO Here's where you would start deal with getting the annotation value pairs
         if (tagChar === 'e') {
             data.readUInt16BE(offset)
             data.readUInt16BE(offset += 2)

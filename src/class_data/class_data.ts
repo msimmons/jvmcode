@@ -20,18 +20,25 @@ export class ClassData {
     }
 }
 
+export interface LineEntry {
+    pc: number
+    line: number
+}
+
 export class FieldData {
     name: string
     type: string
     isParam: boolean
     index: number
+    line: number
     annotations: string[]
 
-    constructor(name: string, type: string, isParam: boolean, index: number, annotations: string[]) {
+    constructor(name: string, type: string, isParam: boolean, index: number, line: number, annotations: string[]) {
         this.name = name
         this.type = type
         this.isParam = isParam
         this.index = index
+        this.line = line
         this.annotations = annotations
     }
 }

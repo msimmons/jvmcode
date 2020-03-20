@@ -189,7 +189,7 @@ export enum MemberType {
 }
 
 // Field and Method Info
-interface MemberInfo {
+export interface MemberInfo {
     type: MemberType
     accessFlags: number
     name: number
