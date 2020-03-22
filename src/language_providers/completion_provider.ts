@@ -2,6 +2,7 @@ import * as vscode from 'vscode'
 import { LanguageController } from '../language_controller';
 import { ProjectController } from '../project_controller';
 import { ParseResult, LanguageRequest } from 'server-models';
+import { JarEntryType } from '../jar_model';
 
 /**
  * Requires Symbols
@@ -101,7 +102,7 @@ export class JvmCompletionProvider implements vscode.CompletionItemProvider {
             this.jarItems = Promise.all([jarResult, parseResult]).then(data => {
                 let items = data[0]
                 let parsed = data[1]
-                return items.filter(i => i.data.type === "CLASS" && i.name.toLocaleLowerCase().startsWith(word) && !i.name.includes('$')).map(i => {
+                return items.filter(i => i.data.type === JarEntryType.CLASS && i.name.toLocaleLowerCase().startsWith(word) && !i.name.includes('$')).map(i => {
                     let name = i.name
                     let pkg = i.package.name
                     let item = new vscode.CompletionItem(name, vscode.CompletionItemKind.Class)

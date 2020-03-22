@@ -1,10 +1,13 @@
 import * as vscode from 'vscode'
-import { DependencySourceData, DependencyData, ClassData, JarPackageData, JarEntryData, PathData, JvmConfig } from "server-models"
+import { JarPackageData, JarEntryData, JarEntryType } from "./jar_model"
+import { DependencySourceData, DependencyData, PathData, USER_SOURCE } from "./project_model"
+import { ClassData } from "./class_data/class_data"
 import { LanguageRequest } from 'server-models'
 import { workspace, Uri } from "vscode"
 import { iconService } from "./extension"
 
-export class LocalConfig implements JvmConfig {
+export class LocalConfig {
+    javaHome: string
     excludes: string[]
     extensions: string[]
     jmodIncludes: string[]
@@ -234,7 +237,7 @@ export class PathNode implements TreeNode {
     tooltip = undefined
     constructor(data: PathData) {
         this.data = data
-        let isUser = (data.source.toLowerCase() === 'user')
+        let isUser = (data.source === USER_SOURCE)
         this.context = isUser ? 'user-item' : undefined
         this.classDirs = [new ClassDirNode(data.classDir, isUser)]
         this.sourceDirs = [new SourceDirNode(data.sourceDir, isUser)]
@@ -258,7 +261,7 @@ export class SourceDirNode implements TreeNode {
     tooltip: string
     constructor(path: string, isUser: boolean) {
         this.path = path
-        this.context = isUser ? 'user-item' : undefined
+        this.context = isUser ? 'user-path' : undefined
         this.icon = iconService.getIconPath('file_text.svg')
         this.tooltip = 'Source'
     }
@@ -280,7 +283,7 @@ export class ClassDirNode implements TreeNode {
     tooltip: string
     constructor(path: string, isUser: boolean) {
         this.path = path
-        this.context = isUser ? 'user-item' : undefined
+        this.context = isUser ? 'user-path' : undefined
         this.icon = iconService.getIconPath('file_binary.svg')
         this.tooltip = 'Class'
     }
@@ -388,8 +391,8 @@ export class JarEntryNode implements TreeNode {
         this.package = pkgNode.data
         this.dependency = pkgNode.dependency
         this.name = data.name
-        this.type = data.type === 'CLASS' ? NodeType.CLASS : NodeType.RESOURCE
-        this.context = data.type === 'CLASS' ? 'class-item' : 'resource-item'
+        this.type = data.type === JarEntryType.CLASS ? NodeType.CLASS : NodeType.RESOURCE
+        this.context = data.type === JarEntryType.CLASS ? 'class-item' : 'resource-item'
     }
     public treeLabel() : string { 
         return this.name

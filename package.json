@@ -209,6 +209,11 @@
     "configuration": {
       "title": "JVMCode Server Configuration",
       "properties": {
+        "jvmcode.javaHome": {
+          "type": "string",
+          "default": "/usr/lib/jvm/java-11-openjdk-amd64",
+          "description": "Java home directory"
+        },
         "jvmcode.javaCommand": {
           "type": "string",
           "default": "/usr/bin/java",

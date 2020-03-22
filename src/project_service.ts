@@ -4,7 +4,6 @@ import { DependencyData, JarEntryData, JarPackageData, JvmProject, PathData, Pro
 import { JvmServer } from './jvm_server';
 import { JarEntryNode, CompilationContext } from './models';
 import { ConfigService } from './config_service';
-import { server } from "./extension";
 
 /**
  * Service to make project related requests to JvmServer on behalf of other components.  Also manage caching of 
@@ -100,7 +99,7 @@ export class ProjectService {
      * Return all of this project's classdata
      */
     public async getClassData() : Promise<ClassData[]> {
-        let result = await server.send('jvmcode.all-classdata', {})
+        let result = await this.server.send('jvmcode.all-classdata', {})
         return result.body.data
     }
     
@@ -108,7 +107,7 @@ export class ProjectService {
      * Return classdata for the given path
      */
     public async getClassDataForPath(path: string) : Promise<ClassData> {
-        let result = await server.send('jvmcode.classdata', {path: path})
+        let result = await this.server.send('jvmcode.classdata', {path: path})
         return result.body
     }
 

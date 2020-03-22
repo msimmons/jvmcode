@@ -5,57 +5,72 @@ import { MethodData, FieldData, ClassData, LineEntry } from './class_data'
 
 export class ClassFileReader {
 
+    /**
+     * Create [ClassData] from a [Buffer]
+     * @param path The path of the class file (local or jar)
+     * @param lastModified Last modified time (ms)
+     * @param data The buffer
+     */
+    public create(path: string, lastModified: number, data: Buffer) : ClassData {
+        let classData = new ClassData(path, lastModified)
+        let offset = 0
+        let context = { data: data, offset: offset } as ClassFileContext
+        let magic = readU32(context)
+        if (magic.toString(16) != 'cafebabe') throw `Bad Magic Number: ${magic.toString(16)}`;
+        classData.minor = readU16(context)
+        classData.major = readU16(context)
+        // Constant Pool
+        let constantPool = ConstantPool.read(context)
+        classData.accessFlags = readU16(context);
+        classData.name = this.getClassName(readU16(context), constantPool) // this class
+        classData.extends = this.getClassName(readU16(context), constantPool) // extends
+        // Interfaces
+        let ifCount = readU16(context)
+        classData.implements = []
+        for (var i = 0; i < ifCount; i++) {
+            let name = this.getClassName(readU16(context), constantPool)
+            classData.implements.push(name)
+        }
+        // Find all the classes referenced by this class
+        classData.references = constantPool.pool.filter(e => e.type === InfoType.CLASS).map(e => constantPool.pool[e.value].value)
+        // Find the source file
+        // Field Info
+        classData.fields = []
+        let fCount = readU16(context)
+        for (i = 0; i < fCount; i++) {
+            let field = readMemberInfo(context, constantPool, MemberType.FIELD)
+            classData.fields.push(this.getFieldData(field, constantPool))
+        }
+        // Method Info
+        classData.methods = []
+        let mCount = readU16(context)
+        for (i = 0; i < mCount; i++) {
+            let method = readMemberInfo(context, constantPool, MemberType.METHOD)
+            classData.methods.push(this.getMethodData(method, constantPool))
+        }
+        // Attributes
+        let attributes: AttributeInfo[] = []
+        let aCount = readU16(context)
+        for (i = 0; i < aCount; i++) {
+            attributes.push(readAttributeInfo(context, constantPool))
+        }
+        // Find the source name
+        classData.sourceFile = this.getAttributeName(attributes.find(a => a.type === AttributeType.SourceFile), constantPool)
+        classData.inners = this.getAttributeNames(attributes.find(a => a.type === AttributeType.InnerClasses), constantPool)
+        classData.annotations = this.processAnnotations(attributes, constantPool)
+        return classData
+    }
+
+    /**
+     * Create [ClassData] from a local class file
+     * @param path The local class file to load
+     */
     public load(path: string): Promise<ClassData> {
         let modified = fs.statSync(path).mtime
         return new Promise((resolve, reject) => {
             fs.readFile(path, (err, data) => {
-                let classData = new ClassData(path, modified.valueOf())
-                let offset = 0
-                let context = { data: data, offset: offset } as ClassFileContext
-                let magic = readU32(context)
-                if (magic.toString(16) != 'cafebabe') throw `Bad Magic Number: ${magic.toString(16)}`;
-                classData.minor = readU16(context)
-                classData.major = readU16(context)
-                // Constant Pool
-                let constantPool = ConstantPool.read(context)
-                classData.accessFlags = readU16(context);
-                classData.name = this.getClassName(readU16(context), constantPool) // this class
-                classData.extends = this.getClassName(readU16(context), constantPool) // extends
-                // Interfaces
-                let ifCount = readU16(context)
-                classData.implements = []
-                for (var i = 0; i < ifCount; i++) {
-                    let name = this.getClassName(readU16(context), constantPool)
-                    classData.implements.push(name)
-                }
-                // Find all the classes referenced by this class
-                classData.references = constantPool.pool.filter(e => e.type === InfoType.CLASS).map(e => constantPool.pool[e.value].value)
-                // Find the source file
-                // Field Info
-                classData.fields = []
-                let fCount = readU16(context)
-                for (i = 0; i < fCount; i++) {
-                    let field = readMemberInfo(context, constantPool, MemberType.FIELD)
-                    classData.fields.push(this.getFieldData(field, constantPool))
-                }
-                // Method Info
-                classData.methods = []
-                let mCount = readU16(context)
-                for (i = 0; i < mCount; i++) {
-                    let method = readMemberInfo(context, constantPool, MemberType.METHOD)
-                    classData.methods.push(this.getMethodData(method, constantPool))
-                }
-                // Attributes
-                let attributes: AttributeInfo[] = []
-                let aCount = readU16(context)
-                for (i = 0; i < aCount; i++) {
-                    attributes.push(readAttributeInfo(context, constantPool))
-                }
-                // Find the source name
-                classData.sourceFile = this.getAttributeName(attributes.find(a => a.type === AttributeType.SourceFile), constantPool)
-                classData.inners = this.getAttributeNames(attributes.find(a => a.type === AttributeType.InnerClasses), constantPool)
-                classData.annotations = this.processAnnotations(attributes, constantPool)
-                resolve(classData)
+                if (err) reject(err)
+                else resolve(this.create(path, modified.valueOf(), data))
             })
         })
     }

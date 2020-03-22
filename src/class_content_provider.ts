@@ -1,7 +1,7 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import { ClassData } from 'server-models'
+import { ClassData } from './class_data/class_data'
 
 /**
  * Provide content for class files (serialized [ClassData])

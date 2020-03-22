@@ -62,4 +62,8 @@ export class MethodData {
         let extensionMarker = this.params.find(p => p.name === `$this$${this.name}`)
         return extensionMarker ? extensionMarker.type : undefined
     }
+
+    isMain() : boolean {
+        return this.name === 'main' //TODO more
+    }
 }

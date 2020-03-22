@@ -2,8 +2,7 @@
 
 import * as vscode from 'vscode'
 import { JvmServer } from './jvm_server';
-import { CompileRequest, CompileResult, ParseRequest } from 'server-models'
-import { server } from './extension';
+import { CompileRequest, CompileResult, ParseRequest, ParseResult } from 'server-models'
 
 /**
  * Service to make language related requests to JvmServer on behalf of other components.
@@ -46,24 +45,26 @@ export class LanguageService {
      * Indicate we are ready for language verticle to start
      */
     public startLanguage() {
-        server.send('jvmcode.start-language', {})
+        //server.send('jvmcode.start-language', {})
     }
 
     /**
      * Request that a buffer be parsed by an appropriate language service
      * @param file 
      */
-    public async requestParse(request: ParseRequest) {
-        let reply = await server.send('jvmcode.request-parse', request)
-        return reply.body
+    public async requestParse(request: ParseRequest) : Promise<ParseResult> {
+        //let reply = await server.send('jvmcode.request-parse', request)
+        //return reply.body
+        return undefined
     }
 
     /**
      * Request compilation of the given files
      */
     public async requestCompile(request: CompileRequest) : Promise<CompileResult> {
-        let reply = await server.send('jvmcode.request-compile', request)
-        return reply.body
+        //let reply = await server.send('jvmcode.request-compile', request)
+        //return reply.body
+        return undefined
     }
 
 }
