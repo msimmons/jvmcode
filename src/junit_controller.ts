@@ -27,9 +27,9 @@ export class JUnitController implements vscode.Disposable {
 
     public constructor(projectController: ProjectController) {
         this.projectController = projectController
-        projectController.repo.registerProjectListener(async (jvmProject) => {
-            this.start()
-        })
+        //projectController.repo.registerProjectListener(async (jvmProject) => {
+        //    this.start()
+        //})
     }
 
     public async start() {

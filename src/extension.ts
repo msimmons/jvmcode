@@ -8,7 +8,7 @@ import { LanguageController } from './language_controller'
 import { JUnitController } from './junit_controller'
 import { ConfigService } from './config_service'
 import { IconService } from './icon_service';
-import { ProjectUpdateData } from 'server-models'
+import { ProjectUpdateData } from './project_model'
 import { ProjectRepository } from './project_repository';
 
 let projectRepo: ProjectRepository // TODO Rename to service later
@@ -33,9 +33,6 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(languageController)
     //languageController.start()
 
-    //
-    // Register all the commands below
-    //
     /**
      * Allow the user to find any class in the projects current dependencies
      */
@@ -116,7 +113,7 @@ export function activate(context: vscode.ExtensionContext) {
      */
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.exec-class', async () => {
         let classData = await projectController.getClassData()
-        let classes = classData.filter(cd => cd.methods.find(m => m.isMain())).map(c => c.name)
+        let classes = classData.filter(cd => cd.methods.find(m => m.isMain() && m.isStatic())).map(c => c.name)
         vscode.window.showQuickPick(classes).then((mainClass) => {
             if (!mainClass) return
             let cp = projectController.getClasspath()
@@ -161,7 +158,7 @@ export function activate(context: vscode.ExtensionContext) {
     let api = {
         // Update a project
         updateProject(project: ProjectUpdateData) {
-            projectRepo.updateUserProject(project)
+            projectRepo.updateProject(ConfigService.getConfig(), project)
         }
     }
     return api

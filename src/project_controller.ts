@@ -32,7 +32,6 @@ export class ProjectController {
     private pathRootNode: PathRootNode
     private depedencyRootNode: DependencyRootNode
     private classDataRootNode: ClassDataRootNode
-    private classpath: string
     private entryNodeMap: Map<string, JarEntryNode[]> = new Map() // Lazy cache of FQCN to entryNode
     private classWatchers: Map<string, vscode.FileSystemWatcher> = new Map() // Path -> watcher
     
@@ -58,8 +57,8 @@ export class ProjectController {
      * This API will be exposed to other extensions that can supply [ProjectUpdateData]
      * @param data 
      */
-    public updateProjectData(data: ProjectUpdateData) {
-        let jvmProject = this.repo.updateProject(ConfigService.getConfig(), data)
+    public async updateProjectData(data: ProjectUpdateData) {
+        let jvmProject = await this.repo.updateProject(ConfigService.getConfig(), data)
         this.start()
         this.updateJvmProject(jvmProject)
     }
@@ -72,7 +71,6 @@ export class ProjectController {
         this.pathRootNode = new PathRootNode(project.paths)
         this.ensureClassWatchers(project.paths)
         this.classDataRootNode = new ClassDataRootNode(project.classdata)
-        this.classpath = project.classpath
         this.updateViews()
         this.saveUserData(project)
     }
@@ -108,7 +106,7 @@ export class ProjectController {
     * Alert components that project has been updated
     * @param dependencies 
     */
-    public updateViews() {
+    private updateViews() {
         this.projectTree.update()
     }
     
@@ -116,7 +114,7 @@ export class ProjectController {
     * Return the root nodes for the tree view 
     */
     public getRootNodes() : TreeNode[] {
-        return [this.pathRootNode, this.depedencyRootNode, this.classDataRootNode]
+        return [this.depedencyRootNode, this.pathRootNode, this.classDataRootNode]
     }
     
     /**
@@ -278,7 +276,6 @@ export class ProjectController {
     * Open the contents of a jar entry in a text editor
     */
     public async openJarEntry(entryNode: JarEntryNode, openClassData = false) {
-        await this.start()
         vscode.window.withProgress({ location: vscode.ProgressLocation.Window, title: entryNode.name}, (progess) => {
             return this.resolveJarEntryNode(entryNode).then((reply) => {
                 entryNode.data = reply
@@ -389,9 +386,9 @@ export class ProjectController {
         await this.start()
         vscode.window.showOpenDialog({openLabel: 'Choose Jar File',filters: {'Dependency': ['jar']}, canSelectMany: false}).then((jarFile) => {
             if (!jarFile || jarFile.length === 0) return
-            vscode.window.showOpenDialog({openLabel: 'Optional Source Jar', filters: {'Source': ['jar', 'zip']}, canSelectMany: false}).then((srcFile) => {
+            vscode.window.showOpenDialog({openLabel: 'Optional Source Jar', filters: {'Source': ['jar', 'zip']}, canSelectMany: false}).then(async (srcFile) => {
                 let srcPath = (!srcFile || srcFile.length === 0) ? undefined : srcFile[0]['path']
-                let jvmProject = this.repo.addDependency(ConfigService.getConfig(), jarFile[0]['path'], srcPath)
+                let jvmProject = await this.repo.addDependency(ConfigService.getConfig(), jarFile[0]['path'], srcPath)
                 this.updateJvmProject(jvmProject)
             })
         })
@@ -405,11 +402,11 @@ export class ProjectController {
         vscode.window.showOpenDialog(sourceOptions).then((srcDir) => {
             if (!srcDir) return
             let classOptions: vscode.OpenDialogOptions = {openLabel: 'Choose Class Directory', defaultUri: vscode.workspace.workspaceFolders[0].uri, canSelectMany: false, canSelectFolders: true, canSelectFiles: false}
-            vscode.window.showOpenDialog(classOptions).then((classDir) => {
+            vscode.window.showOpenDialog(classOptions).then(async (classDir) => {
                 if (!classDir) return
                 let name = srcDir[0]['path'].replace(vscode.workspace.workspaceFolders[0].uri.path+'/', '')
                 let pathData = {source: USER_SOURCE, module: 'user', name: name, classDir: classDir[0]['path'], sourceDir: srcDir[0]['path']}
-                let jvmProject = this.repo.addPath(ConfigService.getConfig(), pathData)
+                let jvmProject = await this.repo.addPath(ConfigService.getConfig(), pathData)
                 this.updateJvmProject(jvmProject)
             })
         })
@@ -422,10 +419,10 @@ export class ProjectController {
         let jvmProject: JvmProject
         switch (item.type) {
             case NodeType.PATH:
-                jvmProject = this.repo.removePath(ConfigService.getConfig(), (item as PathNode).data.sourceDir)
+                jvmProject = await this.repo.removePath(ConfigService.getConfig(), (item as PathNode).data.sourceDir)
                 break
             case NodeType.DEPENDENCY:
-                jvmProject = this.repo.removeDependency(ConfigService.getConfig(), (item as DependencyNode).data.fileName)
+                jvmProject = await this.repo.removeDependency(ConfigService.getConfig(), (item as DependencyNode).data.fileName)
                 break
             default:
                 break
@@ -437,7 +434,7 @@ export class ProjectController {
     * Get the current classpath
     */
     public getClasspath() : string {
-        return this.classpath ? this.classpath : ""
+        return this.repo.getClasspath()
     }
     
     /**

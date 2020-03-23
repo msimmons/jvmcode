@@ -31,10 +31,9 @@ export interface PathData {
 }
 
 export interface JvmProject {
-    classdata: ClassData[];
-    classpath: string;
-    dependencySources: DependencySourceData[];
-    paths: PathData[];
+    classdata: ClassData[]
+    dependencySources: DependencySourceData[]
+    paths: PathData[]
 }
 
 export interface ProjectUpdateData {

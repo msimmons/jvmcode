@@ -3,7 +3,7 @@
 import * as vscode from 'vscode';
 import * as JSZip from 'jszip'
 import { readFile } from 'fs';
-import { ClassData } from 'server-models'
+import { ClassData } from './class_data/class_data'
 
 /**
  * Provide content for resources found in JAR files

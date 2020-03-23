@@ -1,6 +1,7 @@
 import * as fs from 'fs'
+import {promisify} from 'util'
 import { ConstantPool } from './constant_pool'
-import { readMemberInfo, readU16, readU32, MemberType, readAttributeInfo, InfoType, AttributeInfo, AttributeType, MemberInfo } from './class_file_info'
+import { readMemberInfo, readU16, readU32, MemberType, readAttributeInfo, InfoType, AttributeInfo, AttributeType, MemberInfo, readU8 } from './class_file_info'
 import { MethodData, FieldData, ClassData, LineEntry } from './class_data'
 
 export class ClassFileReader {
@@ -14,7 +15,7 @@ export class ClassFileReader {
     public create(path: string, lastModified: number, data: Buffer) : ClassData {
         let classData = new ClassData(path, lastModified)
         let offset = 0
-        let context = { data: data, offset: offset } as ClassFileContext
+        let context = { path: path, data: data, offset: offset } as ClassFileContext
         let magic = readU32(context)
         if (magic.toString(16) != 'cafebabe') throw `Bad Magic Number: ${magic.toString(16)}`;
         classData.minor = readU16(context)
@@ -65,14 +66,16 @@ export class ClassFileReader {
      * Create [ClassData] from a local class file
      * @param path The local class file to load
      */
-    public load(path: string): Promise<ClassData> {
-        let modified = fs.statSync(path).mtime
-        return new Promise((resolve, reject) => {
-            fs.readFile(path, (err, data) => {
-                if (err) reject(err)
-                else resolve(this.create(path, modified.valueOf(), data))
-            })
-        })
+    public async load(path: string): Promise<ClassData> {
+        let modified = (await promisify(fs.stat)(path)).mtime
+        let data = await promisify(fs.readFile)(path)
+        try {
+            return this.create(path, modified.valueOf(), data)
+        }
+        catch (err) {
+            console.error(`${err} @ ${path}`)
+            return undefined
+        }
     }
 
     /**
@@ -132,7 +135,7 @@ export class ClassFileReader {
         let type = signature ? signature : descriptor
         let name = this.getName(field.name, pool)
         let annotations = this.processAnnotations(field.attributes, pool)
-        return new FieldData(name, type, false, -1, 0, annotations)
+        return new FieldData(name, type, false, -1, 0, annotations, field.accessFlags)
     }
 
     /**
@@ -145,11 +148,10 @@ export class ClassFileReader {
         let descriptor = this.getName(method.descriptor, pool)
         let type = signature ? signature : descriptor
         let name = this.getName(method.name, pool)
-        console.log(name)
         let code = method.attributes.find(a => a.type === AttributeType.Code)
         let locals = this.getLocalVariables(code, pool)
         let annotations = this.processAnnotations(method.attributes, pool)
-        return new MethodData(name, type, locals, annotations)
+        return new MethodData(name, type, locals, annotations, method.accessFlags)
     }
 
     /**
@@ -160,7 +162,6 @@ export class ClassFileReader {
         let locals = attributes ? attributes.find(a => [AttributeType.LocalVariableTable, AttributeType.LocalVariableTypeTable].includes(a.type)) : undefined
         let lineTable = attributes ? attributes.find(a => a.type === AttributeType.LineNumberTable) : undefined
         let lineEntries = this.getLineEntries(lineTable)
-        console.log(lineEntries)
         let data = locals ? locals.info : undefined
         let params = []
         let off = 0
@@ -171,12 +172,11 @@ export class ClassFileReader {
             let line = lineEntry ? lineEntry.line : lineEntries.length > 0 ? lineEntries[0].line : -1
             data.readUInt16BE(off += 2) // length
             let name = this.getName(data.readUInt16BE(off += 2), pool)
-            console.log(`${name} ${startPc}`)
             let descriptor = this.getName(data.readUInt16BE(off += 2), pool)
             let index = data.readUInt16BE(off += 2)
             let type = descriptor
             let annotations = this.processAnnotations(attributes, pool)
-            params.push(new FieldData(name, type, startPc == 0, index, line, annotations))
+            params.push(new FieldData(name, type, startPc == 0, index, line, annotations, 0))
         }
         return params
     }
@@ -203,70 +203,72 @@ export class ClassFileReader {
     private processAnnotations(info: AttributeInfo[], pool: ConstantPool): string[] {
         if (!info) return []
         let annotations = []
-        info.filter(a => [AttributeType.RuntimeVisibleAnnotations, AttributeType.RuntimeInvisibleAnnotations].includes(a.type)).forEach(a => {
-            this.getAnnotations(annotations, a.info)
+        info.filter(a => [AttributeType.RuntimeVisibleAnnotations, AttributeType.RuntimeVisibleParameterAnnotations].includes(a.type)).forEach(a => {
+            let context = {path: 'annotation', data: a.info, offset: 0} as ClassFileContext
+            if (a.type === AttributeType.RuntimeVisibleAnnotations) this.getAnnotations(annotations, context)
+            else this.getParameterAnnotations(annotations, context)
         })
         return annotations.map(a => pool.pool[a].value)
     }
 
     /**
-     * Get all the annotations
+     * Get all the class annotations
      */
-    private getAnnotations(annotations: number[], data: Buffer, offset?: number, num?: number): number {
-        if (offset == undefined) {
-            return this.getAnnotations(annotations, data, 0)
+    private getAnnotations(annotations: number[], context: ClassFileContext, num?: number) {
+        let count = readU16(context)
+        for (var i=0; i<count; i++) {
+            this.getAnnotation(annotations, context)
         }
-        if (!num) {
-            let count = data.readUInt16BE(offset)
-            return this.getAnnotations(annotations, data, offset + 2, count)
+    }
+
+    /**
+     * Get all the parameter annotations
+     */
+    private getParameterAnnotations(annotations: number[], context: ClassFileContext, num?: number) {
+        let paramCount = readU8(context)
+        for (var p=0; p<paramCount; p++) {
+            let count = readU16(context)
+            for (var i=0; i<count; i++) {
+                this.getAnnotation(annotations, context)
+            }
         }
-        for (var i = 0; i < num; i++) {
-            offset = this.getAnnotation(annotations, data, offset)
-        }
-        return offset
     }
 
     /**
      * Get a single annotation
      */
-    private getAnnotation(annotations: number[], data: Buffer, offset: number): number {
-        let type = data.readUInt16BE(offset)
+    private getAnnotation(annotations: number[], context: ClassFileContext) {
+        let type = readU16(context)
         annotations.push(type)
-        let size = data.readUInt16BE(offset += 2)
+        let size = readU16(context)
         for (var i = 0; i < size; i++) {
-            offset = this.getAnnotationValue(annotations, data, offset += 2)
+            this.getAnnotationValue(annotations, context)
         }
-        return offset
     }
 
-    private getAnnotationValue(annotations: number[], data: Buffer, offset: number): number {
-        let name = data.readUInt16BE(offset)
-        let tag = data.readUInt8(offset += 2)
+    private getAnnotationValue(annotations: number[], context: ClassFileContext, isArray?: boolean) {
+        let name = isArray ? undefined : readU16(context)
+        let tag = readU8(context)
         let tagChar = Buffer.from([(tag & 0xff)]).toString('ascii')
-        offset += 1
         // TODO Here's where you would start deal with getting the annotation value pairs
         if (tagChar === 'e') {
-            data.readUInt16BE(offset)
-            data.readUInt16BE(offset += 2)
-            offset += 5
+            let typeNdx = readU16(context)
+            let enumNdx = readU16(context)
         }
         else if (tagChar === 'c') {
-            data.readUInt16BE(offset)
-            offset += 3
+            let typeNdx = readU16(context)
         }
         else if (tagChar === '@') {
-            return this.getAnnotation(annotations, data, offset)
+            this.getAnnotation(annotations, context)
         }
         else if (tagChar === '[') {
-            let size = data.readUInt16BE(offset)
+            let size = readU16(context)
             for (var i = 0; i < size; i++) {
-                offset = this.getAnnotationValue(annotations, data, offset += 2)
+                this.getAnnotationValue(annotations, context, true)
             }
         }
         else {
-            let ndx = data.readUInt16BE(offset)
-            offset += 3
+            let constNdx = readU16(context)
         }
-        return offset
     }
 }

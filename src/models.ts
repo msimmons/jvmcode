@@ -215,7 +215,7 @@ export class ClassDataNode implements TreeNode {
     tooltip = undefined
     constructor(data: ClassData) {
         this.data = data
-        this.name = data.name.substring(this.data.name.lastIndexOf('.')+1)
+        this.name = data.name.substring(this.data.name.lastIndexOf('/')+1)
         this.tooltip = data.path.replace(vscode.workspace.workspaceFolders[0].uri.path, '')
     }
     public treeLabel() : string {

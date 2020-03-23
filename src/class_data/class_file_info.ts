@@ -244,7 +244,7 @@ export function readAttributeInfo(context: ClassFileContext, pool: ConstantPool)
     let name = readU16(context)
     let typeName = (pool.pool[name] as UTF8Info).value // Look up UTF string at name index
     let type = AttributeType[typeName]
-    if (!type) throw `Unkown attribute type ${typeName}`
+    if (!type) console.debug(`Unkown attribute type ${typeName}`)
     switch (type) {
         case AttributeType.Code: return readCodeAttribute(context, pool, type)
         default: return readSimpleAttribute(context, pool, type)
