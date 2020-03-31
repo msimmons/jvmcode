@@ -20,9 +20,6 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            *jvm_cache_keys
-      - restore_cache:
-          keys:
             *npm_cache_keys
       - run: 
           shell: /bin/bash --login -eo pipefail 
