@@ -16,6 +16,7 @@ export interface JarEntryData {
     name: string
     path: string
     type: JarEntryType
+    resolved: boolean
 }
 
 export class ResourceEntryData implements JarEntryData {
@@ -23,6 +24,7 @@ export class ResourceEntryData implements JarEntryData {
     name: string
     path: string
     type: JarEntryType = JarEntryType.RESOURCE
+    resolved: boolean = false
     constructor(name: string, path: string) {
         this.name = name
         this.fqcn = name
@@ -36,6 +38,7 @@ export class SourceEntryData implements JarEntryData {
     path: string
     type = JarEntryType.SOURCE
     jarFile: string
+    resolved: boolean = false
     constructor(name: string, path: string, jarFile: string) {
         this.name = name
         this.fqcn = name
@@ -52,6 +55,7 @@ export class ClassEntryData implements JarEntryData {
     path: string
     srcEntry?: SourceEntryData
     type = JarEntryType.CLASS
+    resolved: boolean = false
     constructor(pkg: string, name: string, path: string) {
         this.pkg = pkg
         this.name = name

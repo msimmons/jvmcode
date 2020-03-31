@@ -1,7 +1,7 @@
 import * as vscode from 'vscode'
 import { LanguageController } from '../language_controller';
 import { ProjectController } from '../project_controller';
-import { ParseResult, LanguageRequest } from 'server-models';
+import { ParseResult, LanguageRequest, ParseSymbolType } from '../language_model';
 import { JarEntryType } from '../jar_model';
 
 /**
@@ -46,7 +46,7 @@ export class JvmCompletionProvider implements vscode.CompletionItemProvider {
             }
         }
         else {
-            let sym = pr.symbols.find(s => s.symbolType != "PACKAGE")
+            let sym = pr.symbols.find(s => s.symbolType != ParseSymbolType.PACKAGE)
             if (sym) {
                 beforeLine = doc.positionAt(sym.location.start).line
             }
@@ -60,13 +60,14 @@ export class JvmCompletionProvider implements vscode.CompletionItemProvider {
         throw new Error("Method not implemented.");
     }
 
+    EXCLUDE_TYPES = [ParseSymbolType.IMPORT, ParseSymbolType.PACKAGE, ParseSymbolType.SYMREF]
     private getSymbolItems(document: vscode.TextDocument, position: vscode.Position, parseResult: Promise<ParseResult>) : Promise<vscode.CompletionItem[]> {
         let range = document.getWordRangeAtPosition(position)
         let wordStart = document.offsetAt(range.start)
         let wordEnd = document.offsetAt(range.end)
         return parseResult.then(pr => {
             let symbol = pr.symbols.find(s => s.location.start >= wordStart && s.location.end <= wordEnd)
-            let inScope = pr.symbols.filter(s => s.parent <= symbol.parent && !["IMPORT","PACKAGE","SYMREF"].includes(s.symbolType))
+            let inScope = pr.symbols.filter(s => s.parent <= symbol.parent && !this.EXCLUDE_TYPES.includes(s.symbolType))
             let items = []
             inScope.map(s => {
                 let item = new vscode.CompletionItem(s.name, vscode.CompletionItemKind.Field)

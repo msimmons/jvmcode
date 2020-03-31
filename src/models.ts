@@ -2,9 +2,10 @@ import * as vscode from 'vscode'
 import { JarPackageData, JarEntryData, JarEntryType } from "./jar_model"
 import { DependencySourceData, DependencyData, PathData, USER_SOURCE } from "./project_model"
 import { ClassData } from "./class_data/class_data"
-import { LanguageRequest } from 'server-models'
+import { LanguageRequest } from './language_model'
 import { workspace, Uri } from "vscode"
 import { iconService } from "./extension"
+import * as PathHelper from "path"
 
 export class LocalConfig {
     javaHome: string
@@ -120,12 +121,14 @@ export class FailureNode implements TreeNode {
     context?: string = 'failure-node'
     tooltip = undefined
     data: JUnitFailure
+    label: string
     constructor(data: JUnitFailure) {
         this.data = data
         this.tooltip = data.type
+        this.label = data.message.replace(data.type, '')
     }
     treeLabel(): string {
-        return this.data.message
+        return this.label
     }
     children(): TreeNode[] {
         return []
@@ -325,13 +328,17 @@ export class DependencyNode implements TreeNode {
     isTerminal = false
     isOpenable = false
     context = undefined
+    tooltip = undefined
+    name = undefined
     constructor(data: DependencyData, isUser: boolean) { 
         this.data = data
         this.context = isUser ? 'user-item' : undefined
+        this.tooltip = data.fileName
+        this.name = dependencyLabel(data)
         // packages are lazily loaded thru controller
     }
     public treeLabel() : string  {
-        return dependencyLabel(this.data)
+        return this.name
     }
     public children() : TreeNode[] {
         return this.packages
@@ -347,7 +354,7 @@ export function dependencyLabel(data: DependencyData) : string {
         return data.groupId + ':' + data.artifactId + ':' + data.version 
     }
     else {
-        return data.fileName
+        return PathHelper.basename(data.fileName)
     }
 }
 

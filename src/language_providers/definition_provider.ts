@@ -1,5 +1,5 @@
 import * as vscode from 'vscode'
-import { ParseSymbol, ParseResult } from 'server-models'
+import { ParseSymbol, ParseResult, ParseSymbolType } from '../language_model'
 import { LanguageController } from '../language_controller'
 import { languageController } from '../extension'
 
@@ -32,14 +32,14 @@ export class JvmDefinitionProvider implements vscode.DefinitionProvider {
     private async findLocation(document: vscode.TextDocument, offset: number, symbol: ParseSymbol, result: ParseResult) : Promise<vscode.Location> {
         if (!symbol) return undefined
         switch (symbol.symbolType) {
-            case "FIELD":
-            case "METHOD":
+            case ParseSymbolType.FIELD:
+            case ParseSymbolType.METHOD:
                 return this.selfLocation(document, symbol)
-            case "SYMREF": 
+            case ParseSymbolType.SYMREF: 
                 let defl = this.defLocation(document, offset, symbol, result)
                 return defl ? defl : this.refLocation(symbol)
-            case "TYPEREF":
-            case "IMPORT":
+            case ParseSymbolType.TYPEREF:
+            case ParseSymbolType.IMPORT:
                 return await this.refLocation(symbol)
             default: undefined
         }

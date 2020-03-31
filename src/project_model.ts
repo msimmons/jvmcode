@@ -4,16 +4,16 @@ export const SYSTEM_SOURCE = "System"
 export const USER_SOURCE = "User"
 
 export interface DependencyData {
-    artifactId: string;
-    fileName: string;
-    groupId: string;
-    jmod: string | null;
-    modules: string[];
-    resolved: boolean;
-    scopes: string[];
-    sourceFileName: string | null;
-    transitive: boolean;
-    version: string;
+    artifactId: string
+    fileName: string
+    groupId: string
+    jmod: string | null
+    modules: string[]
+    resolved: boolean
+    scopes: string[]
+    sourceFileName: string | null
+    transitive: boolean
+    version: string
 }
 
 export interface DependencySourceData {

@@ -27,9 +27,11 @@ export class JUnitController implements vscode.Disposable {
 
     public constructor(projectController: ProjectController) {
         this.projectController = projectController
-        //projectController.repo.registerProjectListener(async (jvmProject) => {
-        //    this.start()
-        //})
+        projectController.registerProjectListener(async (jvmProject) => {
+            this.start()
+            // Might have added source directories
+            this.findTestResults(ConfigService.getConfig().testResultsDir)
+        })
     }
 
     public async start() {
@@ -49,7 +51,7 @@ export class JUnitController implements vscode.Disposable {
 
         this.junitTree = new JUnitTreeProvider(this)
         this.disposables.push(vscode.window.registerTreeDataProvider(this.junitTree.viewId, this.junitTree))
-        this.findTestResults(dir)
+        //this.findTestResults(dir)
 
         this.disposables.push(vscode.commands.registerCommand('jvmcode.show-test-results', async (event) => {
             if (!event) return
@@ -112,7 +114,7 @@ export class JUnitController implements vscode.Disposable {
     private async doUpdateProblems(uri: vscode.Uri, fqcn: string, problems: vscode.DiagnosticCollection) {
         this.updateData()
         problems.clear()
-        let localPackages = this.projectController.getPackages()
+        let localPackages = await this.projectController.getPackages()
         fs.readFile(uri.path, (err, data) => {
             if (err) console.error(`Error reading ${uri.path}`, err)
             else {
@@ -172,19 +174,15 @@ export class JUnitController implements vscode.Disposable {
     }
 
     private async processTestCase(tcase: JUnitCase, packages: string[]) : Promise<vscode.Diagnostic[]> {
-        let diagnostics : vscode.Diagnostic[] = []
-        if (tcase.failure) {
-            tcase.failure.forEach(async f => {
-                let problem = await this.processFailure(tcase, f, packages)
-                diagnostics.push(problem)
-            })
-        }
-        return diagnostics
+        if (!tcase.failure) return []
+        let diagnostics = tcase.failure.map(async f => {
+            return this.processFailure(tcase, f, packages)
+        })
+        return Promise.all(diagnostics)
     }
 
     private async processFailure(tcase: JUnitCase, fail: JUnitFailure, packages: string[]) : Promise<vscode.Diagnostic> {
-        let related : vscode.DiagnosticRelatedInformation[] = []
-        fail.stack.split('\n').forEach(l => {
+        let relatedInfo = fail.stack.split('\n').map(async l => {
             let r = this.STACK_RE.exec(l.trim())
             if (r) {
                 let classname = r[1]
@@ -192,18 +190,20 @@ export class JUnitController implements vscode.Disposable {
                 let pos = +r[3]-1
                 let found = packages.find(p => {return classname.startsWith(p)})
                 if (found) {
-                    let path = this.projectController.filename2Path(filename)
+                    let path = await this.projectController.findSourcePath(filename)
                     if (path) {
                         let location = new vscode.Location(vscode.Uri.file(path), new vscode.Position(pos,0))
-                        related.push(new vscode.DiagnosticRelatedInformation(location, `${classname} (${filename}: ${pos+1})`))
+                        return new vscode.DiagnosticRelatedInformation(location, l.trim())
                     }
+                    else return undefined
                 }
             }
+            else return undefined
         })
         let range = new vscode.Range(0, 0, 0, 0)
         let problem = new vscode.Diagnostic(range, fail.message, vscode.DiagnosticSeverity.Error)
         problem.source = `${tcase.name} (${tcase.time})`
-        problem.relatedInformation = related
+        problem.relatedInformation = (await (Promise.all(relatedInfo))).filter(r => r)
         return problem
     }
 

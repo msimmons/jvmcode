@@ -3,35 +3,44 @@
 import * as vscode from 'vscode'
 import { JarEntryNode, TreeNode, LanguageNode, ClassDataNode } from './models'
 import { ProjectController } from './project_controller'
-import { LanguageService } from './language_service'
 import { LanguageController } from './language_controller'
 import { JUnitController } from './junit_controller'
 import { ConfigService } from './config_service'
 import { IconService } from './icon_service';
 import { ProjectUpdateData } from './project_model'
 import { ProjectRepository } from './project_repository';
+import { PerformanceObserver, performance } from 'perf_hooks'
+import { LanguageRequest } from './language_model';
+import { JavaProvider } from './java_language/java_provider';
 
 let projectRepo: ProjectRepository // TODO Rename to service later
 export let projectController: ProjectController
-export let languageService: LanguageService
 export let languageController: LanguageController
 let junitController: JUnitController
 export let testContext: vscode.ExtensionContext // Allows test to access the context?
 export let iconService: IconService
+let performanceObserver: PerformanceObserver
 
 export function activate(context: vscode.ExtensionContext) {
     testContext = context
     iconService = new IconService(context)
+    performanceObserver = new PerformanceObserver((entryList) => {
+        entryList.getEntries().forEach(entry => {
+            console.debug(`${entry.name}: ${entry.duration}ms`)
+            performance.clearMarks(entry.name)
+        })
+    })
+    performanceObserver.observe({entryTypes: ['measure']})
 
     projectRepo = new ProjectRepository()
     projectController = new ProjectController(context, projectRepo)
     junitController = new JUnitController(projectController)
     context.subscriptions.push(junitController)
-    // We don't start the project controller or junit controller unless we get a request or there are user items
-    //languageService = new LanguageService(server)
-    //languageController = new LanguageController(languageService, projectController)
+    languageController = new LanguageController(projectController)
     context.subscriptions.push(languageController)
-    //languageController.start()
+
+    // Register here until it's a separate extension
+    languageController.registerLanguage(new JavaProvider())
 
     /**
      * Allow the user to find any class in the projects current dependencies
@@ -158,7 +167,11 @@ export function activate(context: vscode.ExtensionContext) {
     let api = {
         // Update a project
         updateProject(project: ProjectUpdateData) {
-            projectRepo.updateProject(ConfigService.getConfig(), project)
+            projectController.updateProjectData(project)
+        },
+        // Request Language Support
+        requestLanguage(language: LanguageRequest) {
+            languageController.registerLanguage(language)
         }
     }
     return api

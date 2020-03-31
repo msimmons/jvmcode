@@ -2,7 +2,7 @@
   "name": "jvmcode",
   "displayName": "JVMCode",
   "description": "JVM Services",
-  "version": "1.0.4",
+  "version": "2.0.0",
   "publisher": "contrapt",
   "license": "Apache 2.0",
   "engines": {
@@ -251,7 +251,11 @@
             "jdk",
             "sun",
             "java.awt",
-            "java.rmi"
+            "java.rmi",
+            "bin",
+            "classes",
+            "conf",
+            "include"
           ],
           "description": "A list of packages to exclude from dependency list.  Matches all packages with the given prefix"
         },
@@ -295,7 +299,7 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile; ./gradlew build deploy",
+    "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "test": "npm run compile && node ./node_modules/vscode/bin/test"
@@ -305,6 +309,7 @@
     "@types/node": "^8.10.59",
     "@types/jszip": "^3.1.7",
     "@types/vscode": "^1.42.0",
+    "@types/parsimmon": "^1.10.1",
     "mocha": "^3.5.0",
     "typescript": "^3.5.1",
     "tslint": "^5.16.0"
@@ -313,7 +318,6 @@
     "fast-xml-parser": "^3.16.0",
     "he": "^1.2.0",
     "jszip": "^3.2.2",
-    "node-uuid": "^1.4.8",
-    "vertx3-eventbus-client": "^3.8.5"
+    "parsimmon": "^1.13.0"
   }
 }

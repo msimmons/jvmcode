@@ -10,8 +10,8 @@ class TestClass {
         let cdr = new ClassFileReader()
         let classFile = '/home/mark/work/jvmcode/server/build/classes/kotlin/main/net/contrapt/jvmcode/handler/GetClasspath.class'
         //let classFile = '/home/mark/work/jvmcode/server/build/classes/kotlin/main/net/contrapt/jvmcode/service/model/ProjectUpdateRequest.class'
-        let result = await cdr.load(classFile)
-        console.log(JSON.stringify(result, undefined, 3))
+        //let result = await cdr.load(classFile)
+        //console.log(JSON.stringify(result, undefined, 3))
     }
 }
 

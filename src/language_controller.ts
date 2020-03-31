@@ -1,50 +1,45 @@
 'use strict';
 
 import * as vscode from 'vscode'
-import { LanguageService } from './language_service'
-import { CompileRequest, LanguageRequest, ParseRequest, ParseResult } from 'server-models'
+import { CompileRequest, LanguageRequest, ParseRequest, ParseResult } from './language_model'
 import { ProjectController } from './project_controller';
 import * as provider from './language_providers'
 import { TreeNode, LanguageNode } from './models';
 import { LanguageTreeProvider } from './language_tree_provider';
 import { languageController } from './extension';
+import { JavaProvider } from './java_language/java_provider';
 
 /**
  * Responsible for managing JVM language services
  */
 export class LanguageController implements vscode.Disposable {
 
-    private languageService: LanguageService
     private projectController: ProjectController
+    private languageMap = new Map<string, LanguageRequest>()
     private problemCollections = new Map<string, vscode.DiagnosticCollection>()
     private disposables : vscode.Disposable[] =  []
     private parseResults = new Map<string, Promise<ParseResult>>()
     private rootNodes: Array<LanguageNode> = []
     private languageTree: LanguageTreeProvider
+    private started: boolean = false
 
-    public constructor(languageService: LanguageService, projectController: ProjectController) {
-        this.languageService = languageService
+    public constructor(projectController: ProjectController) {
         this.projectController = projectController
-        this.registerLanguageListener()
     }
 
     public start() {
+        if (this.started) return
         this.languageTree = new LanguageTreeProvider(languageController)
         vscode.window.registerTreeDataProvider(this.languageTree.viewId, this.languageTree)
-        // Temporarily trigger the language verticle to send request
-        this.languageService.startLanguage()
     }
 
-    /** 
-     * Register a consumer for language requests
+    /**
+     * API exposed to other extensions to request language support
+     * @param request 
      */
-    private registerLanguageListener() {
-        this.languageService.registerLanguageListener((languageRequest: LanguageRequest) => {
-            this.registerLanguage(languageRequest)
-        })
-    }
-
     public registerLanguage(request: LanguageRequest) {
+        this.start()
+        this.languageMap.set(request.languageId, request)
         // Watch files with the requested extensions
         let pattern = vscode.workspace.workspaceFolders[0].uri.path+`/**/*.{${request.extensions.join(',')}}`
         let watcher = vscode.workspace.createFileSystemWatcher(pattern)
@@ -130,11 +125,16 @@ export class LanguageController implements vscode.Disposable {
             console.debug(`Skip compile of ${languageId} ${uri.path}`)
             return
         }
+        let language = this.languageMap.get(languageId)
+        if (!language) {
+            console.debug(`No handler found for ${languageId}`)
+            return
+        }
         let classpath = this.projectController.getClasspath()
-        let request = {languageId: languageId, files: [context.path], outputDir: context.outputDir, classpath: classpath, sourcepath: context.sourceDir, name: 'vsc-java'} as CompileRequest
+        let request = {languageId: languageId, files: [context.path], outputDir: context.outputDir, classpath: classpath, sourcepath: context.sourceDir, name: language.name} as CompileRequest
         vscode.window.withProgress({location: vscode.ProgressLocation.Window}, async (progress) => {
             progress.report({message: 'Compiling...'})
-            let result = await this.languageService.requestCompile(request)
+            let result = await language.compile(request)
             let problems = this.problemCollections.get(result.name)
             problems.clear()
             result.diagnostics.forEach(d => {
@@ -154,9 +154,14 @@ export class LanguageController implements vscode.Disposable {
     private async requestParse(doc: vscode.TextDocument) : Promise<ParseResult> {
         let key = doc.uri.toString()
         if (!doc.isDirty && this.parseResults.has(key)) return this.parseResults.get(key)
+        let language = this.languageMap.get(doc.languageId)
+        if (!language) {
+            console.debug(`No handler found for ${doc.languageId}`)
+            return undefined
+        }
         let text = doc.getText()
-        let request = {languageId: doc.languageId, file: doc.uri.path, text: text, stripCR: (doc.eol === vscode.EndOfLine.LF)} as ParseRequest
-        let promise = this.languageService.requestParse(request)
+        let request = {languageId: doc.languageId, file: doc.uri.path, text: text} as ParseRequest
+        let promise = language.parse(request)
         this.parseResults.set(key, promise)
         return promise
     }

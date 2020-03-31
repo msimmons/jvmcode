@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
 import { ProviderResult } from 'vscode';
-import { ParseSymbol } from 'server-models'
+import { ParseSymbol, ParseSymbolType } from '../language_model'
 import { LanguageController } from '../language_controller';
 
 /**
@@ -30,7 +30,7 @@ export class JvmSymbolProvider implements vscode.DocumentSymbolProvider, vscode.
                 resolve(undefined)
                 return
             }
-            let info = result.symbols.filter(s => s.parent == -1 && !["IMPORT", "PACKAGE"].includes(s.symbolType)).map(s =>{
+            let info = result.symbols.filter(s => s.parent == -1 && ![ParseSymbolType.IMPORT, ParseSymbolType.PACKAGE].includes(s.symbolType)).map(s =>{
                 let docSymbol = this.createDocSymbol(document, s)
                 if (s.children) docSymbol.children = this.symbolTree(document, s, result.symbols)
                 return docSymbol
@@ -40,7 +40,7 @@ export class JvmSymbolProvider implements vscode.DocumentSymbolProvider, vscode.
     }
 
     private symbolTree(document: vscode.TextDocument, symbol: ParseSymbol, symbols: ParseSymbol[]) : vscode.DocumentSymbol[] {
-        return symbol.children.filter(s => !["TYPEREF","LITERAL","SYMREF"].includes(symbols[s].symbolType)).map(s =>{
+        return symbol.children.filter(s => ![ParseSymbolType.TYPEREF, ParseSymbolType.LITERAL, ParseSymbolType.SYMREF].includes(symbols[s].symbolType)).map(s =>{
             let docSymbol = this.createDocSymbol(document, symbols[s])
             if (symbols[s].children) docSymbol.children = this.symbolTree(document, symbols[s], symbols)
             return docSymbol
@@ -51,9 +51,9 @@ export class JvmSymbolProvider implements vscode.DocumentSymbolProvider, vscode.
         let kind = this.getSymbolKind(symbol)
         let start = document.positionAt(symbol.location.start)
         let end = document.positionAt(symbol.location.end)
-        let scopeEnd = document.positionAt(symbol.scopeEnd.end)
+        let scopeEnd = symbol.scopeEnd ? document.positionAt(symbol.scopeEnd.end) : end
         let fullRange = new vscode.Range(start, scopeEnd)
-        let selectionRange = new vscode.Range(start, end)
+        let selectionRange = end.compareTo(scopeEnd) <= 0 ? new vscode.Range(start, end) : fullRange
         let arrayDim = "[]".repeat(symbol.arrayDim)
         let tag = this.getSymbolTag(symbol)
         return new vscode.DocumentSymbol(`${symbol.name}${tag} ${symbol.classifier}`, `${symbol.type}${arrayDim}`, kind, fullRange, selectionRange)
@@ -61,8 +61,8 @@ export class JvmSymbolProvider implements vscode.DocumentSymbolProvider, vscode.
 
     private getSymbolTag(symbol: ParseSymbol): string {
         switch(symbol.symbolType) {
-            case "CONSTRUCTOR": 
-            case "METHOD": 
+            case ParseSymbolType.CONSTRUCTOR: 
+            case ParseSymbolType.METHOD: 
                 return "()"
             default: return ""
         }
@@ -70,19 +70,19 @@ export class JvmSymbolProvider implements vscode.DocumentSymbolProvider, vscode.
 
     private getSymbolKind(symbol: ParseSymbol) : vscode.SymbolKind {
         switch(symbol.symbolType) {
-            case "CLASS": return vscode.SymbolKind.Class
-            case "INTERFACE": return vscode.SymbolKind.Interface
-            case "ENUM": return vscode.SymbolKind.Enum
-            case "ANNOTATION": return vscode.SymbolKind.Class
-            case "CONSTRUCTOR": return vscode.SymbolKind.Constructor
-            case "METHOD": return vscode.SymbolKind.Method
-            case "FIELD": return vscode.SymbolKind.Field
-            case "THIS": return vscode.SymbolKind.Field
-            case "VARIABLE": return vscode.SymbolKind.Variable
-            case "BLOCK": return vscode.SymbolKind.Namespace
-            case "CONTROL": return vscode.SymbolKind.Namespace
-            case "TYPEREF": return vscode.SymbolKind.Constant
-            case "TYPEPARAM": return vscode.SymbolKind.TypeParameter
+            case ParseSymbolType.CLASS: return vscode.SymbolKind.Class
+            case ParseSymbolType.INTERFACE: return vscode.SymbolKind.Interface
+            case ParseSymbolType.ENUM: return vscode.SymbolKind.Enum
+            case ParseSymbolType.ANNOTATION: return vscode.SymbolKind.Class
+            case ParseSymbolType.CONSTRUCTOR: return vscode.SymbolKind.Constructor
+            case ParseSymbolType.METHOD: return vscode.SymbolKind.Method
+            case ParseSymbolType.FIELD: return vscode.SymbolKind.Field
+            case ParseSymbolType.THIS: return vscode.SymbolKind.Field
+            case ParseSymbolType.VARIABLE: return vscode.SymbolKind.Variable
+            case ParseSymbolType.BLOCK: return vscode.SymbolKind.Namespace
+            case ParseSymbolType.CONTROL: return vscode.SymbolKind.Namespace
+            case ParseSymbolType.TYPEREF: return vscode.SymbolKind.Constant
+            case ParseSymbolType.TYPEPARAM: return vscode.SymbolKind.TypeParameter
             default: return vscode.SymbolKind.Object
         }
     }

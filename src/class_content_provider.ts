@@ -15,7 +15,7 @@ export class ClassContentProvider implements vscode.TextDocumentContentProvider 
 
 	private onDidChangeEmitter = new vscode.EventEmitter<vscode.Uri>();
     private subscriptions: vscode.Disposable;
-    private classDataMap = new Map<string, string>() // map of path to classdata for classes
+    private contentMap = new Map<string, string>() // map of path to classdata for classes
 
 	public constructor() {
 		// Listen to the `closeTextDocument`-event which means we must
@@ -42,14 +42,15 @@ export class ClassContentProvider implements vscode.TextDocumentContentProvider 
      */
     addClassData(uri: vscode.Uri, classData: ClassData) {
         let text = JSON.stringify(classData, undefined, 3)
-        this.classDataMap.set(this.getUriKey(uri), text)
+        this.contentMap.set(this.getUriKey(uri), text)
+        this.onDidChangeEmitter.fire(uri)
     }
 
     /**
      * Get rid of all classdata
      */
     clearResults() {
-        this.classDataMap.clear()
+        this.contentMap.clear()
     }
 
 	/** Expose an event to signal changes of _virtual_ documents
@@ -72,6 +73,6 @@ export class ClassContentProvider implements vscode.TextDocumentContentProvider 
      */
     private getContent(uri: vscode.Uri) : string {
         let key = this.getUriKey(uri)
-        return this.classDataMap.has(key) ? this.classDataMap.get(key) : `No ClassData available for ${key}`
+        return this.contentMap.has(key) ? this.contentMap.get(key) : `No ClassData available for ${key}`
     }
 }

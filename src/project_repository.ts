@@ -6,9 +6,10 @@ import * as PathHelper from 'path'
 import { JarEntryData, ClassEntryData, JarPackageData, SourceEntryData, ResourceEntryData } from './jar_model'
 import { DependencyData, DependencySourceData, PathData, JvmProject, ProjectUpdateData, SYSTEM_SOURCE, USER_SOURCE } from './project_model'
 import { ClassData } from "./class_data/class_data"
-import { LocalConfig } from "./models";
+import { LocalConfig, dependencyLabel } from "./models";
 import { ClassFileReader } from "./class_data/class_file_reader";
 import { promisify } from 'util'
+import { performance } from 'perf_hooks'
 
 /**
  * All non-vscode specific Project services; integration with vscode is handled in the controllers
@@ -17,6 +18,8 @@ export class ProjectRepository {
 
     private fqcnMap = new Map<string, {entry: JarEntryData, dependency: DependencyData}>() // Fqcn -> related data
     private sourceMap = new Map<string, SourceEntryData[]>() // Filename -> list of matches
+    private packageMap = new Map<string, JarPackageData[]>() // jar name to resolved packages
+    private resolvedSourceJars = new Set<string>()
     private jdkDependencySource: DependencySourceData
     private userDependencySource: DependencySourceData = {source: USER_SOURCE, description: 'User Provided', dependencies: []}
     private userPaths: PathData[] = []
@@ -30,7 +33,7 @@ export class ProjectRepository {
     /**
      * Get the version of java for the configured java home
      */
-    public getVersion(javaHome: string) : string {
+    private getVersion(javaHome: string) : string {
         let releaseFile = PathHelper.join(javaHome, 'release')
         if (fs.existsSync(releaseFile)) {
             let line = fs.readFileSync(releaseFile).toString().split('\n').find(l => {
@@ -43,7 +46,7 @@ export class ProjectRepository {
         }
     }
 
-    public createJdkSource(config: LocalConfig) : DependencySourceData {
+    private createJdkSource(config: LocalConfig) : DependencySourceData {
         let version = this.getVersion(config.javaHome)
         let pre9 = fs.existsSync(PathHelper.join(config.javaHome, 'jre/lib/rt.jar'))
         if (pre9) {
@@ -66,7 +69,7 @@ export class ProjectRepository {
     /**
      * Request that the project be published
      */
-    public async initializeJDK(config: LocalConfig) {
+    private initializeJDK(config: LocalConfig) {
         if (!this.jdkDependencySource) this.jdkDependencySource = this.createJdkSource(config)
     }
 
@@ -74,7 +77,7 @@ export class ProjectRepository {
      * Add a new single jar file dependency
      * @param dependency 
      */
-    public addDependency(config: LocalConfig, jarFile: string, srcFile: string) : Promise<JvmProject> {
+    public async addDependency(config: LocalConfig, jarFile: string, srcFile: string) : Promise<JvmProject> {
         let dependency = {fileName: jarFile, sourceFileName: srcFile, transitive: false} as DependencyData
         this.userDependencySource.dependencies.push(dependency)
         let update = {source: USER_SOURCE, paths: this.userPaths, dependencySources: [this.userDependencySource]} as ProjectUpdateData
@@ -85,7 +88,7 @@ export class ProjectRepository {
      * Remove a jar depdnency
      * @param jarFile
      */
-    public removeDependency(config: LocalConfig, jarFile: string) : Promise<JvmProject> {
+    public async removeDependency(config: LocalConfig, jarFile: string) : Promise<JvmProject> {
         this.userDependencySource.dependencies = this.userDependencySource.dependencies.filter(d => d.fileName != jarFile)
         let update = {source: USER_SOURCE, paths: this.userPaths, dependencySources: [this.userDependencySource]} as ProjectUpdateData
         return this.updateProject(config, update)
@@ -94,7 +97,7 @@ export class ProjectRepository {
     /**
      * Add a path component(s) to the project
      */
-    public addPath(config: LocalConfig, userPath: PathData) : Promise<JvmProject> {
+    public async addPath(config: LocalConfig, userPath: PathData) : Promise<JvmProject> {
         this.userPaths.push(userPath)
         let update = {source: USER_SOURCE, paths: this.userPaths, dependencySources: [this.userDependencySource]} as ProjectUpdateData
         return this.updateProject(config, update)
@@ -104,7 +107,7 @@ export class ProjectRepository {
      * Remove a user path
      * @param path
      */
-    public removePath(config: LocalConfig, sourceDir: string) : Promise<JvmProject> {
+    public async removePath(config: LocalConfig, sourceDir: string) : Promise<JvmProject> {
         this.userPaths = this.userPaths.filter(p => p.sourceDir != sourceDir)
         let update = {source: USER_SOURCE, paths: this.userPaths, dependencySources: [this.userDependencySource]} as ProjectUpdateData
         return this.updateProject(config, update)
@@ -120,7 +123,10 @@ export class ProjectRepository {
             this.userPaths = project.paths
         }
         else {
-            this.externalDependencySources = this.externalDependencySources.filter(ds => ds.source != project.source).concat(project.dependencySources)
+            // Remove existing matching source
+            this.externalDependencySources = this.externalDependencySources.filter(ds => ds.source != project.source)
+            // Add the new ones (if they have dependencies)
+            this.externalDependencySources = this.externalDependencySources.concat(project.dependencySources.filter(s => s.dependencies.length > 0))
             this.externalPaths = this.externalPaths.filter(p => p.source != project.source).concat(project.paths)
         }
         let allSources = [this.jdkDependencySource, this.userDependencySource].concat(this.externalDependencySources)
@@ -145,14 +151,60 @@ export class ProjectRepository {
      */
     public async getClassData() : Promise<ClassData[]> {
         let allPaths = this.userPaths.concat(this.externalPaths).map(p => p.classDir)
+        if (allPaths.length === 0) return []
         let files = (await Promise.all(allPaths.map(async dir => await this.findClassFiles(dir)))).reduce((p,c) => p.concat(c))
         return (await Promise.all(files.map(async file => await this.classFileReader.load(file)))) .filter(d => d)
     }
 
     /**
+     * Find all directory entries recursively matching the given criteria
+     * @param dir The directory to start in
+     * @param name Optional exact match to filename plus extension
+     * @param extension Optional exact match to extension (with dot)
+     * @param directory Optional return directories if true
+     */
+    public async findRecursive(dir: string, name?: string, extension?: string, directory?: boolean) : Promise<string[]> {
+        if (! await promisify(fs.exists)(dir)) return []
+        let entries = await promisify(fs.readdir)(dir)
+        let files = Promise.all(entries.map(async entry => {
+            let file = PathHelper.join(dir, entry)
+            let stats = await promisify(fs.stat)(file)
+            let entryMatch = []
+            let dirMatch = []
+            if (directory) {
+                if (stats.isDirectory()) dirMatch.push(file)
+            }
+            else if (name) {
+                if (name === entry) entryMatch.push(file)
+            }
+            else if (extension) {
+                if (extension === PathHelper.extname(entry)) entryMatch.push(file)
+            }
+            else if (!stats.isDirectory()) {
+                entryMatch.push(file)
+            }
+            return stats.isDirectory() ? (await this.findRecursive(file, name, extension, directory)).concat(dirMatch) : entryMatch
+        }))
+        return (await files).reduce((p, c) => p.concat(c))
+    }
+
+    /**
+     * Find a local source file in the configured source directories
+     */
+    public async findSourceFile(name: string) : Promise<string> {
+        let allPaths = this.userPaths.concat(this.externalPaths).map(p => p.sourceDir)
+        let paths = await Promise.all(allPaths.map(async p => {
+            return await this.findRecursive(p, name)
+        }))
+        let reduced = paths.length > 0 ? paths.reduce((p,c) => p.concat(c)) : []
+        return reduced.length > 0 ? reduced[0] : undefined
+    }
+
+    /**
      * Return all of this project's local class files recursively from the given directory
      */
-    public async findClassFiles(dir: string) : Promise<string[]> {
+    private async findClassFiles(dir: string) : Promise<string[]> {
+        if (!await promisify(fs.exists)(dir)) return []
         let entries = await promisify(fs.readdir)(dir)
         let files = Promise.all(entries.map(async entry => {
             let file = PathHelper.join(dir, entry)
@@ -173,8 +225,7 @@ export class ProjectRepository {
      * Returns the collection of package entries for the dependency
      * @param dependency 
      */
-    public async getPackages(dependency: DependencyData) : Promise<JarPackageData[]> {
-        this.indexSourceJar(dependency)
+    public async resolvePackages(dependency: DependencyData) : Promise<JarPackageData[]> {
         return this.resolveDependency(dependency)
     }
 
@@ -190,22 +241,26 @@ export class ProjectRepository {
         let entry = this.fqcnMap.get(fqcn)
         if (!entry) throw `No entry found for ${fqcn}`
         if (!jarFile) jarFile = entry.dependency.fileName
+        if (entry.entry.resolved) return entry.entry
+        this.fqcnMap.set(fqcn, entry)
         let classEntry = entry.entry as ClassEntryData
-        if (classEntry.classData && classEntry.srcEntry) return classEntry
-        return this.readJarEntry(jarFile, entry.entry.path, '').then(data => {
+        return this.readJarEntry(jarFile, entry.entry.path).then(data => {
             classEntry.classData = this.classFileReader.create(entry.entry.path, 0, data)
             classEntry.srcEntry = this.resolveSourceEntry(classEntry, entry.dependency.sourceFileName)
+            classEntry.resolved = true
             return classEntry
         })
     }
 
     /**
-     * Find the source entry for the given [ClassEntryData]
+     * Find the source entry for the given [ClassEntryData] source file by searching
+     * all the indexed source files preferring the one that comes from the associated source jar
      */
     private resolveSourceEntry(entry: ClassEntryData, srcJar: string) : SourceEntryData {
         let filename = entry.classData ? entry.classData.sourceFile : undefined
         let sourceEntries = this.sourceMap.get(filename)
-        return sourceEntries ? sourceEntries.find(e => e.jarFile === srcJar) : undefined
+        let match =  sourceEntries ? sourceEntries.find(e => e.jarFile === srcJar) : undefined
+        return match ? match : (sourceEntries ? sourceEntries[0] : undefined)
     }
 
     /**
@@ -213,6 +268,10 @@ export class ProjectRepository {
      * @param dependency 
      */
     private async resolveDependency(dependency: DependencyData) : Promise<JarPackageData[]> {
+        this.indexSourceJar(dependency)
+        if (this.packageMap.has(dependency.fileName)) return this.packageMap.get(dependency.fileName)
+        let count = 0
+        performance.mark('start')
         return this.findJarEntries(dependency.fileName).then(entries => {
             let packages = new Map<string, JarEntryData[]>()
             entries.forEach(entry => {
@@ -228,14 +287,15 @@ export class ProjectRepository {
                     packages.get(pkg).push(jarEntry)
                     this.fqcnMap.set(jarEntry.fqcn, {entry: jarEntry, dependency: dependency})
                 }
+                count++
             })
-            let packageData = []
-            Array.from(packages.entries()).forEach(entry => {
-                if (entry[1].length > 0) {
-                    let pkg = {name: entry[0], entries: entry[1]} as JarPackageData
-                    packageData.push(pkg)
-                }
-            })
+            let packageData = Array.from(packages.entries()).filter(e => e[1].length > 0)
+                .map(e => { return {name: e[0], entries: e[1].sort((a,b) => a.name.localeCompare(b.name))} })
+                .sort((a, b) => a.name.localeCompare(b.name))
+            dependency.resolved = true
+            this.packageMap.set(dependency.fileName, packageData)
+            performance.mark('end')
+            performance.measure(`resolveDependency(${dependency.fileName}), ${count} entries`, 'start', 'end')
             return packageData
         })
     }
@@ -245,51 +305,61 @@ export class ProjectRepository {
      */
     private async indexSourceJar(dependency: DependencyData) {
         if (!dependency.sourceFileName) return
+        if (this.resolvedSourceJars.has(dependency.sourceFileName)) return
+        this.resolvedSourceJars.add(dependency.sourceFileName)
+        let count = 0
+        performance.mark('start')
         this.findJarEntries(dependency.sourceFileName).then(entries => {
             entries.forEach(entry => {
                 if (!entry.dir) {
                     let filename = PathHelper.basename(entry.name)
                     let sourceEntry = new SourceEntryData(filename, entry.name, dependency.sourceFileName)
                     this.sourceMap.has(filename) ? this.sourceMap.get(filename).push(sourceEntry) : this.sourceMap.set(filename, [sourceEntry])
+                    count++
                 }
             })
+            performance.mark('end')
+            performance.measure(`indexSourceJar(${dependency.sourceFileName}), ${count} entries`, 'start', 'end')
         })
     }
 
-    public readJarEntry(jarFile: string, path: string, jmod: string) : Promise<Buffer> {
-        return new Promise((resolve, reject) => {
-            fs.readFile(jarFile, (err, data) => {
-                console.log(`Got data ${data.length}`)
-                if (err) reject(`Error opening jar file ${jarFile}:  ${err}`)
-                else {
-                    JSZip.loadAsync(data).then(zip => {
-                        let entry = zip.file(path)
-                        if (!entry) reject(`No entry found in ${jarFile} for ${path}`)
-                        entry.async("nodebuffer").then((buffer) =>{
-                            resolve(buffer)
-                        }).catch(reason => {
-                            reject(`Error in entry.async for ${entry.name} in ${jarFile}:  ${reason}`)
-                        })
-                    }).catch(reason => {
-                        reject(`Error reading data from ${jarFile}:  ${reason}`)
-                    })
-                }
-            })
-        })
+    /**
+     * Read the given path from the given jar file returing contents as Buffer
+     * @param jarFile 
+     * @param path 
+     */
+    public async readJarEntry(jarFile: string, path: string) : Promise<Buffer> {
+        try {
+            performance.mark('startRead')
+            let data = await promisify(fs.readFile)(jarFile)
+            performance.mark('startZip')
+            let zip = await JSZip.loadAsync(data)
+            performance.mark('startFile')
+            let entry = zip.file(path)
+            performance.mark('endFile')
+            performance.measure(`readJarEntry(${jarFile}).data, ${data.length}`, 'startRead', 'startZip')
+            performance.measure(`readJarEntry(${jarFile}).zip, ${zip.length}`, 'startZip', 'startFile')
+            performance.measure(`readJarEntry(${jarFile}).file, ${entry.name}`, 'startFile', 'endFile')
+            if (!entry) {
+                console.error(`No entry found in ${jarFile} for ${path}`)
+                return undefined
+            }
+            return await entry.async("nodebuffer")
+        } catch(reason) {
+            console.error(`Error reading data from ${jarFile}:  ${reason}`)
+            return undefined
+        }
     }
 
-    private findJarEntries(jarFile: string) : Promise<JSZip.JSZipObject[]> {
-        return new Promise((resolve, reject) => {
-            fs.readFile(jarFile, (err, data) => {
-                if (err) reject(`Error opening jar file ${jarFile}:  ${err}`)
-                else {
-                    JSZip.loadAsync(data).then(zip => {
-                        resolve(Object.values(zip.files))
-                    }).catch(reason => {
-                        reject(`Error in reading jar file ${jarFile}:  ${reason}`)
-                    })
-                }
-            })
-        })
+    private async findJarEntries(jarFile: string) : Promise<JSZip.JSZipObject[]> {
+        try {
+            let data = await promisify(fs.readFile)(jarFile)
+            let zip = await JSZip.loadAsync(data)
+            return Object.values(zip.files)
+        }
+        catch (error) {
+            console.error(error)
+            return []
+        }
     }
 }
