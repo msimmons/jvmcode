@@ -1,4 +1,5 @@
 import { Info, DispatchTable, InfoType, readU16 } from "./class_file_info"
+import { ClassFileContext } from './class_file_context'
 
 export class ConstantPool {
 

@@ -1,5 +1,6 @@
 import { StringDecoder } from 'string_decoder'
 import { ConstantPool } from './constant_pool'
+import { ClassFileContext } from './class_file_context'
 
 export enum InfoType {
     RESERVED = 0,

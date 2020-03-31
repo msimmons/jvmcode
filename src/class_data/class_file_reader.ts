@@ -3,6 +3,7 @@ import {promisify} from 'util'
 import { ConstantPool } from './constant_pool'
 import { readMemberInfo, readU16, readU32, MemberType, readAttributeInfo, InfoType, AttributeInfo, AttributeType, MemberInfo, readU8 } from './class_file_info'
 import { MethodData, FieldData, ClassData, LineEntry } from './class_data'
+import { ClassFileContext } from './class_file_context'
 
 export class ClassFileReader {
 
