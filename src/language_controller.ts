@@ -8,6 +8,7 @@ import { TreeNode, LanguageNode } from './models';
 import { LanguageTreeProvider } from './language_tree_provider';
 import { languageController } from './extension';
 import { JavaProvider } from './java_language/java_provider';
+import { ParseService } from './parse_service';
 
 /**
  * Responsible for managing JVM language services
@@ -22,9 +23,11 @@ export class LanguageController implements vscode.Disposable {
     private rootNodes: Array<LanguageNode> = []
     private languageTree: LanguageTreeProvider
     private started: boolean = false
+    private parseService: ParseService
 
     public constructor(projectController: ProjectController) {
         this.projectController = projectController
+        this.parseService = new ParseService(projectController.repo)
     }
 
     public start() {
@@ -89,7 +92,7 @@ export class LanguageController implements vscode.Disposable {
         this.disposables.push(vscode.languages.registerReferenceProvider(allSelector, new provider.JvmReferenceProvider()))
         this.disposables.push(vscode.languages.registerRenameProvider(fileSelector, new provider.JvmRenameProvider()))
         this.disposables.push(vscode.languages.registerSignatureHelpProvider(fileSelector, new provider.JvmSignatureProvider())) // Meta for trigger chars
-        let symbolProvider = new provider.JvmSymbolProvider(this)
+        let symbolProvider = new provider.JvmSymbolProvider(this, this.projectController)
         this.disposables.push(vscode.languages.registerDocumentSymbolProvider(allSelector, symbolProvider)) // metadata?
         this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(symbolProvider))
         this.disposables.push(vscode.languages.registerTypeDefinitionProvider(allSelector, new provider.JvmTypeDefinitionProvider()))
@@ -161,7 +164,7 @@ export class LanguageController implements vscode.Disposable {
         }
         let text = doc.getText()
         let request = {languageId: doc.languageId, file: doc.uri.path, text: text} as ParseRequest
-        let promise = language.parse(request)
+        let promise = this.parseService.parse(request, language)
         this.parseResults.set(key, promise)
         return promise
     }

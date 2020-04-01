@@ -28,19 +28,9 @@ JVM Code will supply all non-language specific info.  Essentially all things rel
 - Decompile class with no source (Fernflower?)
 
 ## Symbols
-  - source: Either a jar dependency or a source file in current project (JAR, SOURCE)
-  - namespace: The package of the symbol
-  - name: The symbol name
-  - type: The type of symbol (class, interface, object)
-  - file: The uri for the file that contains the symbol
-  - location: The line/column location of the symbol
-  - doc: Documentation, if any
-
-## Use Cases
-- Know what is imported in current scope
-- Suggest types from 1) current package, 2) imported types, 3) all dependencies
-- On choosing a type, insert import statement if necessary (allow config for ordering imports)
-- Show member and parameter help for dot completions
+- References
+- Navigate to local classes
+- _Language parsers_
 
 ## See the following
 [Class File Info](https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.3.2)

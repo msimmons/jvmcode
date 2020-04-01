@@ -1,4 +1,6 @@
 {
+   "fqcn": "net.contrapt.gradle.plugin.PluginModelBuilder",
+   "pkg": "net.contrapt.gradle.plugin",
     "path": "test/fixtures/PluginModelBuilder.class",
     "lastModified": 1585672915276,
     "minor": 0,

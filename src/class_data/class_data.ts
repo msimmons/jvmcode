@@ -1,4 +1,6 @@
 export class ClassData {
+    fqcn: string
+    pkg: string
     name: string
     path: string
     major: number

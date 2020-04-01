@@ -2,16 +2,19 @@ import * as vscode from 'vscode'
 import { ProviderResult } from 'vscode';
 import { ParseSymbol, ParseSymbolType } from '../language_model'
 import { LanguageController } from '../language_controller';
+import { ProjectController } from '../project_controller';
 
 /**
  * Requires Symbols and workspace Symbols
  */
 export class JvmSymbolProvider implements vscode.DocumentSymbolProvider, vscode.WorkspaceSymbolProvider {
 
-    controller: LanguageController
+    language: LanguageController
+    project: ProjectController
     
-    constructor(languageController: LanguageController) {
-        this.controller = languageController
+    constructor(languageController: LanguageController, projectController: ProjectController) {
+        this.language = languageController
+        this.project = projectController
     }
 
     provideWorkspaceSymbols(query: string, token: vscode.CancellationToken): vscode.ProviderResult<vscode.SymbolInformation[]> {
@@ -25,7 +28,8 @@ export class JvmSymbolProvider implements vscode.DocumentSymbolProvider, vscode.
 
     provideDocumentSymbols(document: vscode.TextDocument, token: vscode.CancellationToken): ProviderResult<vscode.SymbolInformation[] | vscode.DocumentSymbol[]> {
         return new Promise(async (resolve, reject) => {
-            let result = await this.controller.getParseResult(document)
+            await this.project.getJarEntryNodes() // Forces load of dependencies
+            let result = await this.language.getParseResult(document)
             if (!result) {
                 resolve(undefined)
                 return

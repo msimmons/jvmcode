@@ -1,4 +1,5 @@
 import * as fs from 'fs'
+import * as PathHelper from 'path'
 import {promisify} from 'util'
 import { ConstantPool } from './constant_pool'
 import { readMemberInfo, readU16, readU32, MemberType, readAttributeInfo, InfoType, AttributeInfo, AttributeType, MemberInfo, readU8 } from './class_file_info'
@@ -60,6 +61,8 @@ export class ClassFileReader {
         classData.sourceFile = this.getAttributeName(attributes.find(a => a.type === AttributeType.SourceFile), constantPool)
         classData.inners = this.getAttributeNames(attributes.find(a => a.type === AttributeType.InnerClasses), constantPool)
         classData.annotations = this.processAnnotations(attributes, constantPool)
+        classData.fqcn = classData.name.replace(/\//g, '.').replace(/\$/g, '.')
+        classData.pkg = PathHelper.dirname(classData.name).replace(/\//g, '.')
         return classData
     }
 

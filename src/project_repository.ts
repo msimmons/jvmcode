@@ -16,7 +16,10 @@ import { performance } from 'perf_hooks'
  */
 export class ProjectRepository {
 
-    private fqcnMap = new Map<string, {entry: JarEntryData, dependency: DependencyData}>() // Fqcn -> related data
+    private fqcnEntryMap = new Map<string, {entry: JarEntryData, dependency: DependencyData}>() // Fqcn -> related data
+    private entryNameToFqcn = new Map<string, Set<string>>()
+    private fqncClassMap = new Map<string, ClassData>() // Fqcn -> local class data
+    private classNameToFqcn = new Map<string, Set<string>>()
     private sourceMap = new Map<string, SourceEntryData[]>() // Filename -> list of matches
     private packageMap = new Map<string, JarPackageData[]>() // jar name to resolved packages
     private resolvedSourceJars = new Set<string>()
@@ -28,6 +31,24 @@ export class ProjectRepository {
     private classFileReader = new ClassFileReader()
 
     public constructor() {
+    }
+
+    /**
+     * Find all class jar entries by unqualified name
+     */
+    public findJarEntriesByName(name: string) : ClassEntryData[] {
+        let fqcns = this.entryNameToFqcn.get(name)
+        if (fqcns) return Array.from(fqcns).map(fqcn => this.fqcnEntryMap.get(fqcn)).filter(e => e).map(e => e.entry) as ClassEntryData[]
+        else return []
+    }
+
+    /**
+     * Find all class data entries by unqualified name
+     */
+    public findClassDataByName(name: string) : ClassData[] {
+        let fqcns = this.classNameToFqcn.get(name)
+        if (fqcns) return Array.from(fqcns).map(fqcn => this.fqncClassMap.get(fqcn)).filter(e => e)
+        else return []
     }
 
     /**
@@ -153,7 +174,27 @@ export class ProjectRepository {
         let allPaths = this.userPaths.concat(this.externalPaths).map(p => p.classDir)
         if (allPaths.length === 0) return []
         let files = (await Promise.all(allPaths.map(async dir => await this.findClassFiles(dir)))).reduce((p,c) => p.concat(c))
-        return (await Promise.all(files.map(async file => await this.classFileReader.load(file)))) .filter(d => d)
+        let classData = (await Promise.all(files.map(async file => await this.classFileReader.load(file)))) .filter(d => d)
+        classData.forEach(cd => this.addClassData(cd))
+        return classData
+    }
+
+    /**
+     * Return classdata for the given path
+     */
+    public async getClassDataForPath(path: string) : Promise<ClassData> {
+        let classData =  await this.classFileReader.load(path)
+        this.addClassData(classData)
+        return classData
+    }
+
+    /**
+     * Cache name and fqcn -> class data
+     */
+    private addClassData(classData: ClassData) {
+        let name = classData.fqcn.split('.').slice(-1)[0]
+        this.fqncClassMap.set(classData.fqcn, classData)
+        this.classNameToFqcn.has(name) ? this.classNameToFqcn.get(name).add(classData.fqcn) : this.classNameToFqcn.set(name, new Set([classData.fqcn]))
     }
 
     /**
@@ -215,13 +256,6 @@ export class ProjectRepository {
     }
     
     /**
-     * Return classdata for the given path
-     */
-    public async getClassDataForPath(path: string) : Promise<ClassData> {
-        return this.classFileReader.load(path)
-    }
-
-    /**
      * Returns the collection of package entries for the dependency
      * @param dependency 
      */
@@ -238,11 +272,11 @@ export class ProjectRepository {
      * @param jarFile 
      */
     public async resolveJarEntryData(fqcn : string, jarFile : string) : Promise<JarEntryData> {
-        let entry = this.fqcnMap.get(fqcn)
+        let entry = this.fqcnEntryMap.get(fqcn)
         if (!entry) throw `No entry found for ${fqcn}`
         if (!jarFile) jarFile = entry.dependency.fileName
         if (entry.entry.resolved) return entry.entry
-        this.fqcnMap.set(fqcn, entry)
+        this.fqcnEntryMap.set(fqcn, entry)
         let classEntry = entry.entry as ClassEntryData
         return this.readJarEntry(jarFile, entry.entry.path).then(data => {
             classEntry.classData = this.classFileReader.create(entry.entry.path, 0, data)
@@ -285,7 +319,9 @@ export class ProjectRepository {
                     let jarEntry: JarEntryData = ext.endsWith('class') ? new ClassEntryData(pkg, name, entry.name) : new ResourceEntryData(filename, entry.name)
                     if (!packages.has(pkg)) packages.set(pkg, [])
                     packages.get(pkg).push(jarEntry)
-                    this.fqcnMap.set(jarEntry.fqcn, {entry: jarEntry, dependency: dependency})
+                    this.fqcnEntryMap.set(jarEntry.fqcn, {entry: jarEntry, dependency: dependency})
+                    let uqn = jarEntry.fqcn.split('.').slice(-1)[0]
+                    this.entryNameToFqcn.has(uqn) ? this.entryNameToFqcn.get(uqn).add(jarEntry.fqcn) : this.entryNameToFqcn.set(uqn, new Set<string>([jarEntry.fqcn]))
                 }
                 count++
             })

@@ -25,11 +25,14 @@ describe('Parse a java source file', () => {
 
     filenames.forEach(filename => {
         let text = readData(filename, 'javasource')
+        let start = new Date().valueOf()
         let expected = JSON.parse(readData(filename, 'json')) as ParseResult
+        let end = new Date().valueOf()
         let request = {text: text, file: filename, languageId: 'java'} as ParseRequest
         it(filename, () => {
             let result = parser.parse(request)
             expect(result).to.deep.include(expected)
+            expect(end-start).to.be.lessThan(1000)
         })
     })
 

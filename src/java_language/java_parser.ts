@@ -40,6 +40,7 @@ export class JavaParser {
 
     private processContent(context: ParseContext, content: string) {
         let result = Grammar.Defs.parse(content)
+        if (!result.status) result = Grammar.Expression.parse(content)
         if (result.status) result.value(context)
         else {
             console.warn(`FAILED: ${content}`, result)

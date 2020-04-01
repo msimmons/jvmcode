@@ -23,7 +23,6 @@ export class JvmDefinitionProvider implements vscode.DefinitionProvider {
             }
             let offset = document.offsetAt(position)
             let symbol = result.symbols.find(s => { return s.location.start <= offset && s.location.end >= offset})
-            console.log(symbol)
             let location = this.findLocation(document, offset, symbol, result)
             resolve(location)
         })

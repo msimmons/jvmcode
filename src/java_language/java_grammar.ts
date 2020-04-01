@@ -266,9 +266,9 @@ export const Grammar = P.createLanguage<{
     OCT_LITERAL: () => P.regexp(/0[0-7_]*/).map(v => {return {value: v, type: 'java.lang.Number'}}).node('Literal'),
     IDENT: () => P.regexp(/[a-zA-Z\$][\w]*/),
 
-    BlockKeyword: () => P.regexp(/try|catch|finally|for/).node('Keyword'),
-    Keyword: () => P.regexp(/return|throw|if|else|while|do|new/).node('Keyword'),
-    ModifierKeyword: () => P.regexp(/static|synchronized/).node('Keyword'),
+    BlockKeyword: () => P.regexp(/(try|catch|finally|for)\b/).node('Keyword'),
+    Keyword: () => P.regexp(/(return|throw|if|else|while|do|new)\b/).node('Keyword'),
+    ModifierKeyword: () => P.regexp(/(static|synchronized)\b/).node('Keyword'),
 
     Literal: (r) => P.alt(r.FALSE, r.TRUE, r.NULL, r.UNICODE_LITERAL, r.CHAR_LITERAL, r.STRING3_LITERAL, 
         r.STRING_LITERAL, r.HEX_LITERAL, r.BIN_LITERAL, r.NUM_LITERAL, r.OCT_LITERAL).map(node => {
@@ -448,7 +448,7 @@ export const Grammar = P.createLanguage<{
         return context.addSymDef(id.name, id.name, ParseSymbolType.CONSTRUCTOR, id.start, id.end, 0, true)
     }),
 
-    Param: (r) => P.alt(r.QIdent, r.Literal).trim(r._).node('Param').map(node => context => {
+    Param: (r) => P.alt(r.Literal, r.QIdent).trim(r._).node('Param').map(node => context => {
         context.logNode(node)
         let id = node.value
         if (id.symbolType === ParseSymbolType.LITERAL) return context.addLiteral(id.name, id.type, id.start, id.end)
@@ -459,7 +459,7 @@ export const Grammar = P.createLanguage<{
         return undefined
     }),
 
-    Expression: (r) => P.alt(r.QIdent, r.Literal, P.regexp(/[^\w]/)).atLeast(1).node('Expression').map(node => context => {
+    Expression: (r) => P.alt(r.Literal, r.QIdent, P.regexp(/[^\w]/)).atLeast(1).node('Expression').map(node => context => {
         context.logNode(node)
         node.value.forEach(v => {
             if (typeof v === 'object') {

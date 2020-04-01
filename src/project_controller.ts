@@ -232,7 +232,18 @@ export class ProjectController {
         return vscode.Uri.file(path).with({scheme: scheme, authority: authority, fragment: jarFile})
     }
 
+    /**
+     * Return a uri for the given fqcn
+     * @param fqcn
+     */
     async getFqcnUri(fqcn: string) : Promise<vscode.Uri> {
+        // First check local classes
+        let localClass = this.classDataRootNode.classDataNodes.find(node => node.data.fqcn === fqcn)
+        if (localClass) {
+            let path = await this.findSourcePath(localClass.data.sourceFile)
+            return vscode.Uri.file(path)
+        }
+        // Else check jar entries
         let entries = this.entryNodeMap.get(fqcn)
         if (!entries) {
             entries = (await this.getJarEntryNodes()).filter(entry => entry.data.fqcn === fqcn)
