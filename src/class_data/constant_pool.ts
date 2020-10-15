@@ -1,4 +1,5 @@
-import { Info, DispatchTable, InfoType } from "./class_file_info"
+import { Info, DispatchTable, InfoType, readU16 } from "./class_file_info"
+import { ClassFileContext } from './class_file_context'
 
 export class ConstantPool {
 
@@ -9,9 +10,9 @@ export class ConstantPool {
     }
 
     static read(context: ClassFileContext) : ConstantPool {
-        let cpSize = context.data.readUInt16BE(context.offset)
-        let pool: Info[] = []
-        for (var i = 0; i < cpSize; i++) {
+        let cpSize = readU16(context)
+        let pool: Info[] = [{type: 0, index: 0, value: 'JVM'}]
+        for (var i = 1; i < cpSize; i++) {
             let tag = context.data.readUInt8(context.offset)
             context.offset += 1
             let dispatcher = DispatchTable.get(tag)
@@ -20,10 +21,13 @@ export class ConstantPool {
                 pool.push(info)
             }
             else {
-                console.log(`Unknown constant type ${tag} at ${i}`)
+                console.debug(`Unknown constant type ${tag} at ${i} offset ${context.offset} in ${context.path}`)
                 context.offset += 1
             }
-            if ([InfoType.LONG, InfoType.DOUBLE].includes(tag)) i++
+            if ([InfoType.LONG, InfoType.DOUBLE].includes(tag)) {
+                i++
+                pool.push({type: 0, index: i, value: 'Padding'})
+            }
         }
         return new ConstantPool(pool)
     }

@@ -1,73 +1,46 @@
 'use strict';
 
 import * as vscode from 'vscode'
-import { JvmServer } from './jvm_server'
 import { JarEntryNode, TreeNode, LanguageNode, ClassDataNode } from './models'
-import { ProjectService } from './project_service'
 import { ProjectController } from './project_controller'
-import { StatsController } from './stats_controller'
-import { LanguageService } from './language_service'
 import { LanguageController } from './language_controller'
 import { JUnitController } from './junit_controller'
 import { ConfigService } from './config_service'
 import { IconService } from './icon_service';
+import { ProjectUpdateData } from './project_model'
+import { ProjectRepository } from './project_repository';
+import { PerformanceObserver, performance } from 'perf_hooks'
+import { LanguageRequest } from './language_model';
+import { JavaProvider } from './java_language/java_provider';
 
-export let server: JvmServer
-export let projectService: ProjectService
+let projectRepo: ProjectRepository // TODO Rename to service later
 export let projectController: ProjectController
-export let languageService: LanguageService
 export let languageController: LanguageController
 let junitController: JUnitController
-let statsController: StatsController
-export let extensionContext: vscode.ExtensionContext // Allows test to access the context?
+export let testContext: vscode.ExtensionContext // Allows test to access the context?
 export let iconService: IconService
+let performanceObserver: PerformanceObserver
 
 export function activate(context: vscode.ExtensionContext) {
-    extensionContext = context
+    testContext = context
     iconService = new IconService(context)
-
-    // Start and manage the JVM vertx server -- one server per workspace
-    if (!server) {
-        server = new JvmServer(context)
-        server.start()
-        projectService = new ProjectService(server)
-        projectController = new ProjectController(context, projectService)
-        junitController = new JUnitController(projectController)
-        context.subscriptions.push(junitController)
-        // We don't start the project controller or junit controller unless we get a request or there are user items
-        languageService = new LanguageService(server)
-        languageController = new LanguageController(languageService, projectController)
-        context.subscriptions.push(languageController)
-        languageController.start()
-        statsController = new StatsController(server)
-        statsController.start()
-    }
-
-    //
-    // Register all the commands below
-    //
-
-    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.start', () => {
-        server = new JvmServer(context)
-        server.start()
-    }))
-
-    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.log-level', () => {
-        vscode.window.showQuickPick(['DEBUG', 'INFO', 'WARN', 'ERROR']).then((choice) => {
-            if (choice) {
-                server.send('jvmcode.log-level', { level: choice }).then((reply) => {
-                    vscode.window.showInformationMessage('Set level to: ' + JSON.stringify(reply.body.level))
-                }).catch((error) => {
-                    vscode.window.showErrorMessage('Unable to set level: ' + error.message)
-                })
-            }
+    performanceObserver = new PerformanceObserver((entryList) => {
+        entryList.getEntries().forEach(entry => {
+            console.debug(`${entry.name}: ${entry.duration}ms`)
+            performance.clearMarks(entry.name)
         })
-    }))
+    })
+    performanceObserver.observe({entryTypes: ['measure']})
 
-    context.subscriptions.push(vscode.commands.registerCommand('jvmcode.stop', () => {
-        server.shutdown()
-        server = null
-    }))
+    projectRepo = new ProjectRepository()
+    projectController = new ProjectController(context, projectRepo)
+    junitController = new JUnitController(projectController)
+    context.subscriptions.push(junitController)
+    languageController = new LanguageController(projectController)
+    context.subscriptions.push(languageController)
+
+    // Register here until it's a separate extension
+    languageController.registerLanguage(new JavaProvider())
 
     /**
      * Allow the user to find any class in the projects current dependencies
@@ -149,7 +122,7 @@ export function activate(context: vscode.ExtensionContext) {
      */
     context.subscriptions.push(vscode.commands.registerCommand('jvmcode.exec-class', async () => {
         let classData = await projectController.getClassData()
-        let classes = classData.filter(cd => cd.methods.find(m => m.isMain)).map(c => c.name)
+        let classes = classData.filter(cd => cd.methods.find(m => m.isMain() && m.isStatic())).map(c => c.name)
         vscode.window.showQuickPick(classes).then((mainClass) => {
             if (!mainClass) return
             let cp = projectController.getClasspath()
@@ -192,29 +165,13 @@ export function activate(context: vscode.ExtensionContext) {
 
     /* Export an api for use by other extensions */
     let api = {
-        // Send message to the given address (one consumer with result callback)
-        send(address: string, message: object): Promise<any> {
-            return server.send(address, message)
+        // Update a project
+        updateProject(project: ProjectUpdateData) {
+            projectController.updateProjectData(project)
         },
-        // Publish a message to the given address (multiple consumers, no callback)
-        publish(address: string, message: object) {
-            server.publish(address, message)
-        },
-        // Install the given verticle
-        install(jarFiles: string[], verticleName: string): Promise<any> {
-            return server.install(jarFiles, verticleName)
-        },
-        // Serve static content at the given path from the given webRoot (absolute)
-        serve(path: string, webRoot: string) {
-            return server.serve(path, webRoot)
-        },
-        // Register a consumer
-        registerConsumer(address: string, callback) {
-            server.registerConsumer(address, callback)
-        },
-        // Unregister a consumer
-        unregisterConsumer(address: string, callback) {
-            server.unregisterConsumer(address, callback)
+        // Request Language Support
+        requestLanguage(language: LanguageRequest) {
+            languageController.registerLanguage(language)
         }
     }
     return api
@@ -224,5 +181,4 @@ export function activate(context: vscode.ExtensionContext) {
 export async function deactivate() {
     languageController.dispose()
     junitController.dispose()
-    await server.shutdown()
 }

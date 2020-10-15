@@ -13,13 +13,14 @@ export class ConfigService {
      */
     public static getConfig() : LocalConfig {
         let configuration = vscode.workspace.getConfiguration('jvmcode')
+        let javaHome: string = configuration.get('javaHome') as string
         let excludes: string[] = configuration.get('excludes') as string[]
         let extensions: string[] = configuration.get('sourceExtensions') as string[]
         let jmodIncludes: string[] = configuration.get('jmodIncludes') as string[]
         let srcLocation: string = configuration.get('srcLocation') as string
         let outputDirMap: string[] = configuration.get('outputDirMap') as string[]
         let testResultsDir: string = configuration.get('testResultsDir') as string
-        return { excludes: excludes, extensions: extensions, jmodIncludes: jmodIncludes, srcLocation: srcLocation, outputDirMap: outputDirMap, testResultsDir: testResultsDir }
+        return { javaHome: javaHome, excludes: excludes, extensions: extensions, jmodIncludes: jmodIncludes, srcLocation: srcLocation, outputDirMap: outputDirMap, testResultsDir: testResultsDir }
     }
 
     public static getJavaCommand() : string {

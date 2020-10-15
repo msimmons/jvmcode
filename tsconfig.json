@@ -9,6 +9,7 @@
             "DOM"
         ],
         "sourceMap": true,
+        "declaration": true,
         "rootDir": ".",
         "allowJs": true
     },

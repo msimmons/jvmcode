@@ -1,8 +1,8 @@
 {
   "name": "jvmcode",
   "displayName": "JVMCode",
-  "description": "JVM Services",
-  "version": "1.0.4",
+  "description": "Support for JVM Languages",
+  "version": "2.0.0",
   "publisher": "contrapt",
   "license": "Apache 2.0",
   "engines": {
@@ -26,21 +26,6 @@
   "main": "./out/src/extension",
   "contributes": {
     "commands": [
-      {
-        "command": "jvmcode.start",
-        "title": "Start Server",
-        "category": "JVM"
-      },
-      {
-        "command": "jvmcode.log-level",
-        "title": "Set Log Level",
-        "category": "JVM"
-      },
-      {
-        "command": "jvmcode.stop",
-        "title": "Stop Server",
-        "category": "JVM"
-      },
       {
         "command": "jvmcode.add-dependency",
         "title": "Add Dependency",
@@ -207,8 +192,13 @@
       ]
     },
     "configuration": {
-      "title": "JVMCode Server Configuration",
+      "title": "JVM Configuration",
       "properties": {
+        "jvmcode.javaHome": {
+          "type": "string",
+          "default": "/usr/lib/jvm/java-11-openjdk-amd64",
+          "description": "Java home directory"
+        },
         "jvmcode.javaCommand": {
           "type": "string",
           "default": "/usr/bin/java",
@@ -246,7 +236,11 @@
             "jdk",
             "sun",
             "java.awt",
-            "java.rmi"
+            "java.rmi",
+            "bin",
+            "classes",
+            "conf",
+            "include"
           ],
           "description": "A list of packages to exclude from dependency list.  Matches all packages with the given prefix"
         },
@@ -290,25 +284,28 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile; ./gradlew build deploy",
+    "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "test": "npm run compile && node ./node_modules/vscode/bin/test"
+    "test": "mocha -r ts-node/register test/unit/**/*.test.ts"
   },
   "devDependencies": {
+    "@types/chai": "^4.2.11",
+    "@types/jszip": "^3.1.7",
     "@types/mocha": "^2.2.48",
     "@types/node": "^8.10.59",
-    "@types/jszip": "^3.1.7",
+    "@types/parsimmon": "^1.10.1",
     "@types/vscode": "^1.42.0",
+    "chai": "^4.2.0",
     "mocha": "^3.5.0",
-    "typescript": "^3.5.1",
-    "tslint": "^5.16.0"
+    "ts-node": "^8.8.1",
+    "tslint": "^5.16.0",
+    "typescript": "^3.5.1"
   },
   "dependencies": {
     "fast-xml-parser": "^3.16.0",
     "he": "^1.2.0",
     "jszip": "^3.2.2",
-    "node-uuid": "^1.4.8",
-    "vertx3-eventbus-client": "^3.8.5"
+    "parsimmon": "^1.13.0"
   }
 }

@@ -3,7 +3,8 @@
 import * as vscode from 'vscode';
 import * as JSZip from 'jszip'
 import { readFile } from 'fs';
-import { ClassData } from 'server-models'
+import { ClassData } from './class_data/class_data'
+import { ProjectRepository } from './project_repository';
 
 /**
  * Provide content for resources found in JAR files
@@ -17,9 +18,11 @@ export class JarContentProvider implements vscode.TextDocumentContentProvider {
 
 	private onDidChangeEmitter = new vscode.EventEmitter<vscode.Uri>();
     private subscriptions: vscode.Disposable;
-    private classDataMap = new Map<string, string>() // map of path to classdata for classfiles
+    private contentMap = new Map<string, string>() // Map of URI to content -- think about LRU for memory conservation
+    private repository: ProjectRepository
 
-	public constructor() {
+    constructor(repository: ProjectRepository) {
+        this.repository = repository
 		// Listen to the `closeTextDocument`-event which means we must
 		// clear the corresponding model object - `ReferencesDocument`
         //this.subscriptions = vscode.workspace.onDidCloseTextDocument(doc => {this.closeDoc(doc)})
@@ -44,14 +47,14 @@ export class JarContentProvider implements vscode.TextDocumentContentProvider {
      */
     addClassData(uri: vscode.Uri, classData: ClassData) {
         let text = JSON.stringify(classData, undefined, 3)
-        this.classDataMap.set(this.getUriKey(uri), text)
+        this.contentMap.set(this.getUriKey(uri), text)
     }
 
     /**
      * Get rid of all classdata
      */
     clearResults() {
-        this.classDataMap.clear()
+        this.contentMap.clear()
     }
 
 	/** Expose an event to signal changes of _virtual_ documents
@@ -77,30 +80,11 @@ export class JarContentProvider implements vscode.TextDocumentContentProvider {
     /**
      * Read the contents of the given path from the given source jar file.
      */
-    private getSourceContent(uri: vscode.Uri) : Promise<string> {
+    private async getSourceContent(uri: vscode.Uri) : Promise<string> {
         let jarFile = uri.fragment
         let path = uri.path.startsWith('/') ? uri.path.substring(1) : uri.path
-        return new Promise((resolve, reject) => {
-            readFile(jarFile, (err, data) => {
-                if (err) {
-                    resolve(`Error opening file ${jarFile}\n   ${err}`)
-                }
-                else {
-                    JSZip.loadAsync(data).then(zip => {
-                        let entry = zip.file(path)
-                        if (!entry) resolve(`No entry found in ${jarFile} for ${path}`)
-                        entry.async("string").then((text) =>{
-                            this.classDataMap[this.getUriKey(uri)] = text
-                            resolve(text)
-                        }).catch(reason => {
-                            resolve(`Error in entry.async for ${entry.name} in ${jarFile}\n   ${reason}`)
-                        })
-                    }).catch(reason => {
-                        resolve(`Error in loadAsync for ${jarFile}\n   ${reason}`)
-                    })
-                }
-            })
-        })
+        let buffer = await this.repository.readJarEntry(jarFile, path)
+        return buffer.toString('utf8')
     }
 
     /**
@@ -109,7 +93,7 @@ export class JarContentProvider implements vscode.TextDocumentContentProvider {
     private getClassContent(uri: vscode.Uri) : Promise<string> {
         let key = this.getUriKey(uri)
         return new Promise((resolve, reject) => {
-            resolve(this.classDataMap.has(key) ? this.classDataMap.get(key) : `No ClassData available for ${key}`)
+            resolve(this.contentMap.has(key) ? this.contentMap.get(key) : `No ClassData available for ${key}`)
         })
     }
 }

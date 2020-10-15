@@ -1,0 +1,2154 @@
+{
+   "fqcn": "net.contrapt.gradle.plugin.PluginModelBuilder",
+   "pkg": "net.contrapt.gradle.plugin",
+    "path": "test/fixtures/PluginModelBuilder.class",
+    "lastModified": 1585672915276,
+    "minor": 0,
+    "major": 52,
+    "accessFlags": 49,
+    "name": "net/contrapt/gradle/plugin/PluginModelBuilder",
+    "extends": "java/lang/Object",
+    "implements": [],
+    "references": [
+       "net/contrapt/gradle/plugin/PluginModelBuilder",
+       "java/lang/Object",
+       "java/lang/Throwable",
+       "kotlin/jvm/internal/Intrinsics",
+       "java/util/ArrayList",
+       "java/util/List",
+       "kotlin/Result",
+       "kotlin/ResultKt",
+       "kotlin/collections/CollectionsKt",
+       "java/util/Collection",
+       "kotlin/collections/MapsKt",
+       "java/util/Map",
+       "kotlin/collections/SetsKt",
+       "java/util/Set",
+       "java/lang/StringBuilder",
+       "org/gradle/api/Project",
+       "org/gradle/api/invocation/Gradle",
+       "java/io/File",
+       "net/contrapt/gradle/plugin/PluginDependencySource",
+       "net/contrapt/gradle/plugin/PluginModel",
+       "net/contrapt/gradle/plugin/PluginModel$Companion",
+       "java/lang/Iterable",
+       "net/contrapt/gradle/plugin/PluginModel$Impl",
+       "org/gradle/internal/exceptions/LocationAwareException",
+       "java/lang/Integer",
+       "kotlin/TuplesKt",
+       "java/lang/String",
+       "kotlin/Pair",
+       "kotlin/TypeCastException",
+       "java/lang/CharSequence",
+       "net/contrapt/gradle/plugin/PluginDiagnostic$Impl",
+       "java/lang/Number",
+       "net/contrapt/gradle/plugin/PluginDiagnostic",
+       "java/util/Iterator",
+       "java/util/Map$Entry",
+       "kotlin/collections/ArraysKt",
+       "[Ljava/lang/String;",
+       "net/contrapt/gradle/plugin/PluginModelBuilder$getTasks$curPrefix$1",
+       "kotlin/jvm/functions/Function1",
+       "org/gradle/api/Task",
+       "java/util/LinkedHashSet",
+       "java/lang/Exception",
+       "java/util/UUID",
+       "org/gradle/api/artifacts/ConfigurationContainer",
+       "org/gradle/api/artifacts/Configuration",
+       "org/gradle/api/artifacts/dsl/DependencyHandler",
+       "org/gradle/api/artifacts/ResolvedConfiguration",
+       "org/gradle/api/artifacts/LenientConfiguration",
+       "org/gradle/api/artifacts/ResolvedArtifact",
+       "org/gradle/api/artifacts/ResolvedModuleVersion",
+       "org/gradle/api/artifacts/ModuleVersionIdentifier",
+       "org/gradle/api/logging/Logger",
+       "net/contrapt/gradle/plugin/PluginDependency",
+       "org/gradle/api/artifacts/UnresolvedDependency",
+       "org/gradle/api/artifacts/ModuleVersionSelector",
+       "org/gradle/api/artifacts/ModuleIdentifier",
+       "java/util/LinkedHashMap",
+       "org/gradle/api/artifacts/Dependency",
+       "org/gradle/api/plugins/Convention",
+       "org/gradle/api/plugins/JavaPluginConvention",
+       "org/gradle/api/tasks/SourceSet",
+       "org/gradle/api/tasks/SourceSetOutput",
+       "kotlin/ranges/RangesKt",
+       "kotlin/text/StringsKt",
+       "org/gradle/api/file/SourceDirectorySet",
+       "net/contrapt/gradle/plugin/PluginPath"
+    ],
+    "fields": [
+       {
+          "name": "sourceToOutputTags",
+          "type": "Ljava/util/List<Ljava/lang/String;>;",
+          "isParam": false,
+          "index": -1,
+          "line": 0,
+          "annotations": [],
+          "accessFlags": 18
+       }
+    ],
+    "methods": [
+       {
+          "name": "getSourceToOutputTags",
+          "type": "()Ljava/util/List<Ljava/lang/String;>;",
+          "params": [
+             {
+                "name": "this",
+                "type": "Lnet/contrapt/gradle/plugin/PluginModelBuilder;",
+                "isParam": true,
+                "index": 0,
+                "line": 16,
+                "annotations": [],
+                "accessFlags": 0
+             }
+          ],
+          "locals": [],
+          "annotations": [],
+          "accessFlags": 17
+       },
+       {
+          "name": "build",
+          "type": "(Lorg/gradle/api/Project;)Lnet/contrapt/gradle/plugin/PluginModel;",
+          "params": [
+             {
+                "name": "this",
+                "type": "Lnet/contrapt/gradle/plugin/PluginModelBuilder;",
+                "isParam": true,
+                "index": 0,
+                "line": 19,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "project",
+                "type": "Lorg/gradle/api/Project;",
+                "isParam": true,
+                "index": 1,
+                "line": 19,
+                "annotations": [],
+                "accessFlags": 0
+             }
+          ],
+          "locals": [
+             {
+                "name": "$this$runCatching",
+                "type": "Lnet/contrapt/gradle/plugin/PluginModelBuilder;",
+                "isParam": false,
+                "index": 7,
+                "line": 19,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$a$-runCatching-PluginModelBuilder$build$taskResult$1",
+                "type": "I",
+                "isParam": false,
+                "index": 8,
+                "line": 20,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$this$runCatching",
+                "type": "Lnet/contrapt/gradle/plugin/PluginModelBuilder;",
+                "isParam": false,
+                "index": 8,
+                "line": 19,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$a$-runCatching-PluginModelBuilder$build$dependenciesResult$1",
+                "type": "I",
+                "isParam": false,
+                "index": 9,
+                "line": 21,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$this$runCatching",
+                "type": "Lnet/contrapt/gradle/plugin/PluginModelBuilder;",
+                "isParam": false,
+                "index": 9,
+                "line": 19,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$a$-runCatching-PluginModelBuilder$build$pathsResult$1",
+                "type": "I",
+                "isParam": false,
+                "index": 10,
+                "line": 22,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "it",
+                "type": "Ljava/lang/Throwable;",
+                "isParam": false,
+                "index": 10,
+                "line": 19,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$a$-getOrElse-PluginModelBuilder$build$tasks$1",
+                "type": "I",
+                "isParam": false,
+                "index": 11,
+                "line": 28,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "it",
+                "type": "Ljava/lang/Throwable;",
+                "isParam": false,
+                "index": 11,
+                "line": 19,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$a$-getOrElse-PluginModelBuilder$build$dependencies$1",
+                "type": "I",
+                "isParam": false,
+                "index": 12,
+                "line": 29,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "it",
+                "type": "Ljava/lang/Throwable;",
+                "isParam": false,
+                "index": 12,
+                "line": 19,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$a$-getOrElse-PluginModelBuilder$build$classpaths$1",
+                "type": "I",
+                "isParam": false,
+                "index": 13,
+                "line": 30,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "dependencySource",
+                "type": "Lnet/contrapt/gradle/plugin/PluginDependencySource;",
+                "isParam": false,
+                "index": 10,
+                "line": 33,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "description",
+                "type": "Ljava/lang/String;",
+                "isParam": false,
+                "index": 9,
+                "line": 32,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "classpaths",
+                "type": "Ljava/util/Set;",
+                "isParam": false,
+                "index": 8,
+                "line": 31,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "dependencies",
+                "type": "Ljava/util/Map;",
+                "isParam": false,
+                "index": 7,
+                "line": 30,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "tasks",
+                "type": "Ljava/util/Collection;",
+                "isParam": false,
+                "index": 6,
+                "line": 29,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "pathsResult",
+                "type": "Ljava/lang/Object;",
+                "isParam": false,
+                "index": 5,
+                "line": 24,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "dependenciesResult",
+                "type": "Ljava/lang/Object;",
+                "isParam": false,
+                "index": 4,
+                "line": 22,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "taskResult",
+                "type": "Ljava/lang/Object;",
+                "isParam": false,
+                "index": 3,
+                "line": 21,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "errors",
+                "type": "Ljava/util/List;",
+                "isParam": false,
+                "index": 2,
+                "line": 20,
+                "annotations": [],
+                "accessFlags": 0
+             }
+          ],
+          "annotations": [],
+          "accessFlags": 17
+       },
+       {
+          "name": "processException",
+          "type": "(Lorg/gradle/api/Project;Ljava/util/List<Lnet/contrapt/gradle/plugin/PluginDiagnostic;>;Ljava/lang/Throwable;)V",
+          "params": [
+             {
+                "name": "this",
+                "type": "Lnet/contrapt/gradle/plugin/PluginModelBuilder;",
+                "isParam": true,
+                "index": 0,
+                "line": 37,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "project",
+                "type": "Lorg/gradle/api/Project;",
+                "isParam": true,
+                "index": 1,
+                "line": 37,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "errors",
+                "type": "Ljava/util/List;",
+                "isParam": true,
+                "index": 2,
+                "line": 37,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "exception",
+                "type": "Ljava/lang/Throwable;",
+                "isParam": true,
+                "index": 3,
+                "line": 37,
+                "annotations": [],
+                "accessFlags": 0
+             }
+          ],
+          "locals": [],
+          "annotations": [],
+          "accessFlags": 18
+       },
+       {
+          "name": "processCause",
+          "type": "(Ljava/lang/Throwable;Ljava/lang/StringBuilder;)Lkotlin/Pair<Ljava/lang/String;Ljava/lang/Integer;>;",
+          "params": [
+             {
+                "name": "this",
+                "type": "Lnet/contrapt/gradle/plugin/PluginModelBuilder;",
+                "isParam": true,
+                "index": 0,
+                "line": 41,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "e",
+                "type": "Ljava/lang/Throwable;",
+                "isParam": true,
+                "index": 1,
+                "line": 41,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "message",
+                "type": "Ljava/lang/StringBuilder;",
+                "isParam": true,
+                "index": 2,
+                "line": 41,
+                "annotations": [],
+                "accessFlags": 0
+             }
+          ],
+          "locals": [],
+          "annotations": [],
+          "accessFlags": 18
+       },
+       {
+          "name": "getDiagnostic",
+          "type": "(Lorg/gradle/api/Project;Ljava/lang/Throwable;Ljava/lang/String;)Lnet/contrapt/gradle/plugin/PluginDiagnostic;",
+          "params": [
+             {
+                "name": "this",
+                "type": "Lnet/contrapt/gradle/plugin/PluginModelBuilder;",
+                "isParam": true,
+                "index": 0,
+                "line": 51,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "project",
+                "type": "Lorg/gradle/api/Project;",
+                "isParam": true,
+                "index": 1,
+                "line": 51,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "thrown",
+                "type": "Ljava/lang/Throwable;",
+                "isParam": true,
+                "index": 2,
+                "line": 51,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "optional",
+                "type": "Ljava/lang/String;",
+                "isParam": true,
+                "index": 3,
+                "line": 51,
+                "annotations": [],
+                "accessFlags": 0
+             }
+          ],
+          "locals": [
+             {
+                "name": "location",
+                "type": "Lkotlin/Pair;",
+                "isParam": false,
+                "index": 6,
+                "line": 54,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "message",
+                "type": "Ljava/lang/StringBuilder;",
+                "isParam": false,
+                "index": 5,
+                "line": 53,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "curExc",
+                "type": "Ljava/lang/Throwable;",
+                "isParam": false,
+                "index": 4,
+                "line": 52,
+                "annotations": [],
+                "accessFlags": 0
+             }
+          ],
+          "annotations": [],
+          "accessFlags": 18
+       },
+       {
+          "name": "getDiagnostic$default",
+          "type": "(Lnet/contrapt/gradle/plugin/PluginModelBuilder;Lorg/gradle/api/Project;Ljava/lang/Throwable;Ljava/lang/String;ILjava/lang/Object;)Lnet/contrapt/gradle/plugin/PluginDiagnostic;",
+          "params": [],
+          "locals": [],
+          "annotations": [],
+          "accessFlags": 4104
+       },
+       {
+          "name": "getTasks",
+          "type": "(Lorg/gradle/api/Project;[Ljava/lang/String;Ljava/util/Collection<Ljava/lang/String;>;)Ljava/util/Collection<Ljava/lang/String;>;",
+          "params": [
+             {
+                "name": "this",
+                "type": "Lnet/contrapt/gradle/plugin/PluginModelBuilder;",
+                "isParam": true,
+                "index": 0,
+                "line": 64,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "project",
+                "type": "Lorg/gradle/api/Project;",
+                "isParam": true,
+                "index": 1,
+                "line": 64,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "prefix",
+                "type": "[Ljava/lang/String;",
+                "isParam": true,
+                "index": 2,
+                "line": 64,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "tasks",
+                "type": "Ljava/util/Collection;",
+                "isParam": true,
+                "index": 3,
+                "line": 64,
+                "annotations": [],
+                "accessFlags": 0
+             }
+          ],
+          "locals": [
+             {
+                "name": "parentPrefix",
+                "type": "[Ljava/lang/String;",
+                "isParam": false,
+                "index": 12,
+                "line": 66,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "it",
+                "type": "Ljava/util/Map$Entry;",
+                "isParam": false,
+                "index": 10,
+                "line": 64,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$a$-forEach-PluginModelBuilder$getTasks$1",
+                "type": "I",
+                "isParam": false,
+                "index": 11,
+                "line": 65,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "element$iv",
+                "type": "Ljava/util/Map$Entry;",
+                "isParam": false,
+                "index": 9,
+                "line": 171,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$this$forEach$iv",
+                "type": "Ljava/util/Map;",
+                "isParam": false,
+                "index": 4,
+                "line": 64,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$f$forEach",
+                "type": "I",
+                "isParam": false,
+                "index": 5,
+                "line": 171,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "it",
+                "type": "Lorg/gradle/api/Task;",
+                "isParam": false,
+                "index": 12,
+                "line": 64,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$a$-map-PluginModelBuilder$getTasks$2",
+                "type": "I",
+                "isParam": false,
+                "index": 13,
+                "line": 69,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "item$iv$iv",
+                "type": "Ljava/lang/Object;",
+                "isParam": false,
+                "index": 11,
+                "line": 175,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$this$mapTo$iv$iv",
+                "type": "Ljava/lang/Iterable;",
+                "isParam": false,
+                "index": 7,
+                "line": 64,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "destination$iv$iv",
+                "type": "Ljava/util/Collection;",
+                "isParam": false,
+                "index": 8,
+                "line": 64,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$f$mapTo",
+                "type": "I",
+                "isParam": false,
+                "index": 9,
+                "line": 174,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$this$map$iv",
+                "type": "Ljava/lang/Iterable;",
+                "isParam": false,
+                "index": 5,
+                "line": 64,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$f$map",
+                "type": "I",
+                "isParam": false,
+                "index": 6,
+                "line": 173,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "it",
+                "type": "Lorg/gradle/api/Task;",
+                "isParam": false,
+                "index": 12,
+                "line": 64,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$a$-map-PluginModelBuilder$getTasks$3",
+                "type": "I",
+                "isParam": false,
+                "index": 13,
+                "line": 71,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "item$iv$iv",
+                "type": "Ljava/lang/Object;",
+                "isParam": false,
+                "index": 11,
+                "line": 179,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$this$mapTo$iv$iv",
+                "type": "Ljava/lang/Iterable;",
+                "isParam": false,
+                "index": 7,
+                "line": 64,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "destination$iv$iv",
+                "type": "Ljava/util/Collection;",
+                "isParam": false,
+                "index": 8,
+                "line": 64,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$f$mapTo",
+                "type": "I",
+                "isParam": false,
+                "index": 9,
+                "line": 178,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$this$map$iv",
+                "type": "Ljava/lang/Iterable;",
+                "isParam": false,
+                "index": 5,
+                "line": 64,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$f$map",
+                "type": "I",
+                "isParam": false,
+                "index": 6,
+                "line": 177,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "curPrefix",
+                "type": "Ljava/lang/String;",
+                "isParam": false,
+                "index": 4,
+                "line": 69,
+                "annotations": [],
+                "accessFlags": 0
+             }
+          ],
+          "annotations": [],
+          "accessFlags": 17
+       },
+       {
+          "name": "getTasks$default",
+          "type": "(Lnet/contrapt/gradle/plugin/PluginModelBuilder;Lorg/gradle/api/Project;[Ljava/lang/String;Ljava/util/Collection;ILjava/lang/Object;)Ljava/util/Collection;",
+          "params": [],
+          "locals": [],
+          "annotations": [],
+          "accessFlags": 4105
+       },
+       {
+          "name": "resolveSourceArtifacts",
+          "type": "(Lorg/gradle/api/Project;Ljava/util/Map<Ljava/lang/String;Lnet/contrapt/gradle/plugin/PluginDependency;>;Ljava/util/List<Lnet/contrapt/gradle/plugin/PluginDiagnostic;>;)V",
+          "params": [
+             {
+                "name": "this",
+                "type": "Lnet/contrapt/gradle/plugin/PluginModelBuilder;",
+                "isParam": true,
+                "index": 0,
+                "line": 76,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "project",
+                "type": "Lorg/gradle/api/Project;",
+                "isParam": true,
+                "index": 1,
+                "line": 76,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "dependencies",
+                "type": "Ljava/util/Map;",
+                "isParam": true,
+                "index": 2,
+                "line": 76,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "errors",
+                "type": "Ljava/util/List;",
+                "isParam": true,
+                "index": 3,
+                "line": 76,
+                "annotations": [],
+                "accessFlags": 0
+             }
+          ],
+          "locals": [
+             {
+                "name": "it",
+                "type": "Ljava/util/Map$Entry;",
+                "isParam": false,
+                "index": 12,
+                "line": 76,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$a$-forEach-PluginModelBuilder$resolveSourceArtifacts$1",
+                "type": "I",
+                "isParam": false,
+                "index": 13,
+                "line": 79,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "element$iv",
+                "type": "Ljava/util/Map$Entry;",
+                "isParam": false,
+                "index": 11,
+                "line": 181,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$this$forEach$iv",
+                "type": "Ljava/util/Map;",
+                "isParam": false,
+                "index": 6,
+                "line": 76,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$f$forEach",
+                "type": "I",
+                "isParam": false,
+                "index": 7,
+                "line": 181,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "key",
+                "type": "Ljava/lang/String;",
+                "isParam": false,
+                "index": 12,
+                "line": 86,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "it",
+                "type": "Lorg/gradle/api/artifacts/ResolvedArtifact;",
+                "isParam": false,
+                "index": 10,
+                "line": 76,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$a$-forEach-PluginModelBuilder$resolveSourceArtifacts$2",
+                "type": "I",
+                "isParam": false,
+                "index": 11,
+                "line": 83,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "element$iv",
+                "type": "Ljava/lang/Object;",
+                "isParam": false,
+                "index": 9,
+                "line": 76,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$this$forEach$iv",
+                "type": "Ljava/lang/Iterable;",
+                "isParam": false,
+                "index": 6,
+                "line": 76,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$f$forEach",
+                "type": "I",
+                "isParam": false,
+                "index": 7,
+                "line": 183,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "e",
+                "type": "Ljava/lang/Exception;",
+                "isParam": false,
+                "index": 6,
+                "line": 91,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "it",
+                "type": "Lorg/gradle/api/artifacts/UnresolvedDependency;",
+                "isParam": false,
+                "index": 13,
+                "line": 76,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$a$-filter-PluginModelBuilder$resolveSourceArtifacts$3",
+                "type": "I",
+                "isParam": false,
+                "index": 14,
+                "line": 95,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "element$iv$iv",
+                "type": "Ljava/lang/Object;",
+                "isParam": false,
+                "index": 12,
+                "line": 76,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$this$filterTo$iv$iv",
+                "type": "Ljava/lang/Iterable;",
+                "isParam": false,
+                "index": 8,
+                "line": 76,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "destination$iv$iv",
+                "type": "Ljava/util/Collection;",
+                "isParam": false,
+                "index": 9,
+                "line": 76,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$f$filterTo",
+                "type": "I",
+                "isParam": false,
+                "index": 10,
+                "line": 186,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$this$filter$iv",
+                "type": "Ljava/lang/Iterable;",
+                "isParam": false,
+                "index": 6,
+                "line": 76,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$f$filter",
+                "type": "I",
+                "isParam": false,
+                "index": 7,
+                "line": 185,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "optional",
+                "type": "Ljava/lang/String;",
+                "isParam": false,
+                "index": 15,
+                "line": 99,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "it",
+                "type": "Lorg/gradle/api/artifacts/UnresolvedDependency;",
+                "isParam": false,
+                "index": 13,
+                "line": 76,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$a$-map-PluginModelBuilder$resolveSourceArtifacts$4",
+                "type": "I",
+                "isParam": false,
+                "index": 14,
+                "line": 98,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "item$iv$iv",
+                "type": "Ljava/lang/Object;",
+                "isParam": false,
+                "index": 12,
+                "line": 190,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$this$mapTo$iv$iv",
+                "type": "Ljava/lang/Iterable;",
+                "isParam": false,
+                "index": 8,
+                "line": 76,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "destination$iv$iv",
+                "type": "Ljava/util/Collection;",
+                "isParam": false,
+                "index": 9,
+                "line": 76,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$f$mapTo",
+                "type": "I",
+                "isParam": false,
+                "index": 10,
+                "line": 189,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$this$map$iv",
+                "type": "Ljava/lang/Iterable;",
+                "isParam": false,
+                "index": 6,
+                "line": 76,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$f$map",
+                "type": "I",
+                "isParam": false,
+                "index": 7,
+                "line": 188,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "config",
+                "type": "Lorg/gradle/api/artifacts/Configuration;",
+                "isParam": false,
+                "index": 5,
+                "line": 78,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "configName",
+                "type": "Ljava/lang/String;",
+                "isParam": false,
+                "index": 4,
+                "line": 77,
+                "annotations": [],
+                "accessFlags": 0
+             }
+          ],
+          "annotations": [],
+          "accessFlags": 17
+       },
+       {
+          "name": "getDependencies",
+          "type": "(Lorg/gradle/api/Project;Ljava/util/List<Lnet/contrapt/gradle/plugin/PluginDiagnostic;>;Ljava/util/Map<Ljava/lang/String;Lnet/contrapt/gradle/plugin/PluginDependency;>;)Ljava/util/Map<Ljava/lang/String;Lnet/contrapt/gradle/plugin/PluginDependency;>;",
+          "params": [
+             {
+                "name": "this",
+                "type": "Lnet/contrapt/gradle/plugin/PluginModelBuilder;",
+                "isParam": true,
+                "index": 0,
+                "line": 105,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "project",
+                "type": "Lorg/gradle/api/Project;",
+                "isParam": true,
+                "index": 1,
+                "line": 105,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "errors",
+                "type": "Ljava/util/List;",
+                "isParam": true,
+                "index": 2,
+                "line": 105,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "dependencies",
+                "type": "Ljava/util/Map;",
+                "isParam": true,
+                "index": 3,
+                "line": 105,
+                "annotations": [],
+                "accessFlags": 0
+             }
+          ],
+          "locals": [
+             {
+                "name": "it",
+                "type": "Ljava/util/Map$Entry;",
+                "isParam": false,
+                "index": 10,
+                "line": 105,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$a$-forEach-PluginModelBuilder$getDependencies$1",
+                "type": "I",
+                "isParam": false,
+                "index": 11,
+                "line": 106,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "element$iv",
+                "type": "Ljava/util/Map$Entry;",
+                "isParam": false,
+                "index": 9,
+                "line": 192,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$this$forEach$iv",
+                "type": "Ljava/util/Map;",
+                "isParam": false,
+                "index": 4,
+                "line": 105,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$f$forEach",
+                "type": "I",
+                "isParam": false,
+                "index": 5,
+                "line": 192,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "it",
+                "type": "Lorg/gradle/api/artifacts/Configuration;",
+                "isParam": false,
+                "index": 12,
+                "line": 105,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$a$-filter-PluginModelBuilder$getDependencies$2",
+                "type": "I",
+                "isParam": false,
+                "index": 13,
+                "line": 109,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "element$iv$iv",
+                "type": "Ljava/lang/Object;",
+                "isParam": false,
+                "index": 11,
+                "line": 105,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$this$filterTo$iv$iv",
+                "type": "Ljava/lang/Iterable;",
+                "isParam": false,
+                "index": 7,
+                "line": 105,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "destination$iv$iv",
+                "type": "Ljava/util/Collection;",
+                "isParam": false,
+                "index": 8,
+                "line": 105,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$f$filterTo",
+                "type": "I",
+                "isParam": false,
+                "index": 9,
+                "line": 195,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$this$filter$iv",
+                "type": "Ljava/lang/Iterable;",
+                "isParam": false,
+                "index": 5,
+                "line": 105,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$f$filter",
+                "type": "I",
+                "isParam": false,
+                "index": 6,
+                "line": 194,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "it",
+                "type": "Lorg/gradle/api/artifacts/Dependency;",
+                "isParam": false,
+                "index": 18,
+                "line": 105,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$a$-map-PluginModelBuilder$getDependencies$3$statedDependencies$1",
+                "type": "I",
+                "isParam": false,
+                "index": 20,
+                "line": 111,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "item$iv$iv",
+                "type": "Ljava/lang/Object;",
+                "isParam": false,
+                "index": 17,
+                "line": 200,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$this$mapTo$iv$iv",
+                "type": "Ljava/lang/Iterable;",
+                "isParam": false,
+                "index": 13,
+                "line": 105,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "destination$iv$iv",
+                "type": "Ljava/util/Collection;",
+                "isParam": false,
+                "index": 14,
+                "line": 105,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$f$mapTo",
+                "type": "I",
+                "isParam": false,
+                "index": 15,
+                "line": 199,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$this$map$iv",
+                "type": "Ljava/lang/Iterable;",
+                "isParam": false,
+                "index": 11,
+                "line": 105,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$f$map",
+                "type": "I",
+                "isParam": false,
+                "index": 12,
+                "line": 198,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$a$-getOrPut-PluginModelBuilder$getDependencies$3$1$dep$1",
+                "type": "I",
+                "isParam": false,
+                "index": 28,
+                "line": 121,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "answer$iv",
+                "type": "Ljava/lang/Object;",
+                "isParam": false,
+                "index": 40,
+                "line": 206,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "value$iv",
+                "type": "Ljava/lang/Object;",
+                "isParam": false,
+                "index": 27,
+                "line": 204,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$this$getOrPut$iv",
+                "type": "Ljava/util/Map;",
+                "isParam": false,
+                "index": 25,
+                "line": 105,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$f$getOrPut",
+                "type": "I",
+                "isParam": false,
+                "index": 26,
+                "line": 203,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "dep",
+                "type": "Lnet/contrapt/gradle/plugin/PluginDependency;",
+                "isParam": false,
+                "index": 41,
+                "line": 123,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "isTransitive",
+                "type": "Z",
+                "isParam": false,
+                "index": 24,
+                "line": 120,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "key",
+                "type": "Ljava/lang/String;",
+                "isParam": false,
+                "index": 23,
+                "line": 119,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "version",
+                "type": "Ljava/lang/String;",
+                "isParam": false,
+                "index": 20,
+                "line": 118,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "name",
+                "type": "Ljava/lang/String;",
+                "isParam": false,
+                "index": 18,
+                "line": 117,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "group",
+                "type": "Ljava/lang/String;",
+                "isParam": false,
+                "index": 17,
+                "line": 116,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "artifact",
+                "type": "Lorg/gradle/api/artifacts/ResolvedArtifact;",
+                "isParam": false,
+                "index": 15,
+                "line": 105,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$a$-forEach-PluginModelBuilder$getDependencies$3$1",
+                "type": "I",
+                "isParam": false,
+                "index": 16,
+                "line": 115,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "element$iv",
+                "type": "Ljava/lang/Object;",
+                "isParam": false,
+                "index": 14,
+                "line": 105,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$this$forEach$iv",
+                "type": "Ljava/lang/Iterable;",
+                "isParam": false,
+                "index": 11,
+                "line": 105,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$f$forEach",
+                "type": "I",
+                "isParam": false,
+                "index": 12,
+                "line": 202,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "e",
+                "type": "Ljava/lang/Exception;",
+                "isParam": false,
+                "index": 11,
+                "line": 128,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "it",
+                "type": "Lorg/gradle/api/artifacts/UnresolvedDependency;",
+                "isParam": false,
+                "index": 18,
+                "line": 105,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$a$-filter-PluginModelBuilder$getDependencies$3$2",
+                "type": "I",
+                "isParam": false,
+                "index": 20,
+                "line": 132,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "element$iv$iv",
+                "type": "Ljava/lang/Object;",
+                "isParam": false,
+                "index": 17,
+                "line": 105,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$this$filterTo$iv$iv",
+                "type": "Ljava/lang/Iterable;",
+                "isParam": false,
+                "index": 13,
+                "line": 105,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "destination$iv$iv",
+                "type": "Ljava/util/Collection;",
+                "isParam": false,
+                "index": 14,
+                "line": 105,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$f$filterTo",
+                "type": "I",
+                "isParam": false,
+                "index": 15,
+                "line": 212,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$this$filter$iv",
+                "type": "Ljava/lang/Iterable;",
+                "isParam": false,
+                "index": 11,
+                "line": 105,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$f$filter",
+                "type": "I",
+                "isParam": false,
+                "index": 12,
+                "line": 211,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "optional",
+                "type": "Ljava/lang/String;",
+                "isParam": false,
+                "index": 23,
+                "line": 136,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "it",
+                "type": "Lorg/gradle/api/artifacts/UnresolvedDependency;",
+                "isParam": false,
+                "index": 18,
+                "line": 105,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$a$-map-PluginModelBuilder$getDependencies$3$3",
+                "type": "I",
+                "isParam": false,
+                "index": 20,
+                "line": 135,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "item$iv$iv",
+                "type": "Ljava/lang/Object;",
+                "isParam": false,
+                "index": 17,
+                "line": 216,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$this$mapTo$iv$iv",
+                "type": "Ljava/lang/Iterable;",
+                "isParam": false,
+                "index": 13,
+                "line": 105,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "destination$iv$iv",
+                "type": "Ljava/util/Collection;",
+                "isParam": false,
+                "index": 14,
+                "line": 105,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$f$mapTo",
+                "type": "I",
+                "isParam": false,
+                "index": 15,
+                "line": 215,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$this$map$iv",
+                "type": "Ljava/lang/Iterable;",
+                "isParam": false,
+                "index": 11,
+                "line": 105,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$f$map",
+                "type": "I",
+                "isParam": false,
+                "index": 12,
+                "line": 214,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "statedDependencies",
+                "type": "Ljava/util/List;",
+                "isParam": false,
+                "index": 22,
+                "line": 113,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "config",
+                "type": "Lorg/gradle/api/artifacts/Configuration;",
+                "isParam": false,
+                "index": 9,
+                "line": 105,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$a$-forEach-PluginModelBuilder$getDependencies$3",
+                "type": "I",
+                "isParam": false,
+                "index": 10,
+                "line": 110,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "element$iv",
+                "type": "Ljava/lang/Object;",
+                "isParam": false,
+                "index": 8,
+                "line": 105,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$this$forEach$iv",
+                "type": "Ljava/lang/Iterable;",
+                "isParam": false,
+                "index": 5,
+                "line": 109,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$f$forEach",
+                "type": "I",
+                "isParam": false,
+                "index": 6,
+                "line": 197,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "projectDependencies",
+                "type": "Ljava/util/Map;",
+                "isParam": false,
+                "index": 4,
+                "line": 109,
+                "annotations": [],
+                "accessFlags": 0
+             }
+          ],
+          "annotations": [],
+          "accessFlags": 17
+       },
+       {
+          "name": "getDependencies$default",
+          "type": "(Lnet/contrapt/gradle/plugin/PluginModelBuilder;Lorg/gradle/api/Project;Ljava/util/List;Ljava/util/Map;ILjava/lang/Object;)Ljava/util/Map;",
+          "params": [],
+          "locals": [],
+          "annotations": [],
+          "accessFlags": 4105
+       },
+       {
+          "name": "getPathDatas",
+          "type": "(Lorg/gradle/api/Project;Ljava/util/List<Lnet/contrapt/gradle/plugin/PluginDiagnostic;>;Ljava/util/Set<Lnet/contrapt/jvmcode/model/PathData;>;)Ljava/util/Set<Lnet/contrapt/jvmcode/model/PathData;>;",
+          "params": [
+             {
+                "name": "this",
+                "type": "Lnet/contrapt/gradle/plugin/PluginModelBuilder;",
+                "isParam": true,
+                "index": 0,
+                "line": 145,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "project",
+                "type": "Lorg/gradle/api/Project;",
+                "isParam": true,
+                "index": 1,
+                "line": 145,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "errors",
+                "type": "Ljava/util/List;",
+                "isParam": true,
+                "index": 2,
+                "line": 145,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "pathDatas",
+                "type": "Ljava/util/Set;",
+                "isParam": true,
+                "index": 3,
+                "line": 145,
+                "annotations": [],
+                "accessFlags": 0
+             }
+          ],
+          "locals": [
+             {
+                "name": "it",
+                "type": "Ljava/util/Map$Entry;",
+                "isParam": false,
+                "index": 10,
+                "line": 145,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$a$-forEach-PluginModelBuilder$getPathDatas$1",
+                "type": "I",
+                "isParam": false,
+                "index": 11,
+                "line": 146,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "element$iv",
+                "type": "Ljava/util/Map$Entry;",
+                "isParam": false,
+                "index": 9,
+                "line": 219,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$this$forEach$iv",
+                "type": "Ljava/util/Map;",
+                "isParam": false,
+                "index": 4,
+                "line": 145,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$f$forEach",
+                "type": "I",
+                "isParam": false,
+                "index": 5,
+                "line": 219,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "it",
+                "type": "Ljava/lang/String;",
+                "isParam": false,
+                "index": 34,
+                "line": 145,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$a$-firstOrNull-PluginModelBuilder$getPathDatas$2$1$classDirMap$1$key$1",
+                "type": "I",
+                "isParam": false,
+                "index": 35,
+                "line": 154,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "element$iv",
+                "type": "Ljava/lang/Object;",
+                "isParam": false,
+                "index": 33,
+                "line": 145,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$this$firstOrNull$iv",
+                "type": "Ljava/lang/Iterable;",
+                "isParam": false,
+                "index": 30,
+                "line": 145,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$f$firstOrNull",
+                "type": "I",
+                "isParam": false,
+                "index": 31,
+                "line": 227,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "key",
+                "type": "Ljava/lang/String;",
+                "isParam": false,
+                "index": 36,
+                "line": 155,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "dir",
+                "type": "Ljava/io/File;",
+                "isParam": false,
+                "index": 28,
+                "line": 145,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$a$-associate-PluginModelBuilder$getPathDatas$2$1$classDirMap$1",
+                "type": "I",
+                "isParam": false,
+                "index": 29,
+                "line": 154,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "element$iv$iv",
+                "type": "Ljava/lang/Object;",
+                "isParam": false,
+                "index": 26,
+                "line": 226,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$this$associateTo$iv$iv",
+                "type": "Ljava/lang/Iterable;",
+                "isParam": false,
+                "index": 22,
+                "line": 145,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "destination$iv$iv",
+                "type": "Ljava/util/Map;",
+                "isParam": false,
+                "index": 23,
+                "line": 145,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$f$associateTo",
+                "type": "I",
+                "isParam": false,
+                "index": 24,
+                "line": 225,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "capacity$iv",
+                "type": "I",
+                "isParam": false,
+                "index": 21,
+                "line": 224,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$this$associate$iv",
+                "type": "Ljava/lang/Iterable;",
+                "isParam": false,
+                "index": 19,
+                "line": 145,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$f$associate",
+                "type": "I",
+                "isParam": false,
+                "index": 20,
+                "line": 223,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "it",
+                "type": "Ljava/lang/String;",
+                "isParam": false,
+                "index": 29,
+                "line": 145,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$a$-firstOrNull-PluginModelBuilder$getPathDatas$2$1$1$key$1",
+                "type": "I",
+                "isParam": false,
+                "index": 30,
+                "line": 158,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "element$iv",
+                "type": "Ljava/lang/Object;",
+                "isParam": false,
+                "index": 28,
+                "line": 145,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$this$firstOrNull$iv",
+                "type": "Ljava/lang/Iterable;",
+                "isParam": false,
+                "index": 25,
+                "line": 145,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$f$firstOrNull",
+                "type": "I",
+                "isParam": false,
+                "index": 26,
+                "line": 231,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "key",
+                "type": "Ljava/lang/String;",
+                "isParam": false,
+                "index": 31,
+                "line": 159,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "dir",
+                "type": "Ljava/io/File;",
+                "isParam": false,
+                "index": 23,
+                "line": 145,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$a$-forEach-PluginModelBuilder$getPathDatas$2$1$1",
+                "type": "I",
+                "isParam": false,
+                "index": 24,
+                "line": 158,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "element$iv",
+                "type": "Ljava/lang/Object;",
+                "isParam": false,
+                "index": 22,
+                "line": 145,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$this$forEach$iv",
+                "type": "Ljava/lang/Iterable;",
+                "isParam": false,
+                "index": 19,
+                "line": 145,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$f$forEach",
+                "type": "I",
+                "isParam": false,
+                "index": 20,
+                "line": 230,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "classDirMap",
+                "type": "Ljava/util/Map;",
+                "isParam": false,
+                "index": 37,
+                "line": 157,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "ss",
+                "type": "Lorg/gradle/api/tasks/SourceSet;",
+                "isParam": false,
+                "index": 17,
+                "line": 145,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$a$-forEach-PluginModelBuilder$getPathDatas$2$1",
+                "type": "I",
+                "isParam": false,
+                "index": 18,
+                "line": 153,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "element$iv",
+                "type": "Ljava/lang/Object;",
+                "isParam": false,
+                "index": 16,
+                "line": 145,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$this$forEach$iv",
+                "type": "Ljava/lang/Iterable;",
+                "isParam": false,
+                "index": 13,
+                "line": 145,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$f$forEach",
+                "type": "I",
+                "isParam": false,
+                "index": 14,
+                "line": 222,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "convention",
+                "type": "Ljava/lang/Object;",
+                "isParam": false,
+                "index": 12,
+                "line": 151,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "it",
+                "type": "Ljava/util/Map$Entry;",
+                "isParam": false,
+                "index": 10,
+                "line": 145,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$a$-forEach-PluginModelBuilder$getPathDatas$2",
+                "type": "I",
+                "isParam": false,
+                "index": 11,
+                "line": 149,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "element$iv",
+                "type": "Ljava/util/Map$Entry;",
+                "isParam": false,
+                "index": 9,
+                "line": 221,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$this$forEach$iv",
+                "type": "Ljava/util/Map;",
+                "isParam": false,
+                "index": 4,
+                "line": 145,
+                "annotations": [],
+                "accessFlags": 0
+             },
+             {
+                "name": "$i$f$forEach",
+                "type": "I",
+                "isParam": false,
+                "index": 5,
+                "line": 221,
+                "annotations": [],
+                "accessFlags": 0
+             }
+          ],
+          "annotations": [],
+          "accessFlags": 17
+       },
+       {
+          "name": "getPathDatas$default",
+          "type": "(Lnet/contrapt/gradle/plugin/PluginModelBuilder;Lorg/gradle/api/Project;Ljava/util/List;Ljava/util/Set;ILjava/lang/Object;)Ljava/util/Set;",
+          "params": [],
+          "locals": [],
+          "annotations": [],
+          "accessFlags": 4105
+       },
+       {
+          "name": "<init>",
+          "type": "()V",
+          "params": [
+             {
+                "name": "this",
+                "type": "Lnet/contrapt/gradle/plugin/PluginModelBuilder;",
+                "isParam": true,
+                "index": 0,
+                "line": 14,
+                "annotations": [],
+                "accessFlags": 0
+             }
+          ],
+          "locals": [],
+          "annotations": [],
+          "accessFlags": 1
+       }
+    ],
+    "sourceFile": "PluginModelBuilder.kt",
+    "inners": [
+       "net/contrapt/gradle/plugin/PluginModelBuilder$getTasks$curPrefix$1"
+    ],
+    "annotations": [
+       "Lkotlin/Metadata;"
+    ]
+ }

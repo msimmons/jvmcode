@@ -1,7 +1,6 @@
 import { TreeDataProvider, TreeItem, TreeItemCollapsibleState, EventEmitter, ThemeIcon } from 'vscode'
 import { TreeNode } from './models'
 import { ProjectController } from './project_controller';
-import { utimesSync } from 'fs';
 
 export class ProjectTreeProvider implements TreeDataProvider<TreeNode> {
 

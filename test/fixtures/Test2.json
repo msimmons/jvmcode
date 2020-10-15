@@ -1,0 +1,4478 @@
+{
+  "imports": [
+     {
+        "id": 1,
+        "parent": -1,
+        "name": "java.math.BigDecimal",
+        "type": "java.math.BigDecimal",
+        "symbolType": "Import",
+        "location": {
+           "start": 113,
+           "end": 133
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 2,
+        "parent": -1,
+        "name": "java.math",
+        "type": "java.math",
+        "symbolType": "Import",
+        "location": {
+           "start": 142,
+           "end": 151
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 3,
+        "parent": -1,
+        "name": "net.contrapt.FOO",
+        "type": "net.contrapt.FOO",
+        "symbolType": "Import",
+        "location": {
+           "start": 169,
+           "end": 185
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 248,
+        "parent": -1,
+        "name": "org.slf4j.Marker",
+        "type": "org.slf4j.Marker",
+        "symbolType": "Import",
+        "location": {
+           "start": 3060,
+           "end": 3076
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     }
+  ],
+  "symbols": [
+     {
+        "id": 0,
+        "parent": -1,
+        "name": "net.contrapt.jvmcode.language",
+        "type": "net.contrapt.jvmcode.language",
+        "symbolType": "Package",
+        "location": {
+           "start": 74,
+           "end": 103
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 1,
+        "parent": -1,
+        "name": "java.math.BigDecimal",
+        "type": "java.math.BigDecimal",
+        "symbolType": "Import",
+        "location": {
+           "start": 113,
+           "end": 133
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 2,
+        "parent": -1,
+        "name": "java.math",
+        "type": "java.math",
+        "symbolType": "Import",
+        "location": {
+           "start": 142,
+           "end": 151
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 3,
+        "parent": -1,
+        "name": "net.contrapt.FOO",
+        "type": "net.contrapt.FOO",
+        "symbolType": "Import",
+        "location": {
+           "start": 169,
+           "end": 185
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 4,
+        "parent": -1,
+        "name": "ClassAnnotation",
+        "type": "ClassAnnotation",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 242,
+           "end": 257
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 5,
+        "parent": -1,
+        "name": "value",
+        "type": "value",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 258,
+           "end": 263
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 6,
+        "parent": -1,
+        "name": "value2",
+        "type": "value2",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 280,
+           "end": 286
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 7,
+        "parent": -1,
+        "name": "TryIt",
+        "type": "TryIt",
+        "symbolType": "Class",
+        "location": {
+           "start": 305,
+           "end": 310
+        },
+        "children": [
+           8,
+           9,
+           10,
+           11,
+           15,
+           16,
+           17,
+           18,
+           19,
+           20,
+           25,
+           26,
+           199,
+           200,
+           201,
+           202,
+           203,
+           204,
+           209,
+           237,
+           238,
+           239,
+           240,
+           241,
+           242
+        ],
+        "arrayDim": 0,
+        "classifier": "",
+        "scopeEnd": {
+           "start": 3020,
+           "end": 3020
+        }
+     },
+     {
+        "id": 8,
+        "parent": 7,
+        "name": "Object",
+        "type": "Object",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 319,
+           "end": 325
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 9,
+        "parent": 7,
+        "name": "Serializable",
+        "type": "Serializable",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 337,
+           "end": 349
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 10,
+        "parent": 7,
+        "name": "Comparable",
+        "type": "Comparable",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 351,
+           "end": 361
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 11,
+        "parent": 7,
+        "name": "static",
+        "type": "static",
+        "symbolType": "Control",
+        "location": {
+           "start": 369,
+           "end": 375
+        },
+        "children": [
+           12,
+           13,
+           14
+        ],
+        "arrayDim": 0,
+        "classifier": "",
+        "scopeEnd": {
+           "start": 430,
+           "end": 430
+        }
+     },
+     {
+        "id": 12,
+        "parent": 11,
+        "name": "System.properties.set",
+        "type": "System.properties.set",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 386,
+           "end": 407
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 13,
+        "parent": 11,
+        "name": "\"name\"",
+        "type": "java.lang.String",
+        "symbolType": "Literal",
+        "location": {
+           "start": 408,
+           "end": 414
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 14,
+        "parent": 11,
+        "name": "\"value\"",
+        "type": "java.lang.String",
+        "symbolType": "Literal",
+        "location": {
+           "start": 416,
+           "end": 423
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 15,
+        "parent": 7,
+        "name": "TryIt",
+        "type": "TryIt",
+        "symbolType": "Constructor",
+        "location": {
+           "start": 444,
+           "end": 449
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": "",
+        "scopeEnd": {
+           "start": 480,
+           "end": 480
+        }
+     },
+     {
+        "id": 16,
+        "parent": 7,
+        "name": "String",
+        "type": "String",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 487,
+           "end": 493
+        },
+        "children": [],
+        "arrayDim": 2,
+        "classifier": ""
+     },
+     {
+        "id": 17,
+        "parent": 7,
+        "name": "foo",
+        "type": "String",
+        "symbolType": "Field",
+        "location": {
+           "start": 498,
+           "end": 501
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 18,
+        "parent": 7,
+        "name": "bar",
+        "type": "String",
+        "symbolType": "Field",
+        "location": {
+           "start": 503,
+           "end": 506
+        },
+        "children": [],
+        "arrayDim": 2,
+        "classifier": ""
+     },
+     {
+        "id": 19,
+        "parent": 7,
+        "name": "Integer",
+        "type": "Integer",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 534,
+           "end": 541
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 20,
+        "parent": 7,
+        "name": "abstractMethod",
+        "type": "Integer",
+        "symbolType": "Method",
+        "location": {
+           "start": 542,
+           "end": 556
+        },
+        "children": [
+           21,
+           22,
+           23,
+           24
+        ],
+        "arrayDim": 0,
+        "classifier": "",
+        "scopeEnd": {
+           "start": 517,
+           "end": 517
+        }
+     },
+     {
+        "id": 21,
+        "parent": 20,
+        "name": "int",
+        "type": "int",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 557,
+           "end": 560
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 22,
+        "parent": 20,
+        "name": "p1",
+        "type": "int",
+        "symbolType": "Variable",
+        "location": {
+           "start": 561,
+           "end": 563
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 23,
+        "parent": 20,
+        "name": "String",
+        "type": "String",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 565,
+           "end": 571
+        },
+        "children": [],
+        "arrayDim": 1,
+        "classifier": ""
+     },
+     {
+        "id": 24,
+        "parent": 20,
+        "name": "p2",
+        "type": "String",
+        "symbolType": "Variable",
+        "location": {
+           "start": 574,
+           "end": 576
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 25,
+        "parent": 7,
+        "name": "void",
+        "type": "void",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 592,
+           "end": 596
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 26,
+        "parent": 7,
+        "name": "aMethod",
+        "type": "void",
+        "symbolType": "Method",
+        "location": {
+           "start": 597,
+           "end": 604
+        },
+        "children": [
+           27,
+           28,
+           29,
+           30,
+           31,
+           32,
+           33,
+           34,
+           35,
+           36,
+           37,
+           38,
+           39,
+           40,
+           41,
+           42,
+           43,
+           44,
+           45,
+           46,
+           47,
+           48,
+           49,
+           50,
+           51,
+           52,
+           53,
+           54,
+           55,
+           56,
+           57,
+           58,
+           59,
+           60,
+           61,
+           62,
+           63,
+           64,
+           65,
+           66,
+           67,
+           68,
+           69,
+           70,
+           71,
+           72,
+           73,
+           74,
+           75,
+           76,
+           77,
+           78,
+           79,
+           80,
+           81,
+           82,
+           83,
+           84,
+           85,
+           86,
+           87,
+           88,
+           89,
+           90,
+           91,
+           92,
+           93,
+           94,
+           95,
+           96,
+           97,
+           98,
+           99,
+           100,
+           101,
+           102,
+           103,
+           104,
+           105,
+           106,
+           107,
+           108,
+           109,
+           110,
+           111,
+           112,
+           113,
+           114,
+           115,
+           116,
+           117,
+           118,
+           119,
+           125,
+           136,
+           142,
+           143,
+           144,
+           145,
+           146,
+           147,
+           148,
+           149,
+           150,
+           151,
+           152,
+           153,
+           154,
+           159,
+           164,
+           165,
+           167,
+           168,
+           183,
+           184,
+           191,
+           192,
+           193,
+           198
+        ],
+        "arrayDim": 0,
+        "classifier": "",
+        "scopeEnd": {
+           "start": 2234,
+           "end": 2234
+        }
+     },
+     {
+        "id": 27,
+        "parent": 26,
+        "name": "int",
+        "type": "int",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 605,
+           "end": 608
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 28,
+        "parent": 26,
+        "name": "a",
+        "type": "int",
+        "symbolType": "Variable",
+        "location": {
+           "start": 609,
+           "end": 610
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 29,
+        "parent": 26,
+        "name": "String",
+        "type": "String",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 612,
+           "end": 618
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 30,
+        "parent": 26,
+        "name": "b",
+        "type": "String",
+        "symbolType": "Variable",
+        "location": {
+           "start": 619,
+           "end": 620
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 31,
+        "parent": 26,
+        "name": "ann",
+        "type": "ann",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 623,
+           "end": 626
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 32,
+        "parent": 26,
+        "name": "Long",
+        "type": "Long",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 634,
+           "end": 638
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 33,
+        "parent": 26,
+        "name": "c",
+        "type": "Long",
+        "symbolType": "Variable",
+        "location": {
+           "start": 639,
+           "end": 640
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 34,
+        "parent": 26,
+        "name": "tl.set",
+        "type": "tl.set",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 652,
+           "end": 658
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 35,
+        "parent": 26,
+        "name": "new",
+        "type": "new",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 659,
+           "end": 662
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 36,
+        "parent": 26,
+        "name": "SoftReference",
+        "type": "SoftReference",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 663,
+           "end": 676
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 37,
+        "parent": 26,
+        "name": "ob",
+        "type": "ob",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 679,
+           "end": 681
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 38,
+        "parent": 26,
+        "name": "v",
+        "type": "v",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 693,
+           "end": 694
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 39,
+        "parent": 26,
+        "name": "3",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 697,
+           "end": 698
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 40,
+        "parent": 26,
+        "name": "v",
+        "type": "v",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 708,
+           "end": 709
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 41,
+        "parent": 26,
+        "name": "3",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 713,
+           "end": 714
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 42,
+        "parent": 26,
+        "name": "v",
+        "type": "v",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 724,
+           "end": 725
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 43,
+        "parent": 26,
+        "name": "3",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 729,
+           "end": 730
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 44,
+        "parent": 26,
+        "name": "v",
+        "type": "v",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 740,
+           "end": 741
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 45,
+        "parent": 26,
+        "name": "3",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 746,
+           "end": 747
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 46,
+        "parent": 26,
+        "name": "v",
+        "type": "v",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 757,
+           "end": 758
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 47,
+        "parent": 26,
+        "name": "3",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 762,
+           "end": 763
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 48,
+        "parent": 26,
+        "name": "v",
+        "type": "v",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 773,
+           "end": 774
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 49,
+        "parent": 26,
+        "name": "3",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 778,
+           "end": 779
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 50,
+        "parent": 26,
+        "name": "v",
+        "type": "v",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 789,
+           "end": 790
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 51,
+        "parent": 26,
+        "name": "3",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 793,
+           "end": 794
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 52,
+        "parent": 26,
+        "name": "v",
+        "type": "v",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 804,
+           "end": 805
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 53,
+        "parent": 26,
+        "name": "3",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 809,
+           "end": 810
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 54,
+        "parent": 26,
+        "name": "v",
+        "type": "v",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 820,
+           "end": 821
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 55,
+        "parent": 26,
+        "name": "3",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 825,
+           "end": 826
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 56,
+        "parent": 26,
+        "name": "v",
+        "type": "v",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 836,
+           "end": 837
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 57,
+        "parent": 26,
+        "name": "3",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 841,
+           "end": 842
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 58,
+        "parent": 26,
+        "name": "v",
+        "type": "v",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 852,
+           "end": 853
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 59,
+        "parent": 26,
+        "name": "3",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 857,
+           "end": 858
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 60,
+        "parent": 26,
+        "name": "v",
+        "type": "v",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 888,
+           "end": 889
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 61,
+        "parent": 26,
+        "name": "3",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 893,
+           "end": 894
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 62,
+        "parent": 26,
+        "name": "v",
+        "type": "v",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 904,
+           "end": 905
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 63,
+        "parent": 26,
+        "name": "3",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 909,
+           "end": 910
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 64,
+        "parent": 26,
+        "name": "v",
+        "type": "v",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 920,
+           "end": 921
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 65,
+        "parent": 26,
+        "name": "3",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 924,
+           "end": 925
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 66,
+        "parent": 26,
+        "name": "v",
+        "type": "v",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 935,
+           "end": 936
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 67,
+        "parent": 26,
+        "name": "3",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 939,
+           "end": 940
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 68,
+        "parent": 26,
+        "name": "v",
+        "type": "v",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 950,
+           "end": 951
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 69,
+        "parent": 26,
+        "name": "3",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 955,
+           "end": 956
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 70,
+        "parent": 26,
+        "name": "v",
+        "type": "v",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 966,
+           "end": 967
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 71,
+        "parent": 26,
+        "name": "3",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 971,
+           "end": 972
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 72,
+        "parent": 26,
+        "name": "v",
+        "type": "v",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 982,
+           "end": 983
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 73,
+        "parent": 26,
+        "name": "3",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 987,
+           "end": 988
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 74,
+        "parent": 26,
+        "name": "v",
+        "type": "v",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 998,
+           "end": 999
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 75,
+        "parent": 26,
+        "name": "3",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 1003,
+           "end": 1004
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 76,
+        "parent": 26,
+        "name": "b.length",
+        "type": "b.length",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1014,
+           "end": 1022
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 77,
+        "parent": 26,
+        "name": "trim",
+        "type": "trim",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1025,
+           "end": 1029
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 78,
+        "parent": 26,
+        "name": "subtring",
+        "type": "subtring",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1032,
+           "end": 1040
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 79,
+        "parent": 26,
+        "name": "1",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 1041,
+           "end": 1042
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 80,
+        "parent": 26,
+        "name": "4",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 1044,
+           "end": 1045
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 81,
+        "parent": 26,
+        "name": "JsonProperty",
+        "type": "JsonProperty",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 1057,
+           "end": 1069
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 82,
+        "parent": 26,
+        "name": "int",
+        "type": "int",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 1077,
+           "end": 1080
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 83,
+        "parent": 26,
+        "name": "a",
+        "type": "int",
+        "symbolType": "Variable",
+        "location": {
+           "start": 1081,
+           "end": 1082
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 84,
+        "parent": 26,
+        "name": "int",
+        "type": "int",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 1092,
+           "end": 1095
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 85,
+        "parent": 26,
+        "name": "b",
+        "type": "int",
+        "symbolType": "Variable",
+        "location": {
+           "start": 1096,
+           "end": 1097
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 86,
+        "parent": 26,
+        "name": "0b10_1010100",
+        "type": "java.lang.Byte",
+        "symbolType": "Literal",
+        "location": {
+           "start": 1100,
+           "end": 1112
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 87,
+        "parent": 26,
+        "name": "int",
+        "type": "int",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 1122,
+           "end": 1125
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 88,
+        "parent": 26,
+        "name": "c",
+        "type": "int",
+        "symbolType": "Variable",
+        "location": {
+           "start": 1126,
+           "end": 1127
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 89,
+        "parent": 26,
+        "name": "d",
+        "type": "int",
+        "symbolType": "Variable",
+        "location": {
+           "start": 1129,
+           "end": 1130
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 90,
+        "parent": 26,
+        "name": "'\\n'",
+        "type": "java.lang.Char",
+        "symbolType": "Literal",
+        "location": {
+           "start": 1133,
+           "end": 1137
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 91,
+        "parent": 26,
+        "name": "char",
+        "type": "char",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 1147,
+           "end": 1151
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 92,
+        "parent": 26,
+        "name": "u",
+        "type": "char",
+        "symbolType": "Variable",
+        "location": {
+           "start": 1152,
+           "end": 1153
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 93,
+        "parent": 26,
+        "name": "'\\uaf30'",
+        "type": "java.lang.Char",
+        "symbolType": "Literal",
+        "location": {
+           "start": 1159,
+           "end": 1167
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 94,
+        "parent": 26,
+        "name": "int",
+        "type": "int",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 1177,
+           "end": 1180
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 95,
+        "parent": 26,
+        "name": "foo",
+        "type": "int",
+        "symbolType": "Variable",
+        "location": {
+           "start": 1181,
+           "end": 1184
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 96,
+        "parent": 26,
+        "name": "2",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 1187,
+           "end": 1188
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 97,
+        "parent": 26,
+        "name": "3",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 1191,
+           "end": 1192
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 98,
+        "parent": 26,
+        "name": "8",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 1197,
+           "end": 1198
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 99,
+        "parent": 26,
+        "name": "bar",
+        "type": "bar",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1201,
+           "end": 1204
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 100,
+        "parent": 26,
+        "name": "foo",
+        "type": "foo",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1208,
+           "end": 1211
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 101,
+        "parent": 26,
+        "name": "bar",
+        "type": "bar",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1212,
+           "end": 1215
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 102,
+        "parent": 26,
+        "name": "biz",
+        "type": "biz",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1218,
+           "end": 1221
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 103,
+        "parent": 26,
+        "name": "byte",
+        "type": "byte",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 1231,
+           "end": 1235
+        },
+        "children": [],
+        "arrayDim": 1,
+        "classifier": ""
+     },
+     {
+        "id": 104,
+        "parent": 26,
+        "name": "bb",
+        "type": "byte",
+        "symbolType": "Variable",
+        "location": {
+           "start": 1238,
+           "end": 1240
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 105,
+        "parent": 26,
+        "name": "x",
+        "type": "x",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1243,
+           "end": 1244
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 106,
+        "parent": 26,
+        "name": "2",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 1247,
+           "end": 1248
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 107,
+        "parent": 26,
+        "name": "false",
+        "type": "java.lang.Boolean",
+        "symbolType": "Literal",
+        "location": {
+           "start": 1251,
+           "end": 1256
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 108,
+        "parent": 26,
+        "name": "8",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 1259,
+           "end": 1260
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 109,
+        "parent": 26,
+        "name": "2",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 1262,
+           "end": 1263
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 110,
+        "parent": 26,
+        "name": "f",
+        "type": "f",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1273,
+           "end": 1274
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 111,
+        "parent": 26,
+        "name": "g",
+        "type": "g",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1277,
+           "end": 1278
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 112,
+        "parent": 26,
+        "name": "0",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 1279,
+           "end": 1280
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 113,
+        "parent": 26,
+        "name": "1",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 1282,
+           "end": 1283
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 114,
+        "parent": 26,
+        "name": "f",
+        "type": "f",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1294,
+           "end": 1295
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 115,
+        "parent": 26,
+        "name": "0",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 1296,
+           "end": 1297
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 116,
+        "parent": 26,
+        "name": "3",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 1301,
+           "end": 1302
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 117,
+        "parent": 26,
+        "name": "8",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 1316,
+           "end": 1317
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 118,
+        "parent": 26,
+        "name": "3",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 1321,
+           "end": 1322
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 119,
+        "parent": 26,
+        "name": "{",
+        "type": "{",
+        "symbolType": "Block",
+        "location": {
+           "start": 1324,
+           "end": 1324
+        },
+        "children": [
+           120,
+           121,
+           122,
+           123,
+           124
+        ],
+        "arrayDim": 0,
+        "classifier": "",
+        "scopeEnd": {
+           "start": 1388,
+           "end": 1388
+        }
+     },
+     {
+        "id": 120,
+        "parent": 119,
+        "name": "g",
+        "type": "g",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1338,
+           "end": 1339
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 121,
+        "parent": 119,
+        "name": "1",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 1342,
+           "end": 1343
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 122,
+        "parent": 119,
+        "name": "3",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 1345,
+           "end": 1346
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 123,
+        "parent": 119,
+        "name": "g",
+        "type": "g",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1360,
+           "end": 1361
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 124,
+        "parent": 119,
+        "name": "this.aMethod",
+        "type": "this.aMethod",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1364,
+           "end": 1376
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 125,
+        "parent": 26,
+        "name": "for",
+        "type": "for",
+        "symbolType": "Control",
+        "location": {
+           "start": 1398,
+           "end": 1401
+        },
+        "children": [
+           126,
+           127,
+           128,
+           129,
+           130,
+           131,
+           132,
+           133,
+           134,
+           135
+        ],
+        "arrayDim": 0,
+        "classifier": "",
+        "scopeEnd": {
+           "start": 1398,
+           "end": 1398
+        }
+     },
+     {
+        "id": 126,
+        "parent": 125,
+        "name": "int",
+        "type": "int",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1403,
+           "end": 1406
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 127,
+        "parent": 125,
+        "name": "i",
+        "type": "i",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1407,
+           "end": 1408
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 128,
+        "parent": 125,
+        "name": "0",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 1409,
+           "end": 1410
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 129,
+        "parent": 125,
+        "name": "i",
+        "type": "i",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1412,
+           "end": 1413
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 130,
+        "parent": 125,
+        "name": "1",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 1414,
+           "end": 1415
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 131,
+        "parent": 125,
+        "name": "i",
+        "type": "i",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1417,
+           "end": 1418
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 132,
+        "parent": 125,
+        "name": "x",
+        "type": "x",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1422,
+           "end": 1423
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 133,
+        "parent": 125,
+        "name": "3",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 1427,
+           "end": 1428
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 134,
+        "parent": 125,
+        "name": "2",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 1429,
+           "end": 1430
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 135,
+        "parent": 125,
+        "name": "y",
+        "type": "y",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1432,
+           "end": 1433
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 136,
+        "parent": 26,
+        "name": "for",
+        "type": "for",
+        "symbolType": "Control",
+        "location": {
+           "start": 1443,
+           "end": 1446
+        },
+        "children": [
+           137,
+           138,
+           139,
+           140,
+           141
+        ],
+        "arrayDim": 0,
+        "classifier": "",
+        "scopeEnd": {
+           "start": 1507,
+           "end": 1507
+        }
+     },
+     {
+        "id": 137,
+        "parent": 136,
+        "name": "String",
+        "type": "String",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1449,
+           "end": 1455
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 138,
+        "parent": 136,
+        "name": "s",
+        "type": "s",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1456,
+           "end": 1457
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 139,
+        "parent": 136,
+        "name": "strings",
+        "type": "strings",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1460,
+           "end": 1467
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 140,
+        "parent": 136,
+        "name": "doSomething",
+        "type": "doSomething",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1483,
+           "end": 1494
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 141,
+        "parent": 136,
+        "name": "s",
+        "type": "s",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1495,
+           "end": 1496
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 142,
+        "parent": 26,
+        "name": "x",
+        "type": "x",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1517,
+           "end": 1518
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 143,
+        "parent": 26,
+        "name": "new",
+        "type": "new",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1521,
+           "end": 1524
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 144,
+        "parent": 26,
+        "name": "Foo",
+        "type": "Foo",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1525,
+           "end": 1528
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 145,
+        "parent": 26,
+        "name": "x.doSomething",
+        "type": "x.doSomething",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1540,
+           "end": 1553
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 146,
+        "parent": 26,
+        "name": "x",
+        "type": "x",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1554,
+           "end": 1555
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 147,
+        "parent": 26,
+        "name": "y",
+        "type": "y",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1557,
+           "end": 1558
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 148,
+        "parent": 26,
+        "name": "foo",
+        "type": "foo",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1560,
+           "end": 1563
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 149,
+        "parent": 26,
+        "name": "y",
+        "type": "y",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1576,
+           "end": 1577
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 150,
+        "parent": 26,
+        "name": "x.aField",
+        "type": "x.aField",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1580,
+           "end": 1588
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 151,
+        "parent": 26,
+        "name": "do",
+        "type": "do",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1598,
+           "end": 1600
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 152,
+        "parent": 26,
+        "name": "{",
+        "type": "{",
+        "symbolType": "Block",
+        "location": {
+           "start": 1601,
+           "end": 1601
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": "",
+        "scopeEnd": {
+           "start": 1602,
+           "end": 1602
+        }
+     },
+     {
+        "id": 153,
+        "parent": 26,
+        "name": "try",
+        "type": "try",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1612,
+           "end": 1615
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 154,
+        "parent": 26,
+        "name": "{",
+        "type": "{",
+        "symbolType": "Block",
+        "location": {
+           "start": 1616,
+           "end": 1616
+        },
+        "children": [
+           155,
+           156,
+           157
+        ],
+        "arrayDim": 0,
+        "classifier": "",
+        "scopeEnd": {
+           "start": 1700,
+           "end": 1700
+        }
+     },
+     {
+        "id": 155,
+        "parent": 154,
+        "name": "x",
+        "type": "x",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1637,
+           "end": 1638
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 156,
+        "parent": 154,
+        "name": "y",
+        "type": "y",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1642,
+           "end": 1643
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 157,
+        "parent": 154,
+        "name": "{",
+        "type": "{",
+        "symbolType": "Block",
+        "location": {
+           "start": 1645,
+           "end": 1645
+        },
+        "children": [
+           158
+        ],
+        "arrayDim": 0,
+        "classifier": "",
+        "scopeEnd": {
+           "start": 1690,
+           "end": 1690
+        }
+     },
+     {
+        "id": 158,
+        "parent": 157,
+        "name": "doSomething",
+        "type": "doSomething",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1663,
+           "end": 1674
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 159,
+        "parent": 26,
+        "name": "catch",
+        "type": "catch",
+        "symbolType": "Control",
+        "location": {
+           "start": 1710,
+           "end": 1715
+        },
+        "children": [
+           160,
+           161,
+           162,
+           163
+        ],
+        "arrayDim": 0,
+        "classifier": "",
+        "scopeEnd": {
+           "start": 1777,
+           "end": 1777
+        }
+     },
+     {
+        "id": 160,
+        "parent": 159,
+        "name": "Exception",
+        "type": "Exception",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1717,
+           "end": 1726
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 161,
+        "parent": 159,
+        "name": "e",
+        "type": "e",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1727,
+           "end": 1728
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 162,
+        "parent": 159,
+        "name": "System.println",
+        "type": "System.println",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1744,
+           "end": 1758
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 163,
+        "parent": 159,
+        "name": "\"hello\"",
+        "type": "java.lang.String",
+        "symbolType": "Literal",
+        "location": {
+           "start": 1759,
+           "end": 1766
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 164,
+        "parent": 26,
+        "name": "finally",
+        "type": "finally",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1787,
+           "end": 1794
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 165,
+        "parent": 26,
+        "name": "{",
+        "type": "{",
+        "symbolType": "Block",
+        "location": {
+           "start": 1795,
+           "end": 1795
+        },
+        "children": [
+           166
+        ],
+        "arrayDim": 0,
+        "classifier": "",
+        "scopeEnd": {
+           "start": 1834,
+           "end": 1834
+        }
+     },
+     {
+        "id": 166,
+        "parent": 165,
+        "name": "somethingElse",
+        "type": "somethingElse",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1809,
+           "end": 1822
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 167,
+        "parent": 26,
+        "name": "isLatin1",
+        "type": "isLatin1",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1848,
+           "end": 1856
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 168,
+        "parent": 26,
+        "name": "{",
+        "type": "{",
+        "symbolType": "Block",
+        "location": {
+           "start": 1860,
+           "end": 1860
+        },
+        "children": [
+           169
+        ],
+        "arrayDim": 0,
+        "classifier": "",
+        "scopeEnd": {
+           "start": 2033,
+           "end": 2033
+        }
+     },
+     {
+        "id": 169,
+        "parent": 168,
+        "name": "for",
+        "type": "for",
+        "symbolType": "Control",
+        "location": {
+           "start": 1874,
+           "end": 1877
+        },
+        "children": [
+           170,
+           171,
+           172,
+           173,
+           174,
+           175,
+           176,
+           177,
+           178,
+           179,
+           180,
+           181
+        ],
+        "arrayDim": 0,
+        "classifier": "",
+        "scopeEnd": {
+           "start": 2023,
+           "end": 2023
+        }
+     },
+     {
+        "id": 170,
+        "parent": 169,
+        "name": "int",
+        "type": "int",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1879,
+           "end": 1882
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 171,
+        "parent": 169,
+        "name": "i",
+        "type": "i",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1883,
+           "end": 1884
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 172,
+        "parent": 169,
+        "name": "0",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 1887,
+           "end": 1888
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 173,
+        "parent": 169,
+        "name": "i",
+        "type": "i",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1890,
+           "end": 1891
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 174,
+        "parent": 169,
+        "name": "n",
+        "type": "n",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1894,
+           "end": 1895
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 175,
+        "parent": 169,
+        "name": "i",
+        "type": "i",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1897,
+           "end": 1898
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 176,
+        "parent": 169,
+        "name": "val",
+        "type": "val",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1925,
+           "end": 1928
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 177,
+        "parent": 169,
+        "name": "i",
+        "type": "i",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1929,
+           "end": 1930
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 178,
+        "parent": 169,
+        "name": "0xff",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 1934,
+           "end": 1938
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 179,
+        "parent": 169,
+        "name": "cs.charAt",
+        "type": "cs.charAt",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1943,
+           "end": 1952
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 180,
+        "parent": 169,
+        "name": "i",
+        "type": "i",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 1953,
+           "end": 1954
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 181,
+        "parent": 169,
+        "name": "{",
+        "type": "{",
+        "symbolType": "Block",
+        "location": {
+           "start": 1957,
+           "end": 1957
+        },
+        "children": [
+           182
+        ],
+        "arrayDim": 0,
+        "classifier": "",
+        "scopeEnd": {
+           "start": 2009,
+           "end": 2009
+        }
+     },
+     {
+        "id": 182,
+        "parent": 181,
+        "name": "false",
+        "type": "java.lang.Boolean",
+        "symbolType": "Literal",
+        "location": {
+           "start": 1986,
+           "end": 1991
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 183,
+        "parent": 26,
+        "name": "else",
+        "type": "else",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 2035,
+           "end": 2039
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 184,
+        "parent": 26,
+        "name": "{",
+        "type": "{",
+        "symbolType": "Block",
+        "location": {
+           "start": 2040,
+           "end": 2040
+        },
+        "children": [
+           185,
+           186,
+           187,
+           188,
+           189
+        ],
+        "arrayDim": 0,
+        "classifier": "",
+        "scopeEnd": {
+           "start": 2152,
+           "end": 2152
+        }
+     },
+     {
+        "id": 185,
+        "parent": 184,
+        "name": "StringUTF16.contentEquals",
+        "type": "StringUTF16.contentEquals",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 2059,
+           "end": 2084
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 186,
+        "parent": 184,
+        "name": "val",
+        "type": "val",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 2085,
+           "end": 2088
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 187,
+        "parent": 184,
+        "name": "cs",
+        "type": "cs",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 2090,
+           "end": 2092
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 188,
+        "parent": 184,
+        "name": "n",
+        "type": "n",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 2094,
+           "end": 2095
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 189,
+        "parent": 184,
+        "name": "{",
+        "type": "{",
+        "symbolType": "Block",
+        "location": {
+           "start": 2098,
+           "end": 2098
+        },
+        "children": [
+           190
+        ],
+        "arrayDim": 0,
+        "classifier": "",
+        "scopeEnd": {
+           "start": 2142,
+           "end": 2142
+        }
+     },
+     {
+        "id": 190,
+        "parent": 189,
+        "name": "false",
+        "type": "java.lang.Boolean",
+        "symbolType": "Literal",
+        "location": {
+           "start": 2123,
+           "end": 2128
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 191,
+        "parent": 26,
+        "name": "new",
+        "type": "new",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 2169,
+           "end": 2172
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 192,
+        "parent": 26,
+        "name": "String",
+        "type": "String",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 2173,
+           "end": 2179
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 193,
+        "parent": 26,
+        "name": "{",
+        "type": "{",
+        "symbolType": "Block",
+        "location": {
+           "start": 2182,
+           "end": 2182
+        },
+        "children": [
+           194,
+           195,
+           196,
+           197
+        ],
+        "arrayDim": 0,
+        "classifier": "",
+        "scopeEnd": {
+           "start": 2206,
+           "end": 2206
+        }
+     },
+     {
+        "id": 194,
+        "parent": 193,
+        "name": "\"a\"",
+        "type": "java.lang.String",
+        "symbolType": "Literal",
+        "location": {
+           "start": 2183,
+           "end": 2186
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 195,
+        "parent": 193,
+        "name": "\"b\"",
+        "type": "java.lang.String",
+        "symbolType": "Literal",
+        "location": {
+           "start": 2188,
+           "end": 2191
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 196,
+        "parent": 193,
+        "name": "variable",
+        "type": "variable",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 2193,
+           "end": 2201
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 197,
+        "parent": 193,
+        "name": "\"d\"",
+        "type": "java.lang.String",
+        "symbolType": "Literal",
+        "location": {
+           "start": 2203,
+           "end": 2206
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 198,
+        "parent": 26,
+        "name": "true",
+        "type": "java.lang.Boolean",
+        "symbolType": "Literal",
+        "location": {
+           "start": 2224,
+           "end": 2228
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 199,
+        "parent": 7,
+        "name": "MethodAnnotation",
+        "type": "MethodAnnotation",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 2242,
+           "end": 2258
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 200,
+        "parent": 7,
+        "name": "T",
+        "type": "T",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 2280,
+           "end": 2281
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 201,
+        "parent": 7,
+        "name": "String",
+        "type": "String",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 2290,
+           "end": 2296
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 202,
+        "parent": 7,
+        "name": "T",
+        "type": "T",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 2297,
+           "end": 2298
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 203,
+        "parent": 7,
+        "name": "int",
+        "type": "int",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 2301,
+           "end": 2304
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 204,
+        "parent": 7,
+        "name": "genericMethod",
+        "type": "int",
+        "symbolType": "Method",
+        "location": {
+           "start": 2305,
+           "end": 2318
+        },
+        "children": [
+           205,
+           206,
+           207,
+           208
+        ],
+        "arrayDim": 0,
+        "classifier": "",
+        "scopeEnd": {
+           "start": 2241,
+           "end": 2241
+        }
+     },
+     {
+        "id": 205,
+        "parent": 204,
+        "name": "Class",
+        "type": "Class",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 2319,
+           "end": 2324
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 206,
+        "parent": 204,
+        "name": "T",
+        "type": "T",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 2325,
+           "end": 2326
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 207,
+        "parent": 204,
+        "name": "clazz",
+        "type": "Class",
+        "symbolType": "Variable",
+        "location": {
+           "start": 2328,
+           "end": 2333
+        },
+        "children": [],
+        "arrayDim": 1,
+        "classifier": ""
+     },
+     {
+        "id": 208,
+        "parent": 204,
+        "name": "IllegalStateException",
+        "type": "IllegalStateException",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 2344,
+           "end": 2365
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 209,
+        "parent": 7,
+        "name": "AnInnerOne",
+        "type": "AnInnerOne",
+        "symbolType": "Class",
+        "location": {
+           "start": 2391,
+           "end": 2401
+        },
+        "children": [
+           210,
+           211,
+           212,
+           213
+        ],
+        "arrayDim": 0,
+        "classifier": "",
+        "scopeEnd": {
+           "start": 2793,
+           "end": 2793
+        }
+     },
+     {
+        "id": 210,
+        "parent": 209,
+        "name": "T",
+        "type": "T",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 2402,
+           "end": 2403
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 211,
+        "parent": 209,
+        "name": "List",
+        "type": "List",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 2412,
+           "end": 2416
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 212,
+        "parent": 209,
+        "name": "Integer",
+        "type": "Integer",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 2425,
+           "end": 2432
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 213,
+        "parent": 209,
+        "name": "AnInnerOne",
+        "type": "AnInnerOne",
+        "symbolType": "Constructor",
+        "location": {
+           "start": 2451,
+           "end": 2461
+        },
+        "children": [
+           214,
+           215,
+           216,
+           217,
+           218,
+           219,
+           220,
+           221,
+           222,
+           223,
+           224,
+           225
+        ],
+        "arrayDim": 0,
+        "classifier": "",
+        "scopeEnd": {
+           "start": 2787,
+           "end": 2787
+        }
+     },
+     {
+        "id": 214,
+        "parent": 213,
+        "name": "i",
+        "type": "i",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 2503,
+           "end": 2504
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 215,
+        "parent": 213,
+        "name": "3",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 2508,
+           "end": 2509
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 216,
+        "parent": 213,
+        "name": "String",
+        "type": "String",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 2525,
+           "end": 2531
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 217,
+        "parent": 213,
+        "name": "i",
+        "type": "i",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 2532,
+           "end": 2533
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 218,
+        "parent": 213,
+        "name": "hello",
+        "type": "hello",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 2535,
+           "end": 2540
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 219,
+        "parent": 213,
+        "name": "i",
+        "type": "i",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 2541,
+           "end": 2542
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 220,
+        "parent": 213,
+        "name": "jk",
+        "type": "jk",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 2543,
+           "end": 2545
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 221,
+        "parent": 213,
+        "name": "3",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 2547,
+           "end": 2548
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 222,
+        "parent": 213,
+        "name": "'c'",
+        "type": "java.lang.Char",
+        "symbolType": "Literal",
+        "location": {
+           "start": 2552,
+           "end": 2555
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 223,
+        "parent": 213,
+        "name": "switch",
+        "type": "switch",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 2569,
+           "end": 2575
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 224,
+        "parent": 213,
+        "name": "3",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 2576,
+           "end": 2577
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 225,
+        "parent": 213,
+        "name": "{",
+        "type": "{",
+        "symbolType": "Block",
+        "location": {
+           "start": 2579,
+           "end": 2579
+        },
+        "children": [
+           226,
+           227,
+           228,
+           229,
+           230,
+           231,
+           232,
+           233,
+           234,
+           235,
+           236
+        ],
+        "arrayDim": 0,
+        "classifier": "",
+        "scopeEnd": {
+           "start": 2777,
+           "end": 2777
+        }
+     },
+     {
+        "id": 226,
+        "parent": 225,
+        "name": "case",
+        "type": "case",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 2597,
+           "end": 2601
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 227,
+        "parent": 225,
+        "name": "8",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 2602,
+           "end": 2603
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 228,
+        "parent": 225,
+        "name": "x",
+        "type": "x",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 2625,
+           "end": 2626
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 229,
+        "parent": 225,
+        "name": "8",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 2629,
+           "end": 2630
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 230,
+        "parent": 225,
+        "name": "3",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 2632,
+           "end": 2633
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 231,
+        "parent": 225,
+        "name": "break",
+        "type": "break",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 2655,
+           "end": 2660
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 232,
+        "parent": 225,
+        "name": "case",
+        "type": "case",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 2678,
+           "end": 2682
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 233,
+        "parent": 225,
+        "name": "7",
+        "type": "java.lang.Number",
+        "symbolType": "Literal",
+        "location": {
+           "start": 2683,
+           "end": 2684
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 234,
+        "parent": 225,
+        "name": "break",
+        "type": "break",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 2706,
+           "end": 2711
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 235,
+        "parent": 225,
+        "name": "default",
+        "type": "default",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 2729,
+           "end": 2736
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 236,
+        "parent": 225,
+        "name": "break",
+        "type": "break",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 2758,
+           "end": 2763
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 237,
+        "parent": 7,
+        "name": "ThreadLocal",
+        "type": "ThreadLocal",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 2821,
+           "end": 2832
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 238,
+        "parent": 7,
+        "name": "StringCoding.Result",
+        "type": "StringCoding.Result",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 2833,
+           "end": 2852
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 239,
+        "parent": 7,
+        "name": "resultCached",
+        "type": "ThreadLocal",
+        "symbolType": "Field",
+        "location": {
+           "start": 2862,
+           "end": 2874
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 240,
+        "parent": 7,
+        "name": "new",
+        "type": "new",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 2877,
+           "end": 2880
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 241,
+        "parent": 7,
+        "name": "ThreadLocal",
+        "type": "ThreadLocal",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 2881,
+           "end": 2892
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 242,
+        "parent": 7,
+        "name": "{",
+        "type": "{",
+        "symbolType": "Block",
+        "location": {
+           "start": 2897,
+           "end": 2897
+        },
+        "children": [
+           243,
+           244
+        ],
+        "arrayDim": 0,
+        "classifier": "",
+        "scopeEnd": {
+           "start": 3009,
+           "end": 3009
+        }
+     },
+     {
+        "id": 243,
+        "parent": 242,
+        "name": "StringCoding.Result",
+        "type": "StringCoding.Result",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 2917,
+           "end": 2936
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 244,
+        "parent": 242,
+        "name": "initialValue",
+        "type": "StringCoding.Result",
+        "symbolType": "Method",
+        "location": {
+           "start": 2937,
+           "end": 2949
+        },
+        "children": [
+           245,
+           246
+        ],
+        "arrayDim": 0,
+        "classifier": "",
+        "scopeEnd": {
+           "start": 3008,
+           "end": 3008
+        }
+     },
+     {
+        "id": 245,
+        "parent": 244,
+        "name": "new",
+        "type": "new",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 2973,
+           "end": 2976
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 246,
+        "parent": 244,
+        "name": "StringCoding.Result",
+        "type": "StringCoding.Result",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 2977,
+           "end": 2996
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 247,
+        "parent": -1,
+        "name": "org.slf4j.event",
+        "type": "org.slf4j.event",
+        "symbolType": "Package",
+        "location": {
+           "start": 3031,
+           "end": 3046
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 248,
+        "parent": -1,
+        "name": "org.slf4j.Marker",
+        "type": "org.slf4j.Marker",
+        "symbolType": "Import",
+        "location": {
+           "start": 3060,
+           "end": 3076
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 249,
+        "parent": -1,
+        "name": "LoggingEvent",
+        "type": "LoggingEvent",
+        "symbolType": "Interface",
+        "location": {
+           "start": 3140,
+           "end": 3152
+        },
+        "children": [
+           250,
+           251,
+           252,
+           253,
+           254,
+           255,
+           256,
+           257,
+           258,
+           259,
+           260,
+           261,
+           262,
+           263,
+           264,
+           265
+        ],
+        "arrayDim": 0,
+        "classifier": "",
+        "scopeEnd": {
+           "start": 3379,
+           "end": 3379
+        }
+     },
+     {
+        "id": 250,
+        "parent": 249,
+        "name": "Level",
+        "type": "Level",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 3160,
+           "end": 3165
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 251,
+        "parent": 249,
+        "name": "getLevel",
+        "type": "Level",
+        "symbolType": "Method",
+        "location": {
+           "start": 3166,
+           "end": 3174
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": "",
+        "scopeEnd": {
+           "start": 3160,
+           "end": 3160
+        }
+     },
+     {
+        "id": 252,
+        "parent": 249,
+        "name": "Marker",
+        "type": "Marker",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 3183,
+           "end": 3189
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 253,
+        "parent": 249,
+        "name": "getMarker",
+        "type": "Marker",
+        "symbolType": "Method",
+        "location": {
+           "start": 3190,
+           "end": 3199
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": "",
+        "scopeEnd": {
+           "start": 3183,
+           "end": 3183
+        }
+     },
+     {
+        "id": 254,
+        "parent": 249,
+        "name": "String",
+        "type": "String",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 3208,
+           "end": 3214
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 255,
+        "parent": 249,
+        "name": "getLoggerName",
+        "type": "String",
+        "symbolType": "Method",
+        "location": {
+           "start": 3215,
+           "end": 3228
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": "",
+        "scopeEnd": {
+           "start": 3208,
+           "end": 3208
+        }
+     },
+     {
+        "id": 256,
+        "parent": 249,
+        "name": "String",
+        "type": "String",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 3237,
+           "end": 3243
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 257,
+        "parent": 249,
+        "name": "getMessage",
+        "type": "String",
+        "symbolType": "Method",
+        "location": {
+           "start": 3244,
+           "end": 3254
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": "",
+        "scopeEnd": {
+           "start": 3237,
+           "end": 3237
+        }
+     },
+     {
+        "id": 258,
+        "parent": 249,
+        "name": "String",
+        "type": "String",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 3263,
+           "end": 3269
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 259,
+        "parent": 249,
+        "name": "getThreadName",
+        "type": "String",
+        "symbolType": "Method",
+        "location": {
+           "start": 3270,
+           "end": 3283
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": "",
+        "scopeEnd": {
+           "start": 3263,
+           "end": 3263
+        }
+     },
+     {
+        "id": 260,
+        "parent": 249,
+        "name": "Object",
+        "type": "Object",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 3292,
+           "end": 3298
+        },
+        "children": [],
+        "arrayDim": 1,
+        "classifier": ""
+     },
+     {
+        "id": 261,
+        "parent": 249,
+        "name": "getArgumentArray",
+        "type": "Object",
+        "symbolType": "Method",
+        "location": {
+           "start": 3301,
+           "end": 3317
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": "",
+        "scopeEnd": {
+           "start": 3292,
+           "end": 3292
+        }
+     },
+     {
+        "id": 262,
+        "parent": 249,
+        "name": "long",
+        "type": "long",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 3326,
+           "end": 3330
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 263,
+        "parent": 249,
+        "name": "getTimeStamp",
+        "type": "long",
+        "symbolType": "Method",
+        "location": {
+           "start": 3331,
+           "end": 3343
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": "",
+        "scopeEnd": {
+           "start": 3326,
+           "end": 3326
+        }
+     },
+     {
+        "id": 264,
+        "parent": 249,
+        "name": "Throwable",
+        "type": "Throwable",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 3352,
+           "end": 3361
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 265,
+        "parent": 249,
+        "name": "getThrowable",
+        "type": "Throwable",
+        "symbolType": "Method",
+        "location": {
+           "start": 3362,
+           "end": 3374
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": "",
+        "scopeEnd": {
+           "start": 3352,
+           "end": 3352
+        }
+     },
+     {
+        "id": 266,
+        "parent": -1,
+        "name": "MyEnum",
+        "type": "MyEnum",
+        "symbolType": "Enum",
+        "location": {
+           "start": 3386,
+           "end": 3392
+        },
+        "children": [
+           267,
+           268,
+           269
+        ],
+        "arrayDim": 0,
+        "classifier": "",
+        "scopeEnd": {
+           "start": 3423,
+           "end": 3423
+        }
+     },
+     {
+        "id": 267,
+        "parent": 266,
+        "name": "ONE",
+        "type": "ONE",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 3399,
+           "end": 3402
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 268,
+        "parent": 266,
+        "name": "TWO",
+        "type": "TWO",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 3408,
+           "end": 3411
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 269,
+        "parent": 266,
+        "name": "TRHEE",
+        "type": "TRHEE",
+        "symbolType": "SymRef",
+        "location": {
+           "start": 3417,
+           "end": 3422
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 270,
+        "parent": -1,
+        "name": "SuppressWarnings",
+        "type": "SuppressWarnings",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 3427,
+           "end": 3443
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 271,
+        "parent": -1,
+        "name": "T",
+        "type": "T",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 3476,
+           "end": 3477
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 272,
+        "parent": -1,
+        "name": "Comparable",
+        "type": "Comparable",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 3486,
+           "end": 3496
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 273,
+        "parent": -1,
+        "name": "T",
+        "type": "T",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 3505,
+           "end": 3506
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 274,
+        "parent": -1,
+        "name": "void",
+        "type": "void",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 3513,
+           "end": 3517
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 275,
+        "parent": -1,
+        "name": "parallelSort",
+        "type": "void",
+        "symbolType": "Method",
+        "location": {
+           "start": 3518,
+           "end": 3530
+        },
+        "children": [
+           276,
+           277,
+           278,
+           279,
+           280,
+           281
+        ],
+        "arrayDim": 0,
+        "classifier": "",
+        "scopeEnd": {
+           "start": 3572,
+           "end": 3572
+        }
+     },
+     {
+        "id": 276,
+        "parent": 275,
+        "name": "T",
+        "type": "T",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 3531,
+           "end": 3532
+        },
+        "children": [],
+        "arrayDim": 1,
+        "classifier": ""
+     },
+     {
+        "id": 277,
+        "parent": 275,
+        "name": "a",
+        "type": "T",
+        "symbolType": "Variable",
+        "location": {
+           "start": 3535,
+           "end": 3536
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 278,
+        "parent": 275,
+        "name": "int",
+        "type": "int",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 3538,
+           "end": 3541
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 279,
+        "parent": 275,
+        "name": "fromIndex",
+        "type": "int",
+        "symbolType": "Variable",
+        "location": {
+           "start": 3542,
+           "end": 3551
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 280,
+        "parent": 275,
+        "name": "int",
+        "type": "int",
+        "symbolType": "TypeRef",
+        "location": {
+           "start": 3553,
+           "end": 3556
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 281,
+        "parent": 275,
+        "name": "toIndex",
+        "type": "int",
+        "symbolType": "Variable",
+        "location": {
+           "start": 3557,
+           "end": 3564
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": ""
+     },
+     {
+        "id": 282,
+        "parent": -1,
+        "name": "Class",
+        "type": "Class",
+        "symbolType": "Constructor",
+        "location": {
+           "start": 3583,
+           "end": 3588
+        },
+        "children": [],
+        "arrayDim": 0,
+        "classifier": "",
+        "scopeEnd": {
+           "start": 3640,
+           "end": 3640
+        }
+     }
+  ],
+  "name": "vsc-java",
+  "file": "Test2",
+  "pkg": {
+     "id": 247,
+     "parent": -1,
+     "name": "org.slf4j.event",
+     "type": "org.slf4j.event",
+     "symbolType": "Package",
+     "location": {
+        "start": 3031,
+        "end": 3046
+     },
+     "children": [],
+     "arrayDim": 0,
+     "classifier": ""
+  }
+}
