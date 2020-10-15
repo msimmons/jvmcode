@@ -1,7 +1,7 @@
 {
   "name": "jvmcode",
   "displayName": "JVMCode",
-  "description": "JVM Services",
+  "description": "Support for JVM Languages",
   "version": "2.0.0",
   "publisher": "contrapt",
   "license": "Apache 2.0",
@@ -26,21 +26,6 @@
   "main": "./out/src/extension",
   "contributes": {
     "commands": [
-      {
-        "command": "jvmcode.start",
-        "title": "Start Server",
-        "category": "JVM"
-      },
-      {
-        "command": "jvmcode.log-level",
-        "title": "Set Log Level",
-        "category": "JVM"
-      },
-      {
-        "command": "jvmcode.stop",
-        "title": "Stop Server",
-        "category": "JVM"
-      },
       {
         "command": "jvmcode.add-dependency",
         "title": "Add Dependency",
@@ -207,7 +192,7 @@
       ]
     },
     "configuration": {
-      "title": "JVMCode Server Configuration",
+      "title": "JVM Configuration",
       "properties": {
         "jvmcode.javaHome": {
           "type": "string",

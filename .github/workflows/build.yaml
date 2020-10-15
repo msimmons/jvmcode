@@ -1,0 +1,27 @@
+name: Build
+on: [push]
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: '12'
+      - name: Set Version
+        run: npm --no-git-tag-version version prerelease --preid=$GITHUB_RUN_NUMBER
+        if: ${{ !endsWith(github.ref, '/develop') }}
+      - name: Build
+        run: |
+          npm i vsce -g
+          npm install
+          vsce package
+          mkdir dist
+          cp *.vsix dist
+      - name: Upload Dist
+        uses: actions/upload-artifact@v2
+        with:
+          name: dist
+          path: dist/
+  
