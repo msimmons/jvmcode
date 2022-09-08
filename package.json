@@ -307,7 +307,7 @@
   "dependencies": {
     "fast-xml-parser": "^3.16.0",
     "he": "^1.2.0",
-    "jszip": "^3.2.2",
+    "jszip": "^3.7.0",
     "node-uuid": "^1.4.8",
     "vertx3-eventbus-client": "^3.8.5"
   }
